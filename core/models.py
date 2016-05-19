@@ -10,6 +10,7 @@ class CoAdmin(models.Model):
         ('AVIATION','Aviation'),
         ('ENTERTAINMENT', 'Entertainment'),
         ('RELIGIOUS','Religious'),
+        ('FINBANK','Finance & Banking')
         ('OTHER','Other')
                 )
     
