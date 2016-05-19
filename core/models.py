@@ -2,7 +2,10 @@ from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import User
 from fernet_fields import EncryptedCharField
+from randomslugfield import RandomSlugField
 # Create your models here.
+
+
 
 class CoAdmin(models.Model):
     
@@ -10,7 +13,7 @@ class CoAdmin(models.Model):
         ('AVIATION','Aviation'),
         ('ENTERTAINMENT', 'Entertainment'),
         ('RELIGIOUS','Religious'),
-        ('FINBANK','Finance & Banking')
+        ('FINBANK','Finance & Banking'),
         ('OTHER','Other')
                 )
     
@@ -24,11 +27,17 @@ class CoAdmin(models.Model):
     state = models.CharField(max_length=100, blank=False)
     dob = models.DateField(blank=False)
     
+
+    
     def __str__(self):
         if self.user.first_name: return self.user.first_name
         else: return self.user.username
 
-
+class CoAccount(models.Model):
+    user = models.OneToOneField(CoAdmin) 
+    sms_balance = models.DecimalField(max_digits=12, decimal_places=4)
+    last_subscribed = models.DateTimeField()
+    subscription_expires = models.DateField()
     
 class CoGroup(models.Model):
     title = models.CharField(max_length=100, blank=False)
@@ -38,7 +47,7 @@ class CoGroup(models.Model):
     
 class CoUser(models.Model):
     user = models.OneToOneField(User)
-    admin = models.OneToOneField(CoAdmin)
+    parent = models.OneToOneField(CoAdmin)
     phone_number = PhoneNumberField(blank=True)
     group = models.ManyToManyField(CoGroup)
     dob = models.DateField(blank=False)
@@ -68,15 +77,50 @@ class SMTPSetting(models.Model):
     smtp_user = models.CharField(max_length=255, blank=True)
     smtp_password = EncryptedCharField(max_length=255,blank=True)
     
+    owner = models.ForeignKey(CoGroup) #those in this group
+    
     def __str__(self):
         return "%s - %s"%(self.description,self.smtp_server)
+
+class Contact(models.Model):
+    #slug = RandomSlugField(length=7, exclude_lower=True, primary_key=True)
+    first_name = models.CharField(max_length=100, blank=False)
+    last_name = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(blank=True)
+    phone = PhoneNumberField(blank=True)
+    #slug = models.SlugField(max_length=100)
     
+    created = models.DateTimeField(auto_now=True)
+    last_modified = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.first_name
+
+class EventType(models.Model):
+    '''
+    Type of Event with the corresponding template
+    '''
+    PRIVPUB = (
+        ('PRI','Private'),
+        ('PUB','Public'),
+               )
+    title = models.CharField(max_length=100)
+    scope = models.CharField(max_length=3, choices=PRIVPUB, blank=False)
+    email_template = models.TextField(blank=True)
+    sms_template = models.TextField(blank=True)
+    
+    def __str__(self):
+        return self.title
 
     
-class ContactList(models.Model):
-    name = models.CharField(max_length=100, blank=False)
-    sender_name = models.CharField(max_length=244, blank=False) #sms sender or email name
-    smtp_setting = models.OneToOneField(SMTPSetting)
+class Event(models.Model):
+    '''
+    Event attached to contact
+    '''
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, blank=True)
+    date = models.DateField(blank=False)
+    event_type = models.ForeignKey(EventType)
+    smtp_setting = models.ForeignKey(SMTPSetting)
     send_sms = models.BooleanField()
     
     created_by = models.ForeignKey(User,models.SET_NULL, null=True)
@@ -84,54 +128,17 @@ class ContactList(models.Model):
     last_modified = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.name    
-      
-
-class Contact(models.Model):
-    first_name = models.CharField(max_length=100, blank=False)
-    last_name = models.CharField(max_length=100, blank=True)
-    email = models.EmailField(blank=True)
-    phone = PhoneNumberField(blank=True)
-    created = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now_add=True)
-    contact_list = models.ForeignKey(ContactList)
-
-    def __str__(self):
-        return self.first_name
+        return "%s - %s"%(self.contact.first_name, self.event_type)   
     
+class SentMessage(models.Model):
+    event = models.ForeignKey(Event)
     
-    
-class Event(models.Model):
-    
-    PRIVPUB = (
-        ('pri','Private'),
-        ('pub','Public'),
-               )
-    
-    name = models.CharField(max_length=100, blank=False)
-    greeting = models.CharField(max_length=100, blank=True)
-    eventclass = models.CharField(max_length=3, choices=PRIVPUB, blank=False)
-    date = models.DateField(blank=False)
-    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, blank=True)
-    
-    def __str__(self):
-        return "%s - %s"%(self.name,self.contact.first_name)
-    
-
-    
-    
-class Message(models.Model):
-    title = models.CharField(max_length=100, blank=False)
-    email_body = models.TextField(blank=True)
-    sms_body = models.TextField(blank=True)
-    contacts = models.ManyToManyField(ContactList)
-    
-    owner = models.ForeignKey(CoAdmin)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return self.title
+        return self.event
+    
     
 
     
