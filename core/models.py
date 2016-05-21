@@ -5,7 +5,7 @@ from fernet_fields import EncryptedCharField
 from randomslugfield import RandomSlugField
 # Create your models here.
 
-
+from django.contrib.postgres.fields import JSONField
 
 class CoAdmin(models.Model):
     
@@ -41,6 +41,7 @@ class CoAccount(models.Model):
     
 class CoGroup(models.Model):
     title = models.CharField(max_length=100, blank=False)
+    active = models.BooleanField()
     
     def __str__(self):
         return self.title
@@ -51,7 +52,6 @@ class CoUser(models.Model):
     phone_number = PhoneNumberField(blank=True)
     group = models.ManyToManyField(CoGroup)
     dob = models.DateField(blank=False)
-
     
     
     def __str__(self):
@@ -76,19 +76,36 @@ class SMTPSetting(models.Model):
     connection_security = models.CharField(max_length=20, choices=CONSEC, default='NO', blank=False)
     smtp_user = models.CharField(max_length=255, blank=True)
     smtp_password = EncryptedCharField(max_length=255,blank=True)
+    active = models.BooleanField()
     
-    owner = models.ForeignKey(CoGroup) #those in this group
+    owner = models.ManyToManyField(CoGroup) #those in this group
     
     def __str__(self):
         return "%s - %s"%(self.description,self.smtp_server)
 
+class ActiveManager(models.Manager):
+    
+    def get_queryset(self):
+        return super(ActiveManager, self).get_queryset().filter(active=True)
+
 class Contact(models.Model):
-    #slug = RandomSlugField(length=7, exclude_lower=True, primary_key=True)
+    
+    SALUTATION = (
+        ('mr','Mr'),
+        ('mrs','Mrs'),
+        ('ms','Ms'),
+        ('chief','Chief'),
+        ('dr','Dr')
+                  )
+    slug = RandomSlugField(length=9, exclude_lower=True, primary_key=True)
+    salutation = models.CharField(max_length=10, choices=SALUTATION, blank=True)
     first_name = models.CharField(max_length=100, blank=False)
     last_name = models.CharField(max_length=100, blank=True)
     email = models.EmailField(blank=True)
     phone = PhoneNumberField(blank=True)
+    uprofile = JSONField() 
     #slug = models.SlugField(max_length=100)
+    active = models.BooleanField(default=True)
     
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
@@ -105,30 +122,49 @@ class EventType(models.Model):
         ('PUB','Public'),
                )
     title = models.CharField(max_length=100)
-    scope = models.CharField(max_length=3, choices=PRIVPUB, blank=False)
+    #scope = models.CharField(max_length=3, choices=PRIVPUB, blank=False)
     email_template = models.TextField(blank=True)
     sms_template = models.TextField(blank=True)
     
     def __str__(self):
         return self.title
 
-    
+class MessageTemplate(models.Model):
+    title = models.CharField(max_length=100)
+    email_template = models.TextField(blank=True)
+    sms_template = models.TextField(blank=True)
+    smtp_setting = models.ForeignKey(SMTPSetting)
+    send_sms = models.BooleanField()
+       
 class Event(models.Model):
     '''
     Event attached to contact
     '''
     contact = models.ForeignKey(Contact, on_delete=models.CASCADE, blank=True)
     date = models.DateField(blank=False)
-    event_type = models.ForeignKey(EventType)
-    smtp_setting = models.ForeignKey(SMTPSetting)
-    send_sms = models.BooleanField()
+    message = models.ForeignKey(MessageTemplate)
+    title = models.CharField(max_length=100, blank=False)
     
     created_by = models.ForeignKey(User,models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return "%s - %s"%(self.contact.first_name, self.event_type)   
+        return "%s - %s"%(self.contact.first_name, self.event_type)
+    
+class PublicEvents(models.Model):
+    contacts = JSONField()
+    title = models.CharField(max_length=100, blank=False)
+    date = models.DateField(blank=False)
+    message = models.ForeignKey(MessageTemplate)
+    
+    created_by = models.ForeignKey(User,models.SET_NULL, null=True)
+    created = models.DateTimeField(auto_now=True)
+    last_modified = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "%s - %s"%(self.title)
+    
     
 class SentMessage(models.Model):
     event = models.ForeignKey(Event)

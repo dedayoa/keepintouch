@@ -1,14 +1,17 @@
 {% load bootstrap3 %}
+{% load staticfiles %}
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<title>Insert title here</title>
+<title>Intouch {% block title %}{% endblock %}</title>
 {% bootstrap_css %}
-
+<script type="text/javascript" href="{% bootstrap_jquery_url %}"></script>
 </head>
 <body>
-<h1>{{name}}</h1>
-{% bootstrap_javascript %}
+{% block content %}
+
+{% endblock %}
 </body>
+{% bootstrap_javascript %}
 </html>
