@@ -113,21 +113,6 @@ class Contact(models.Model):
     def __str__(self):
         return self.first_name
 
-class EventType(models.Model):
-    '''
-    Type of Event with the corresponding template
-    '''
-    PRIVPUB = (
-        ('PRI','Private'),
-        ('PUB','Public'),
-               )
-    title = models.CharField(max_length=100)
-    #scope = models.CharField(max_length=3, choices=PRIVPUB, blank=False)
-    email_template = models.TextField(blank=True)
-    sms_template = models.TextField(blank=True)
-    
-    def __str__(self):
-        return self.title
 
 class MessageTemplate(models.Model):
     title = models.CharField(max_length=100)
@@ -152,18 +137,26 @@ class Event(models.Model):
     def __str__(self):
         return "%s - %s"%(self.contact.first_name, self.event_type)
     
+    
 class PublicEvents(models.Model):
+    
+    APPLIESTO = (
+        ('ALL','All'),
+        ('SEL','Select')
+                 )
+    
     contacts = JSONField()
     title = models.CharField(max_length=100, blank=False)
     date = models.DateField(blank=False)
     message = models.ForeignKey(MessageTemplate)
+    applies_to = models.CharField(max_length=3, choices=APPLIESTO, default='ALL')
     
     created_by = models.ForeignKey(User,models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return "%s - %s"%(self.title)
+        return "%s"%(self.title)
     
     
 class SentMessage(models.Model):
@@ -174,8 +167,4 @@ class SentMessage(models.Model):
     
     def __str__(self):
         return self.event
-    
-    
-
-    
     
