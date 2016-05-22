@@ -7,6 +7,14 @@ from randomslugfield import RandomSlugField
 
 from django.contrib.postgres.fields import JSONField
 
+### Managers
+class ActiveManager(models.Manager):
+    
+    def get_queryset(self):
+        return super(ActiveManager, self).get_queryset().filter(active=True)
+
+
+
 class CoAdmin(models.Model):
     
     INDUSTRY = (
@@ -41,6 +49,7 @@ class CoAccount(models.Model):
     
 class CoGroup(models.Model):
     title = models.CharField(max_length=100, blank=False)
+    admin = models.ForeignKey(CoAdmin)
     active = models.BooleanField()
     
     def __str__(self):
@@ -78,15 +87,13 @@ class SMTPSetting(models.Model):
     smtp_password = EncryptedCharField(max_length=255,blank=True)
     active = models.BooleanField()
     
-    owner = models.ManyToManyField(CoGroup) #those in this group
+    created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
+    created = models.DateTimeField(auto_now=True)
+    last_modified = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return "%s - %s"%(self.description,self.smtp_server)
 
-class ActiveManager(models.Manager):
-    
-    def get_queryset(self):
-        return super(ActiveManager, self).get_queryset().filter(active=True)
 
 class Contact(models.Model):
     
@@ -107,6 +114,7 @@ class Contact(models.Model):
     #slug = models.SlugField(max_length=100)
     active = models.BooleanField(default=True)
     
+    created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
 
@@ -120,6 +128,10 @@ class MessageTemplate(models.Model):
     sms_template = models.TextField(blank=True)
     smtp_setting = models.ForeignKey(SMTPSetting)
     send_sms = models.BooleanField()
+    
+    created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
+    created = models.DateTimeField(auto_now=True)
+    last_modified = models.DateTimeField(auto_now_add=True)
        
 class Event(models.Model):
     '''
@@ -130,7 +142,7 @@ class Event(models.Model):
     message = models.ForeignKey(MessageTemplate)
     title = models.CharField(max_length=100, blank=False)
     
-    created_by = models.ForeignKey(User,models.SET_NULL, null=True)
+    created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
     
@@ -138,20 +150,20 @@ class Event(models.Model):
         return "%s - %s"%(self.contact.first_name, self.event_type)
     
     
-class PublicEvents(models.Model):
+class PublicEvent(models.Model):
     
     APPLIESTO = (
         ('ALL','All'),
         ('SEL','Select')
                  )
     
-    contacts = JSONField()
     title = models.CharField(max_length=100, blank=False)
     date = models.DateField(blank=False)
     message = models.ForeignKey(MessageTemplate)
     applies_to = models.CharField(max_length=3, choices=APPLIESTO, default='ALL')
+    contacts = JSONField(blank=True)
     
-    created_by = models.ForeignKey(User,models.SET_NULL, null=True)
+    created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
     
