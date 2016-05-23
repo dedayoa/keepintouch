@@ -1,9 +1,12 @@
 '''
-Created on May 19, 2016
+Created on May 22, 2016
 
 @author: Dayo
 '''
+
+
 from django.conf.urls import url, include
+
 
 from .views import *
 

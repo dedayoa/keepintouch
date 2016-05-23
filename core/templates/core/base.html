@@ -1,0 +1,33 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Intouch {% block title %}{% endblock %}</title>
+	<link rel="stylesheet" href="{% static "css/foundation.css" %}" />
+	<link href="{% static "css/main.css" %}" rel="stylesheet">
+
+</head>
+<body>
+	{% block body %}
+		{% block header%}{% endblock %}
+		<div class="row">
+			{% block container %}
+			
+			{% endblock %}
+		</div>
+		<div class="row">
+			{% block footer %}{% endblock %}
+		</div>
+
+	{% endblock %}
+	<script src="{% static "js/vendor/jquery.js" %}"></script>
+	<script src="{% static "js/vendor/what-input.js" %}"></script>
+	<script src="{% static "js/vendor/foundation.js" %}"></script>
+	<script>
+	  $(document).foundation();
+	</script>
+</body>
+</html>
