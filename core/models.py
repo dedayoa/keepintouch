@@ -6,6 +6,7 @@ from randomslugfield import RandomSlugField
 # Create your models here.
 
 from django.contrib.postgres.fields import JSONField
+from django.core.urlresolvers import reverse
 
 ### Managers
 class ActiveManager(models.Manager):
@@ -13,9 +14,17 @@ class ActiveManager(models.Manager):
     def get_queryset(self):
         return super(ActiveManager, self).get_queryset().filter(active=True)
 
+    
+class CoGroup(models.Model):
+    title = models.CharField(max_length=100, blank=False)
+    description = models.CharField(max_length=255, blank=True)
+    active = models.BooleanField()
+    
+    def __str__(self):
+        return self.title
+    
 
-
-class CoAdmin(models.Model):
+class CoUser(models.Model):
     
     INDUSTRY = (
         ('AVIATION','Aviation'),
@@ -26,6 +35,8 @@ class CoAdmin(models.Model):
                 )
     
     user = models.OneToOneField(User)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    
     phone_number = PhoneNumberField(blank=True, unique=True)
     company = models.CharField(max_length=255, blank=True)
     industry = models.CharField(max_length=50, choices=INDUSTRY, blank=False)
@@ -34,7 +45,8 @@ class CoAdmin(models.Model):
     city_town = models.CharField(max_length=100, blank=False)
     state = models.CharField(max_length=100, blank=False)
     dob = models.DateField(blank=False)
-    
+    group = models.ManyToManyField(CoGroup)
+    is_coadmin = models.BooleanField(default=False)
 
     
     def __str__(self):
@@ -42,35 +54,12 @@ class CoAdmin(models.Model):
         else: return self.user.username
 
 class CoAccount(models.Model):
-    user = models.OneToOneField(CoAdmin) 
+    user = models.OneToOneField(CoUser)
     sms_balance = models.DecimalField(max_digits=12, decimal_places=4)
     last_subscribed = models.DateTimeField()
     subscription_expires = models.DateField()
     
-class CoGroup(models.Model):
-    title = models.CharField(max_length=100, blank=False)
-    admin = models.ForeignKey(CoAdmin)
-    active = models.BooleanField()
-    
-    def __str__(self):
-        return self.title
-    
-class CoUser(models.Model):
-    user = models.OneToOneField(User)
-    parent = models.OneToOneField(CoAdmin)
-    phone_number = PhoneNumberField(blank=True)
-    group = models.ManyToManyField(CoGroup)
-    dob = models.DateField(blank=False)
-    
-    
-    def __str__(self):
-        if self.user.first_name: return self.user.first_name
-        else: return self.user.username
-    
-    class Meta:
-        pass
 
-    
 class SMTPSetting(models.Model):
     
     CONSEC = (
@@ -114,13 +103,21 @@ class Contact(models.Model):
     #slug = models.SlugField(max_length=100)
     active = models.BooleanField(default=True)
     
-    created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
+    created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True, blank=True)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.first_name
-
+    
+    @property
+    def group(self):
+        return '{}'.format(self.created_by_group)
+    
+    def get_absolute_url(self):
+        return reverse('core:contact_detail',
+                       args=[self.slug])
+        
 
 class MessageTemplate(models.Model):
     title = models.CharField(max_length=100)

@@ -13,7 +13,19 @@
 				{% endblock %}
 			</div>
 			<div class="off-canvas-content" data-off-canvas-content>
-				{% block header%}{% endblock %}
+				{% block header%}
+				<div class="row columns kitapp-header">
+					<div class="title-bar">
+						<div class="title-bar-left">
+							<button class="menu-icon show-for-small-only" type="button" data-toggle="offCanvas"></button>
+							<span class="title-bar-title">InTouch</span>
+						</div>
+						<div class="title-bar-right">
+							<div>Welcome {{user.get_username}}</div>
+						</div>
+					</div>
+				</div>
+				{% endblock %}
 				<div class="row">
 					{% block container %}
 						<div class="hide-for-small-only medium-2 column">
@@ -23,7 +35,7 @@
 						</div>
 						<div class="small-7 medium-7 column">
 							{% block content %}
-							
+						
 							{% endblock %}
 						</div>
 					<div class="small-3 medium-3 column">{% block rsb %}{% endblock %}</div>
@@ -31,7 +43,7 @@
 				</div>
 				<div class="row">
 					{% block footer %}
-						<div class="small-12 columns"><span style="text-align: center">Copyright &copy; 2016</span></div>
+						<div class="small-12 columns"><span class="float-right">Copyright &copy; 2016</span></div>
 					{% endblock %}
 				</div>
 			</div>
