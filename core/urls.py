@@ -15,7 +15,7 @@ urlpatterns = [
     url(r'^settings/$', settings, name='settings'),
     url(r'^contacts/$', contacts, name='all_contact'), #lists all contacts
     url(r'^contact/', include([
-                url(r'^(?P<cusid>[A-Z0-9]{9})/$', ContactView.as_view(), name='contact_detail'),
+                url(r'^(?P<contactid>[A-Z0-9]{9})/$', ContactView.as_view(), name='contact_detail'),
                 url(r'^new/$', NewContactView.as_view(), name='new_contact')
     ]))
 ]
