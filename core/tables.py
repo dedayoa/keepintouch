@@ -20,8 +20,9 @@ class ContactTable(tables.Table):
     select = tables.CheckBoxColumn(accessor='pk')
     first_name = tables.LinkColumn(verbose_name="First Name", text=lambda t: t.first_name, args=[A('pk')])
     last_name = tables.Column(verbose_name="Last Name")
+    active = tables.BooleanColumn(verbose_name="Active?")
 
     class Meta:
         model = Contact
-        fields = ('select','first_name','last_name','group')
+        fields = ('select','first_name','last_name','group','active')
         
