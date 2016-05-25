@@ -2,15 +2,14 @@
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 <head>
-{% block head %}
 	<meta charset="utf-8" />
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Intouch {% block title %}{% endblock %}</title>
-	<link rel="stylesheet" href="{% static "css/foundation.css" %}" />
-	<link href="{% static "css/main.css" %}" rel="stylesheet">
-
-{% endblock %}
+	<title>Intouch - {% block title %}{% endblock %}</title>
+	{% block head_base_links %}
+		<link rel="stylesheet" href="{% static "css/foundation.css" %}" />
+		<link href="{% static "css/main.css" %}" rel="stylesheet">
+	{% endblock %}
 </head>
 <body>
 	{% block body %}
@@ -25,11 +24,13 @@
 		</div>
 
 	{% endblock %}
-	<script src="{% static "js/vendor/jquery.js" %}"></script>
-	<script src="{% static "js/vendor/what-input.js" %}"></script>
-	<script src="{% static "js/vendor/foundation.js" %}"></script>
-	<script>
-	  $(document).foundation();
-	</script>
+	{% block foot_base_js %}
+		<script src="{% static "js/vendor/jquery.js" %}"></script>
+		<script src="{% static "js/vendor/what-input.js" %}"></script>
+		<script src="{% static "js/vendor/foundation.js" %}"></script>
+		<script>
+		  $(document).foundation();
+		</script>
+	{% endblock %}
 </body>
 </html>
