@@ -1,12 +1,12 @@
 <ul class="vertical menu" data-accordion-menu>
 	<li><a href="#">Dashboard</a></li>
-	<li><a href="#">Contacts</a></li>
+	<li><a href="{% url 'core:all_contact' %}">Contacts</a></li>
 	<li><a href="#">Templates</a></li>
 			<li>
 		<a href="#">Events</a>
 		<ul class="menu vertical nested">
-			<li><a href="#">Normal Event</a></li>
-			<li><a href="#">Public Event</a></li>
+			<li><a href="#">Private</a></li>
+			<li><a href="#">Public</a></li>
 		</ul>
 	</li>
 			<li><a href="#">Admin Groups</a></li>
