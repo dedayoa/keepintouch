@@ -7,6 +7,7 @@ from randomslugfield import RandomSlugField
 
 from django.contrib.postgres.fields import JSONField
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 
 ### Managers
 class ActiveManager(models.Manager):
@@ -99,7 +100,7 @@ class Contact(models.Model):
     last_name = models.CharField(max_length=100, blank=True)
     email = models.EmailField(blank=True)
     phone = PhoneNumberField(blank=True)
-    uprofile = JSONField() 
+    #uprofile = JSONField() 
     #slug = models.SlugField(max_length=100)
     active = models.BooleanField(default=True)
     
@@ -115,7 +116,7 @@ class Contact(models.Model):
         return '{}'.format(self.created_by_group)
     
     def get_absolute_url(self):
-        return reverse('core:contact_detail',
+        return reverse('core:contact-detail',
                        args=[self.slug])
         
 
@@ -145,6 +146,10 @@ class Event(models.Model):
     
     def __str__(self):
         return "%s - %s"%(self.contact.first_name, self.event_type)
+    
+    #@todo
+    def next_event(self):
+        now = timezone.now() 
     
     
 class PublicEvent(models.Model):
