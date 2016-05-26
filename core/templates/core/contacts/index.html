@@ -1,12 +1,11 @@
 {% extends "core/base_generic.html" %}
 {% load render_table from django_tables2 %}
-{% block head %}
+{% block head_base_links %}
 	{{ block.super }}
 {% endblock %}
 {% block title %}{{title}}{% endblock %}
 
 {% block content %}
-{{q_grps}}
+	<a class="small button" href="{% url 'core:contact-new' %}">New Contact</a>
 	{% render_table table %}
-	{{cusid}}
 {% endblock %}
