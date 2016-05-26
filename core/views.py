@@ -79,8 +79,9 @@ class ContactView(View):
         
         return render(request, self.template_name, self.params)
 
+#The regular class based view is above.
 class ContactViewView(UpdateView):
-    
+
     model = Contact
     form_class = ContactForm
     template_name = 'core/contacts/contact_detail.html'
@@ -88,21 +89,28 @@ class ContactViewView(UpdateView):
     def get_context_data(self, **kwargs):
         params = super(ContactViewView, self).get_context_data(**kwargs)
         params["title"] = "Contact {}".format(self.object.pk)
+        params["contactid"] = self.object.pk
         return params
 
 class ContactDeleteView(DeleteView):
     
     model = Contact
-    
-    template_name = 'core/contacts/contact_detail.html'
+    #template_name = 'core/contacts/contact_confirm_delete.html' #POSTing so no need for template
     success_url = reverse_lazy('core:contacts-list')
+    
+    def get_context_data(self, **kwargs):
+        params = super(ContactViewView, self).get_context_data(**kwargs)
+        params["title"] = "Deleting Contact ".format(self.object.pk)
+        params["contactid"] = self.object.pk
+        return params
+
     
 class ContactCreateView(CreateView):
     
     model = Contact
     form_class = NewContactForm
-    template_name = 'core/contacts/contact_detail.html'
-    success_url = "/"
+    template_name = 'core/contacts/new_contact.html'
+    success_url = reverse_lazy('core:contacts-list')
     
     def get_context_data(self, **kwargs):
         params = super(ContactCreateView, self).get_context_data(**kwargs)
