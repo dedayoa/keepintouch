@@ -1,3 +1,25 @@
 div.kitapp-header{
 	margin-bottom: 1rem;
 }
+
+div.kitapp-content{
+	min-height: 30rem;
+}
+
+div.alert ul{
+	list-style: square;
+}
+
+
+div.alert-box{
+	background-color: #fcd6d6;
+	padding: 1rem;
+	position: relative;
+	color: #0a0a0a;
+	margin: 0 0 1rem 0;
+	border: 1px solid rgba(10, 10, 10, 0.25);
+}
+
+.alerterror input, .alerterror select{
+	border: 2px red solid;
+}
