@@ -1,15 +1,56 @@
 {% extends "core/base_generic.html" %}
 {% load crispy_forms_tags %}
+{% load staticfiles %}
 
 {% block title %}{{title}}{% endblock %}
-
+{% block head_base_links %}
+	<link href="//cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css" rel="stylesheet">
+	<link href="{% static "css/foundation-datepicker.css" %}" rel="stylesheet">
+	{{ block.super }}
+{% endblock %}
 {% block content %}
 	<div class="row">
-		{% crispy form %}
+		<form action="" method="post">
+			{% crispy form %} {# I have set helper not to generate the form tag #}
+			<fieldset class="fieldset">
+				<legend>Events</legend>
+					{{ event_formset.management_form|crispy}}
+					{{ event_formset.non_form_errors }}
+					{# crispy event_form #}
+					<table class="events-set-list-table">
+						<thead>
+							<th>Date</th>
+							<th>Title</th>
+							<th>Template</th>
+							<th>?</th>
+						</thead>
+						<tbody>		
+						{% for evfli in event_formset %}
+							<tr>
+								<td style="width:30%">{{ evfli.id}} {{evfli.date}}</td>
+								<td style="width:35%">{{evfli.title}}</td>
+								<td style="width:30%">{{evfli.message}}</td>
+								<td style="width:5%">{{ evfli.DELETE }}</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				<!--  {# crispy event_formset event_formset_helper #}  -->
+				<!--  <input type="button" class="small button float-left" value="Add Event Line"></input>  -->
+			</fieldset>
+			<div class="button-holder">
+				<input type="submit" name="submit" value="Submit" class="submit button success float-right" id="submit-id-submit">
+				<input type="reset" name="reset" value="Reset" class="reset button float-right" id="reset-id-reset">
+			</div>
+		</form>		
 		<form method="POST" action="{% url 'core:contact-delete' contactid %}">
 		   {% csrf_token %}
-		   <input type="submit" value="delete" class="button alert float-left" 
+		   <input type="submit" value="Delete" class="button alert float-left" 
 		   onclick="return confirm('Are you sure you want to delete this contact?');">
 		</form>
 	</div>
+{% endblock %}
+{% block foot_base_js %}
+	{{block.super}}
+	<script src="{% static "js/foundation-datepicker.js" %}"></script>
 {% endblock %}
