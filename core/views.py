@@ -169,6 +169,7 @@ class ContactDeleteView(DeleteView):
     model = Contact
     #template_name = 'core/contacts/contact_confirm_delete.html' #POSTing so no need for template
     success_url = reverse_lazy('core:contacts-list')
+    params = {}
     
     def get_context_data(self, **kwargs):
         params = super(ContactViewView, self).get_context_data(**kwargs)
@@ -182,17 +183,16 @@ class ContactCreateView(CreateView):
     model = Contact
     form_class = NewContactForm
     template_name = 'core/contacts/new_contact.html'
-    #success_url = reverse_lazy('core:contacts-detail')
-    
-    def post(self, request, *args, **kwargs):
-        super(ContactCreateView, self).post(request, *args, **kwargs)
-        return HttpResponseRedirect(reverse('core:contact-detail', args=[self.object.pk]))
-        
+    #success_url = reverse_lazy('core:contacts-list')
+
     
     def get_context_data(self, **kwargs):
-        params = super(ContactCreateView, self).get_context_data(**kwargs)
-        params["title"] = "New"
-        return params
+        self.params = super(ContactCreateView, self).get_context_data(**kwargs)
+        self.params["title"] = "New"
+        return self.params
+    
+    def get_success_url(self):
+        return reverse('core:contact-detail', kwargs={'pk': self.object.pk}) #http://stackoverflow.com/questions/11027996/success-url-in-updateview-based-on-passed-value
     
     #fields = ['salutation','first_name','last_name','email','phone','active','created_by_group']
 
