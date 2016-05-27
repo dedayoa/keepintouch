@@ -6,7 +6,9 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block content %}
+<div class="row">
 	{{ block.super }}
 	<a class="small button" href="{% url 'core:contact-new' %}">New Contact</a>
 	{% render_table table %}
+</div>
 {% endblock %}
