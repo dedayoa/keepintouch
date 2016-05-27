@@ -113,9 +113,27 @@ class NewContactForm(forms.ModelForm):
         self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
         super(NewContactForm, self).__init__(*args, **kwargs)
     
+    def clean(self):
+        """
+        User must enter either phone number or email. At least one must be entered
+        """
+        cleaned_data = super(NewContactForm, self).clean()
+        phone_number = cleaned_data.get("phone")
+        email = cleaned_data.get("email")
+        
+        if not (phone_number or email):
+            #msg = 'You must enter at least a phone number or an email address'
+            self.add_error('phone','')
+            self.add_error('email','')
+            raise forms.ValidationError(
+                'You must enter at least a phone number or an email address'
+                                        )
+    
     class Meta:
         model = Contact
         fields = ['salutation','first_name','last_name','email','phone','active','created_by_group']
         labels = {
             'created_by_group': _('Group'),
         }
+        
+        
