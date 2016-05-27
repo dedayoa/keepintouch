@@ -18,5 +18,6 @@ urlpatterns = [
                 url(r'^(?P<pk>[A-Z0-9]{9})/$', ContactViewView.as_view(), name='contact-detail'),
                 url(r'^(?P<pk>[A-Z0-9]{9})/delete/$', ContactDeleteView.as_view(), name='contact-delete'),
                 url(r'^new/$', ContactCreateView.as_view(), name='contact-new')
-    ]))
+    ])),
+    url(r'^event/(?P<pk>\d+)/$', settings, name='event-detail'),
 ]
