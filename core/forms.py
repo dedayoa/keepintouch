@@ -7,7 +7,13 @@ Created on May 23, 2016
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.edit import ModelFormMixin
+from django.forms.models import formset_factory, inlineformset_factory
+from django.conf import settings
+
+
 from .models import Contact, Event
+from .helper import EventFormSetHelper
+
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
@@ -25,7 +31,8 @@ class ContactForm(forms.ModelForm):
         #to work
         self.helper = FormHelper(self)        
         self.helper.attrs = {'data_abide': ''}
-        self.helper.form_method = 'post'
+        #self.helper.form_method = 'post'
+        self.helper.form_tag = False
         
         '''
         self.helper.layout = Layout(
@@ -37,8 +44,8 @@ class ContactForm(forms.ModelForm):
                                     )
         '''
         #self.helper.add_input(Button('delete', _('Delete'), css_class="alert float-left"))
-        self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
-        self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+        #self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
+        #self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
         
         #the below took me a while to figure out and might come in handy later.
         #self.helper.layout.append(HTML('<a class="button alert float-left" href="{% url \'core:contact-delete\' contactid %}">Delete</a>'))
@@ -59,6 +66,8 @@ class ContactForm(forms.ModelForm):
             raise forms.ValidationError(
                 'You must enter at least a phone number or an email address'
                                         )
+            
+    
     
     class Meta:
         model = Contact
@@ -66,8 +75,32 @@ class ContactForm(forms.ModelForm):
         labels = {
             'created_by_group': _('Group'),
         }
+
+
+class EventForm(forms.ModelForm):
+    
+    date = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS,\
+                           widget=forms.DateInput(attrs={'data-date-format':'mm/dd/yy',\
+                                                         'class':'event-form-date'}))
+    
+    def __init__(self, *args, **kwargs):
         
+        super(EventForm, self).__init__(*args, **kwargs)        
+        self.helper = FormHelper(self)        
+        self.helper.attrs = {'data_abide': ''}
         
+    
+    class Meta:
+        model = Event
+        fields = ['contact','date','title','message']
+        
+EventFormSet = inlineformset_factory(Contact, Event, fields=('date','title','message'), form = EventForm, extra=2)        
+
+
+
+
+
+
 class NewContactForm(forms.ModelForm):
     
     first_name = forms.CharField(label=_('First Name'), widget=forms.TextInput(attrs={'required':''}), required=True)
