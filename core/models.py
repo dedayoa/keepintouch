@@ -130,6 +130,9 @@ class MessageTemplate(models.Model):
     created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title
        
 class Event(models.Model):
     '''
@@ -140,16 +143,20 @@ class Event(models.Model):
     message = models.ForeignKey(MessageTemplate)
     title = models.CharField(max_length=100, blank=False)
     
-    created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
+    #created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return "%s - %s"%(self.contact.first_name, self.event_type)
+        return "%s - %s"%(self.contact.first_name, self.title)
     
     #@todo
     def next_event(self):
-        now = timezone.now() 
+        now = timezone.now()
+
+    def get_absolute_url(self):
+        return reverse('core:event-detail',
+                       args=[self.pk])
     
     
 class PublicEvent(models.Model):
