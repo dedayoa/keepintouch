@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy, reverse
+from django.contrib import messages
 
 from django_tables2   import RequestConfig
 
@@ -146,6 +147,7 @@ class ContactViewView(UpdateView):
     
     def form_invalid(self, form, event_line_item_form):
         
+        messages.add_message(self.request, messages.INFO, 'The last action failed due to error in submission.')
         return HttpResponseRedirect(reverse('core:contact-detail', args=[self.object.pk]))
         '''
         return self.render_to_response(
@@ -180,7 +182,12 @@ class ContactCreateView(CreateView):
     model = Contact
     form_class = NewContactForm
     template_name = 'core/contacts/new_contact.html'
-    success_url = reverse_lazy('core:contacts-list')
+    #success_url = reverse_lazy('core:contacts-detail')
+    
+    def post(self, request, *args, **kwargs):
+        super(ContactCreateView, self).post(request, *args, **kwargs)
+        return HttpResponseRedirect(reverse('core:contact-detail', args=[self.object.pk]))
+        
     
     def get_context_data(self, **kwargs):
         params = super(ContactCreateView, self).get_context_data(**kwargs)
