@@ -26,7 +26,7 @@
 					</div>
 				</div>
 				{% endblock %}
-				<div class="row">
+				<div class="row columns">
 					{% block container %}
 						<div class="hide-for-small-only medium-2 column">
 							{% block lsb %}
@@ -35,7 +35,11 @@
 						</div>
 						<div class="small-12 medium-7 column kitapp-content">
 							{% block content %}
-						
+								{% if messages %}
+									{% for message in messages %}
+										<p>{{ message }}</p>
+									{% endfor %}
+								{% endif %}
 							{% endblock %}
 						</div>
 					<div class="medium-3 hide-for-small-only column">{% block rsb %}{% endblock %}</div>
