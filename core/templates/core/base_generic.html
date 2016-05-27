@@ -36,9 +36,11 @@
 						<div class="small-12 medium-7 column kitapp-content">
 							{% block content %}
 								{% if messages %}
+								<div class="alert callout">
 									{% for message in messages %}
 										<p>{{ message }}</p>
 									{% endfor %}
+								</div>
 								{% endif %}
 							{% endblock %}
 						</div>
