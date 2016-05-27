@@ -23,3 +23,8 @@ div.alert-box{
 .alerterror input, .alerterror select{
 	border: 2px red solid;
 }
+
+table.events-set-list-table input,
+table.events-set-list-table select{
+	margin-bottom: 0;
+}
