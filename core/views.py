@@ -8,7 +8,7 @@ from django_tables2   import RequestConfig
 
 from .models import Contact, CoGroup, CoUser, Event
 from .forms import ContactForm, NewContactForm, EventFormSet, EventFormSetHelper
-from .tables import ContactTable
+from .tables import ContactTable, PrivateEventTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 
 # Create your views here.
@@ -196,6 +196,21 @@ class ContactCreateView(CreateView):
     
     #fields = ['salutation','first_name','last_name','email','phone','active','created_by_group']
 
+
+def privateevents(request):
+    
+    if request.method == "GET":
+        q_user = CoUser.objects.get(user=request.user)
+        q_grps = q_user.group.all() #groups the user belongs to
+        q_contacts = Contact.objects.filter(created_by_group__in=q_grps)
+
+        eventstable = PrivateEventTable(Event.objects.filter(contact__in=q_contacts))
+        RequestConfig(request, paginate={'per_page': 25}).configure(eventstable)
+        params = {}
+        params["title"] = "Events"
+        params["table"] = eventstable
+        return render(request, 'core/events/index.html', params)
+    
 class EventCreateView(CreateView):
     
     model = Event

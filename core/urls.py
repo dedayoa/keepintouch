@@ -19,5 +19,6 @@ urlpatterns = [
                 url(r'^(?P<pk>[A-Z0-9]{9})/delete/$', ContactDeleteView.as_view(), name='contact-delete'),
                 url(r'^new/$', ContactCreateView.as_view(), name='contact-new')
     ])),
+    url(r'^events/$', privateevents, name='events-list'), #lists all contacts
     url(r'^event/(?P<pk>\d+)/$', settings, name='event-detail'),
 ]
