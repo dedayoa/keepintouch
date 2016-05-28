@@ -164,21 +164,24 @@ class PublicEvent(models.Model):
     APPLIESTO = (
         ('ALL','All'),
         ('SEL','Select')
-                 )
+    )
     
     title = models.CharField(max_length=100, blank=False)
     date = models.DateField(blank=False)
     message = models.ForeignKey(MessageTemplate)
-    applies_to = models.CharField(max_length=3, choices=APPLIESTO, default='ALL')
-    contacts = JSONField(blank=True)
+    #applies_to = models.CharField(max_length=3, choices=APPLIESTO, default='ALL')
+    recipients = models.ManyToManyField(Contact, blank=True)
     
-    created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
+    #created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return "%s"%(self.title)
     
+    @property
+    def group(self):
+        return '{}'.format(self.created_by_group)
     
 class SentMessage(models.Model):
     event = models.ForeignKey(Event)
