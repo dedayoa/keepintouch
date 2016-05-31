@@ -11,13 +11,15 @@ from django.forms.models import formset_factory, inlineformset_factory
 from django.conf import settings
 
 
-from .models import Contact, Event
+from .models import Contact, Event, PublicEvent
 from .helper import EventFormSetHelper
 
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
 from crispy_forms_foundation.layout import ButtonGroup, ButtonHolder, Submit, Reset, Button, Layout
+from django_select2.forms import Select2Widget, Select2MultipleWidget,\
+    ModelSelect2MultipleWidget
 
 class ContactForm(forms.ModelForm):
     
@@ -71,9 +73,9 @@ class ContactForm(forms.ModelForm):
     
     class Meta:
         model = Contact
-        fields = ['salutation','first_name','last_name','email','phone','active','created_by_group']
+        fields = ['salutation','first_name','last_name','email','phone','active']
         labels = {
-            'created_by_group': _('Group'),
+            #'user_group': _('User Group'),
         }
 
 
@@ -131,9 +133,23 @@ class NewContactForm(forms.ModelForm):
     
     class Meta:
         model = Contact
-        fields = ['salutation','first_name','last_name','email','phone','active','created_by_group']
+        fields = ['salutation','first_name','last_name','email','phone','active']
         labels = {
-            'created_by_group': _('Group'),
+            #'user_group': _('Group'),
         }
-        
-        
+
+class RecipientsChoices(ModelSelect2MultipleWidget):
+
+    search_fields = [
+        'first_name__icontains',
+        ]
+       
+class PublicEventForm(forms.ModelForm):
+    
+    
+    class Meta:
+        model = PublicEvent    
+        fields = ['title','date','message','recipients']
+        widgets = {
+            'recipients': RecipientsChoices
+        }  
