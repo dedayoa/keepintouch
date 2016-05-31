@@ -2,8 +2,8 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import Contact, CoUser, MessageTemplate, \
-                    Event, PublicEvent, SentMessage, SMTPSetting, CoGroup
+from .models import Contact, KITUser, MessageTemplate, \
+                    Event, PublicEvent, SentMessage, SMTPSetting, CoUserGroup
 
 class ContactAdmin(admin.ModelAdmin):
 
@@ -16,5 +16,5 @@ admin.site.register(Contact, ContactAdmin)
 admin.site.register(SentMessage)
 admin.site.register(MessageTemplate)
 admin.site.register(SMTPSetting)
-admin.site.register(CoUser)
-admin.site.register(CoGroup)
+admin.site.register(KITUser)
+admin.site.register(CoUserGroup)

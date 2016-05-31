@@ -7,7 +7,7 @@ Created on May 23, 2016
 import django_tables2 as tables
 from django_tables2.utils import A
 from .models import Contact, MessageTemplate, Event, PublicEvent,\
-                    CoUser, CoAccount, SMTPSetting
+                    KITUser, KITAdminAccount, SMTPSetting
 from django.utils.html import format_html
 
 
@@ -22,10 +22,11 @@ class ContactTable(tables.Table):
     first_name = tables.LinkColumn(verbose_name="First Name", text=lambda t: t.first_name, args=[A('pk')])
     last_name = tables.Column(verbose_name="Last Name")
     active = tables.BooleanColumn(verbose_name="Active?")
+    kit_user = tables.Column(verbose_name="Created By")
 
     class Meta:
         model = Contact
-        fields = ('select','first_name','last_name','group','active')
+        fields = ('select','first_name','last_name','kit_user','active')
         
         
 class PrivateEventTable(tables.Table):
@@ -46,3 +47,15 @@ class PrivateEventTable(tables.Table):
     class Meta:
         model = Event
         fields = ('contact','date','title','message')
+        
+class PublicEventTable(tables.Table):
+    
+    title = tables.LinkColumn(verbose_name="Title", args=[A('pk')])
+    message = tables.Column(verbose_name="Message")
+    date = tables.DateColumn(verbose_name="Date")
+    
+    
+    class Meta:
+        model = PublicEvent
+        fields = ('title','date', 'message', 'group')
+    
