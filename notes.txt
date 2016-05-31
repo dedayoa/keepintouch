@@ -1,0 +1,1 @@
+python manage.py loadtestdata core.KITUser:20 core.ContactGroup:10 core.PublicEvents:20 core.Events:30 core.Contact:10 core.CoUserGroup:20 auth.user:30
