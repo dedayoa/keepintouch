@@ -6,10 +6,12 @@ from django.contrib import messages
 
 from django_tables2   import RequestConfig
 
-from .models import Contact, CoGroup, CoUser, Event
-from .forms import ContactForm, NewContactForm, EventFormSet, EventFormSetHelper
-from .tables import ContactTable, PrivateEventTable
+from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent
+from .forms import ContactForm, NewContactForm, EventFormSet,\
+                    EventFormSetHelper, PublicEventForm
+from .tables import ContactTable, PrivateEventTable, PublicEventTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
+from django_select2.views import AutoResponseView
 
 # Create your views here.
 
@@ -31,9 +33,12 @@ def settings(request):
 def contacts(request):
     
     if request.method == "GET":
-        q_user = CoUser.objects.get(user=request.user)
-        q_grps = q_user.group.all() #groups the user belongs to
-        contactstable = ContactTable(Contact.objects.filter(created_by_group__in=q_grps))
+        user_q = KITUser.objects.get(user=request.user)
+        #q_grps = user_q.group.all() #groups the user belongs to
+        #user_s_group = CoUserGroup.objects.filter()
+        #Contact.objects.filter()
+        
+        contactstable = ContactTable(user_q.get_contacts())
         RequestConfig(request, paginate={'per_page': 25}).configure(contactstable)
         params = {}
         params["title"] = "Contacts"
@@ -200,7 +205,7 @@ class ContactCreateView(CreateView):
 def privateevents(request):
     
     if request.method == "GET":
-        q_user = CoUser.objects.get(user=request.user)
+        q_user = KITUser.objects.get(user=request.user)
         q_grps = q_user.group.all() #groups the user belongs to
         q_contacts = Contact.objects.filter(created_by_group__in=q_grps)
 
@@ -211,6 +216,31 @@ def privateevents(request):
         params["table"] = eventstable
         return render(request, 'core/events/index.html', params)
     
-class EventCreateView(CreateView):
+def publicevents(request):
     
-    model = Event
+    if request.method == "GET":
+        q_user = KITUser.objects.get(user=request.user)
+        q_grps = q_user.group.all() #groups the user belongs to
+        q_publ_ev = PublicEvent.objects.filter(event_group__in=q_grps)
+
+        eventstable = PublicEventTable(q_publ_ev)
+        RequestConfig(request, paginate={'per_page': 25}).configure(eventstable)
+        params = {}
+        params["title"] = "Public Events"
+        params["table"] = eventstable
+        return render(request, 'core/events/public_events_index.html', params)
+    
+class PublicEventCreateView(CreateView):
+    
+    model = PublicEvent
+    form_class = PublicEventForm
+    template_name = 'core/events/new_public_event.html'
+
+class ContactsSelect2View(AutoResponseView):
+    pass
+   
+class PublicEventUpdateView(UpdateView):
+    
+    model = PublicEvent
+    form_class = PublicEventForm
+    template_name = 'core/events/public_event_detail.html'
