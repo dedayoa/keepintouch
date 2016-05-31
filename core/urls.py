@@ -20,5 +20,9 @@ urlpatterns = [
                 url(r'^new/$', ContactCreateView.as_view(), name='contact-new')
     ])),
     url(r'^events/$', privateevents, name='events-list'), #lists all contacts
-    url(r'^event/(?P<pk>\d+)/$', settings, name='event-detail'),
+    url(r'^events/public/$', publicevents, name='public-events-list'), #lists all contacts
+    url(r'^event/public/', include([
+                url(r'^(?P<pk>\d+)/$', PublicEventUpdateView.as_view(), name='public-event-detail'),
+                url(r'^new/$', PublicEventCreateView.as_view(), name='public-event-new'),
+    ])),
 ]
