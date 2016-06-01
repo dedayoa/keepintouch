@@ -83,7 +83,6 @@ class KITUser(models.Model):
     address_2 = models.CharField(max_length=100, blank=True)
     city_town = models.CharField(max_length=100, blank=False)
     state = models.CharField(max_length=100, blank=False)
-    cou_group = models.ForeignKey('CoUserGroup', models.PROTECT, null=True, blank=True)
     is_admin = models.BooleanField(default=False)
     
     objects = KITUserManager()
@@ -102,17 +101,28 @@ class KITUser(models.Model):
             #return self.kituser_set.contact_set
             return Contact.objects.filter(kit_user__parent=self.pk)
         else:
-            return self.contact_set.all()
-        
+            my_groups = self.groups_belongto.all()
+            users_who_are_in_groups_i_belong_to = KITUser.objects.filter(groups_belongto__in=my_groups)
+            contacts1 = Contact.objects.filter(kit_user__in=users_who_are_in_groups_i_belong_to)
+            #Contact.objects.filter(kit_user__cousergroup)
+            contacts2 = Contact.objects.filter(kit_user__groups_belongto__kit_admin=self.parent).distinct()
+            #return {'contact1': contacts1, 'contact2':contacts2} #self.contact_set.all(cousergroup__kit_user=self.pk)
+            return contacts2
+            
+            
     def get_private_events(self):
         if self.is_admin:
+            '''
+            Return the private events of all contacts created by users
+            under the groups I admin over
+            '''
             #return self.kituser_set.contact_set
-            contacts = Contact.objects.filter(kit_user__parent=self.pk)
-            #return Event.objects.filter(contact__)
-            return contacts.event_set.all().order_by("-date")
+            #contacts = Contact.objects.filter(kit_user__parent=self.pk)
+            
+            return Event.objects.filter(contact__kit_user__parent=self.pk)
         else:
-            contacts = self.contact_set.all()
-            return contacts.event_set.all()
+            #contacts = self.contact_set.all()
+            return Event.objects.filter(contact__kit_user=self.pk)
 
 post_save.connect(create_and_set_default_user_group, sender=KITUser)      
 
@@ -126,7 +136,8 @@ def prevent_save_of_group_titled_default(sender, instance, *args, **kwargs):
 class CoUserGroup(models.Model):
     title = models.CharField(max_length=100, blank=False)
     description = models.CharField(max_length=255, blank=True)
-    kit_admin = models.ForeignKey(KITUser, on_delete=models.CASCADE, blank=False)
+    kit_admin = models.ForeignKey(KITUser, on_delete=models.CASCADE, related_name='groups_adminover', blank=False)
+    kit_users = models.ManyToManyField(KITUser, related_name='groups_belongto', blank=True)
     active = models.BooleanField() #when deactivated, 
     
     def __str__(self):
@@ -209,7 +220,7 @@ class Contact(models.Model):
     active = models.BooleanField(default=True)
     
     kit_user = models.ForeignKey(KITUser, models.PROTECT)
-    cou_group = models.ManyToManyField('CoUserGroup', blank=True)
+    #cou_group = models.ManyToManyField('CoUserGroup', blank=True)
     
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
@@ -228,7 +239,7 @@ class Contact(models.Model):
     def all_cou_group(self):
         return ', '.join([x.title for x in self.cou_group.all()])
 
-post_save.connect(set_m2m_contact_usergroup, sender=Contact) 
+#post_save.connect(set_m2m_contact_usergroup, sender=Contact) 
 
     
 class ContactGroup(models.Model):
