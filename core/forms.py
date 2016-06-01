@@ -66,7 +66,7 @@ class ContactForm(forms.ModelForm):
             self.add_error('phone','')
             self.add_error('email','')
             raise forms.ValidationError(
-                'You must enter at least a phone number or an email address'
+                'You must enter at least a valid phone number or an email address'
                                         )
             
     
