@@ -28,3 +28,7 @@ table.events-set-list-table input,
 table.events-set-list-table select{
 	margin-bottom: 0;
 }
+
+.select2-container{
+	margin-bottom: 1rem;
+}

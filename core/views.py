@@ -226,10 +226,10 @@ def publicevents(request):
     
     if request.method == "GET":
         q_user = KITUser.objects.get(user=request.user)
-        q_grps = q_user.group.all() #groups the user belongs to
-        q_publ_ev = PublicEvent.objects.filter(event_group__in=q_grps)
+        #q_grps = q_user.group.all() #groups the user belongs to
+        #q_publ_ev = PublicEvent.objects.filter(event_group__in=q_grps)
 
-        eventstable = PublicEventTable(q_publ_ev)
+        eventstable = PublicEventTable(q_user.get_public_events())
         RequestConfig(request, paginate={'per_page': 25}).configure(eventstable)
         params = {}
         params["title"] = "Public Events"
@@ -241,6 +241,11 @@ class PublicEventCreateView(CreateView):
     model = PublicEvent
     form_class = PublicEventForm
     template_name = 'core/events/new_public_event.html'
+    
+    def form_valid(self, form):
+        form.instance.kit_user = self.request.user.kituser
+
+        return super(PublicEventCreateView, self).form_valid(form)
 
 class ContactsSelect2View(AutoResponseView):
     pass

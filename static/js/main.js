@@ -8,4 +8,6 @@ $( document ).ready(function() {
 		format: 'dd-mm-yyyy',
 		disableDblClickSelection: true
 	});
+	
+	$('.django-select2').djangoSelect2();
 });

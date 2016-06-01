@@ -53,9 +53,10 @@ class PublicEventTable(tables.Table):
     title = tables.LinkColumn(verbose_name="Title", args=[A('pk')])
     message = tables.Column(verbose_name="Message")
     date = tables.DateColumn(verbose_name="Date")
+    kit_user = tables.Column(verbose_name="Created By")
     
     
     class Meta:
         model = PublicEvent
-        fields = ('title','date', 'message', 'group')
+        fields = ('title','date', 'message', 'kit_user')
     

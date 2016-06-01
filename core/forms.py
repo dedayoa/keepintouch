@@ -146,10 +146,19 @@ class RecipientsChoices(ModelSelect2MultipleWidget):
        
 class PublicEventForm(forms.ModelForm):
     
+    def __init__(self, *args, **kwargs):
+        
+        self.helper = FormHelper()
+        self.helper.form_action = '.'
+        self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
+        self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+        
+        super(PublicEventForm, self).__init__(*args, **kwargs)
     
     class Meta:
         model = PublicEvent    
         fields = ['title','date','message','recipients']
         widgets = {
-            'recipients': RecipientsChoices
+            'recipients': Select2MultipleWidget,
+            'message' : Select2Widget
         }  
