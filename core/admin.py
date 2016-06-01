@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-# Register your models here.
+# Register your modelx here.
 
-from .models import Contact, KITUser, MessageTemplate, \
-                    Event, PublicEvent, SentMessage, SMTPSetting, CoUserGroup
+from .models import Contact, KITUser, Event, PublicEvent, MessageTemplate, SentMessage, SMTPSetting, CoUserGroup
+
 
 class ContactAdmin(admin.ModelAdmin):
 
