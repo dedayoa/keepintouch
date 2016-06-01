@@ -119,10 +119,11 @@ class KITUser(models.Model):
             #return self.kituser_set.contact_set
             #contacts = Contact.objects.filter(kit_user__parent=self.pk)
             
-            return Event.objects.filter(contact__kit_user__parent=self.pk)
+            return Event.objects.filter(contact__kit_user__parent=self.pk).order_by("date")
         else:
             #contacts = self.contact_set.all()
-            return Event.objects.filter(contact__kit_user=self.pk)
+            #return Event.objects.filter(contact__kit_user=self.pk).order_by("date")
+            return Event.objects.filter(contact__kit_user__groups_belongsto__kit_admin=self.parent).order_by("date")
 
 post_save.connect(create_and_set_default_user_group, sender=KITUser)      
 
