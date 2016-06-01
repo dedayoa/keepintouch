@@ -212,10 +212,10 @@ def privateevents(request):
     
     if request.method == "GET":
         q_user = KITUser.objects.get(user=request.user)
-        q_grps = q_user.group.all() #groups the user belongs to
-        q_contacts = Contact.objects.filter(created_by_group__in=q_grps)
+        #q_grps = q_user.group.all() #groups the user belongs to
+        #q_contacts = Contact.objects.filter(created_by_group__in=q_grps)
 
-        eventstable = PrivateEventTable(Event.objects.filter(contact__in=q_contacts))
+        eventstable = PrivateEventTable(q_user.get_private_events())
         RequestConfig(request, paginate={'per_page': 25}).configure(eventstable)
         params = {}
         params["title"] = "Events"
