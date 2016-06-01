@@ -103,6 +103,16 @@ class KITUser(models.Model):
             return Contact.objects.filter(kit_user__parent=self.pk)
         else:
             return self.contact_set.all()
+        
+    def get_private_events(self):
+        if self.is_admin:
+            #return self.kituser_set.contact_set
+            contacts = Contact.objects.filter(kit_user__parent=self.pk)
+            #return Event.objects.filter(contact__)
+            return contacts.event_set.all().order_by("-date")
+        else:
+            contacts = self.contact_set.all()
+            return contacts.event_set.all()
 
 post_save.connect(create_and_set_default_user_group, sender=KITUser)      
 
