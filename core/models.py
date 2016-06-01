@@ -6,7 +6,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import User
 from fernet_fields import EncryptedCharField
 from randomslugfield import RandomSlugField
-# Create your models here.
+# Create your modelx here.
 
 from django.contrib.postgres.fields import JSONField
 from django.core.urlresolvers import reverse
@@ -15,6 +15,7 @@ from django.db.models.signals import post_save, pre_save, m2m_changed
 from django.core.exceptions import ValidationError
 from django.http import request
 from django.dispatch.dispatcher import receiver
+
 
 ### Managers
 class ActiveManager(models.Manager):
@@ -116,14 +117,17 @@ class KITUser(models.Model):
             Return the private events of all contacts created by users
             under the groups I admin over
             '''
-            #return self.kituser_set.contact_set
-            #contacts = Contact.objects.filter(kit_user__parent=self.pk)
             
             return Event.objects.filter(contact__kit_user__parent=self.pk).order_by("date")
         else:
-            #contacts = self.contact_set.all()
-            #return Event.objects.filter(contact__kit_user=self.pk).order_by("date")
             return Event.objects.filter(contact__kit_user__groups_belongsto__kit_admin=self.parent).order_by("date")
+        
+    def get_public_events(self):
+        if self.is_admin:
+            return PublicEvent.objects.filter(kit_user__parent=self.pk).order_by("date")
+        else:
+            return PublicEvent.objects.filter(kit_user__groups_belongsto__kit_admin=self.parent).order_by("date")
+            
 
 post_save.connect(create_and_set_default_user_group, sender=KITUser)      
 
@@ -217,11 +221,11 @@ class Contact(models.Model):
     email = models.EmailField(blank=True)
     phone = PhoneNumberField(blank=True)
     #uprofile = JSONField() 
-    #slug = models.SlugField(max_length=100)
+    #slug = modelx.SlugField(max_length=100)
     active = models.BooleanField(default=True)
     
     kit_user = models.ForeignKey(KITUser, models.PROTECT)
-    #cou_group = models.ManyToManyField('CoUserGroup', blank=True)
+    #cou_group = modelx.ManyToManyField('CoUserGroup', blank=True)
     
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
@@ -260,7 +264,7 @@ class MessageTemplate(models.Model):
     smtp_setting = models.ForeignKey(SMTPSetting)
     send_sms = models.BooleanField()
     
-    #user_group = models.ForeignKey(CoUserGroup,models.SET_NULL, null=True)
+    #user_group = modelx.ForeignKey(CoUserGroup,modelx.SET_NULL, null=True)
     kit_admin = models.ForeignKey(KITUser, models.PROTECT, blank=True)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
@@ -273,6 +277,8 @@ class MessageTemplate(models.Model):
         return '{}'.format(self.kit_admin.user_group)
 
 
+
+    
 class EventManager(models.Manager):
     pass
        
@@ -289,6 +295,7 @@ class Event(models.Model):
     #couser = models.ForeignKey(CoUser, models.SET_NULL, blank=True)
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
+
     
     def __str__(self):
         return "%s - %s"%(self.contact.first_name, self.title)
@@ -320,6 +327,7 @@ class PublicEvent(models.Model):
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
     
+    
     def __str__(self):
         return "%s"%(self.title)
     
@@ -332,6 +340,7 @@ class PublicEvent(models.Model):
                        args=[self.pk])
 
 
+
     
 class SentMessage(models.Model):
     event = models.ForeignKey(Event)
@@ -341,4 +350,3 @@ class SentMessage(models.Model):
     
     def __str__(self):
         return self.event
-    
