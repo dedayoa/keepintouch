@@ -144,6 +144,7 @@ class ContactViewView(UpdateView):
         #return render(request,self.template_name, self.params)
     
     def form_valid(self, form, event_line_item_form):
+        
         self.object = form.save()
         #event_line_item_form.instance = self.object
         event_line_item_form.save()
@@ -189,7 +190,12 @@ class ContactCreateView(CreateView):
     form_class = NewContactForm
     template_name = 'core/contacts/new_contact.html'
     #success_url = reverse_lazy('core:contacts-list')
+    
+    def form_valid(self, form):
+        form.instance.kit_user = self.request.user.kituser
 
+        return super(ContactCreateView, self).form_valid(form)
+        #return HttpResponseRedirect(reverse('core:contact-detail', args=[self.object.pk])) 
     
     def get_context_data(self, **kwargs):
         self.params = super(ContactCreateView, self).get_context_data(**kwargs)
