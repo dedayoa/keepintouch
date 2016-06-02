@@ -60,3 +60,13 @@ class PublicEventTable(tables.Table):
         model = PublicEvent
         fields = ('title','date', 'message', 'kit_user')
     
+class TemplateTable(tables.Table):
+    
+    title = tables.LinkColumn(verbose_name="Title", args=[A('pk')])
+    smtp_setting = tables.Column(verbose_name="SMTP")
+    send_sms = tables.BooleanColumn(verbose_name="SMS")
+    cou_group = tables.Column(verbose_name="User Group")
+    
+    class Meta:
+        model = MessageTemplate
+        fields = ('title','smtp_setting', 'cou_group', 'send_sms')

@@ -23,6 +23,11 @@ urlpatterns = [
     url(r'^events/public/$', publicevents, name='public-events-list'), #lists all contacts
     url(r'^event/public/', include([
                 url(r'^(?P<pk>\d+)/$', PublicEventUpdateView.as_view(), name='public-event-detail'),
-                url(r'^new/$', PublicEventCreateView.as_view(), name='public-event-new'),
+                url(r'^(?P<pk>\d+)/delete/$', PublicEventDeleteView.as_view(), name='public-event-delete'),
+                url(r'^new/$', PublicEventCreateView.as_view(), name='public-event-new')
+    ])),
+    url(r'^templates/$', templates, name='templates-list'),
+    url(r'^template/', include([
+                url(r'^(?P<pk>\d+)/$', MessageTemplateUpdateView.as_view(), name='templates-detail'),
     ])),
 ]

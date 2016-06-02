@@ -6,10 +6,10 @@ from django.contrib import messages
 
 from django_tables2   import RequestConfig
 
-from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent
+from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate
 from .forms import ContactForm, NewContactForm, EventFormSet,\
-                    EventFormSetHelper, PublicEventForm
-from .tables import ContactTable, PrivateEventTable, PublicEventTable
+                    EventFormSetHelper, PublicEventForm, MessageTemplateForm
+from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django_select2.views import AutoResponseView
 
@@ -167,7 +167,6 @@ class ContactViewView(UpdateView):
         self.params = super(ContactViewView, self).get_context_data(**kwargs)
         self.params["title"] = "Contact {}".format(self.object.pk)
         self.params["contactid"] = self.object.pk
-
         return self.params
 
 class ContactDeleteView(DeleteView):
@@ -247,11 +246,55 @@ class PublicEventCreateView(CreateView):
 
         return super(PublicEventCreateView, self).form_valid(form)
 
-class ContactsSelect2View(AutoResponseView):
-    pass
    
 class PublicEventUpdateView(UpdateView):
     
     model = PublicEvent
     form_class = PublicEventForm
     template_name = 'core/events/public_event_detail.html'
+    params = {}
+    '''
+    def get(self, request, *args, **kwargs):
+        super(PublicEventUpdateView, self).get(request, *args, **kwargs)
+        self.params["form"] = self.form_class(instance=self.object)
+        self.params["publiceventid"] = self.object.pk       
+        return render(request,self.template_name, self.params)'''
+    
+    def get_context_data(self, **kwargs):
+        params = super(PublicEventUpdateView, self).get_context_data(**kwargs)
+        params["publiceventid"] = self.object.pk
+        return params
+    
+class PublicEventDeleteView(DeleteView):
+    
+    model = PublicEvent
+    #template_name = 'core/contacts/contact_confirm_delete.html' #POSTing so no need for template
+    success_url = reverse_lazy('core:public-events-list')
+    #params = {}
+    
+    def get_context_data(self, **kwargs):
+        params = super(PublicEventDeleteView, self).get_context_data(**kwargs)
+        params["title"] = "Deleting Public Event {} ".format(self.object.title)
+        params["publiceventid"] = self.object.pk
+        return params
+    
+    
+def templates(request):
+    
+    if request.method == "GET":
+        q_user = KITUser.objects.get(user=request.user)
+        #q_grps = q_user.group.all() #groups the user belongs to
+        #q_contacts = Contact.objects.filter(created_by_group__in=q_grps)
+
+        templatestable = TemplateTable(q_user.get_templates())
+        RequestConfig(request, paginate={'per_page': 25}).configure(templatestable)
+        params = {}
+        params["title"] = "Templates"
+        params["table"] = templatestable
+        return render(request, 'core/templates/index.html', params)
+    
+class MessageTemplateUpdateView(UpdateView):
+    
+    model = MessageTemplate
+    form_class = MessageTemplateForm
+    template_name = 'core/templates/template_detail.html'

@@ -127,6 +127,12 @@ class KITUser(models.Model):
             return PublicEvent.objects.filter(kit_user__parent=self.pk).order_by("date")
         else:
             return PublicEvent.objects.filter(kit_user__groups_belongsto__kit_admin=self.parent).order_by("date")
+        
+    def get_templates(self):
+        if self.is_admin:
+            return MessageTemplate.objects.filter(kit_admin = self.pk)
+        else:
+            return MessageTemplate.objects.filter(cou_group__kit_users = self.pk)
             
 
 post_save.connect(create_and_set_default_user_group, sender=KITUser)      
@@ -264,8 +270,11 @@ class MessageTemplate(models.Model):
     smtp_setting = models.ForeignKey(SMTPSetting)
     send_sms = models.BooleanField()
     
-    #user_group = modelx.ForeignKey(CoUserGroup,modelx.SET_NULL, null=True)
+    cou_group = models.ForeignKey(CoUserGroup,models.SET_NULL, null=True)
     kit_admin = models.ForeignKey(KITUser, models.PROTECT, blank=True)
+    
+    active = models.BooleanField()
+    
     created = models.DateTimeField(auto_now=True)
     last_modified = models.DateTimeField(auto_now_add=True)
     
@@ -275,6 +284,10 @@ class MessageTemplate(models.Model):
     @property
     def get_usergroup_template_belongs_by(self):
         return '{}'.format(self.kit_admin.user_group)
+    
+    def get_absolute_url(self):
+        return reverse('core:templates-detail',
+                       args=[self.pk])
 
 
 

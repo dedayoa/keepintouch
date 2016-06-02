@@ -11,7 +11,7 @@ from django.forms.models import formset_factory, inlineformset_factory
 from django.conf import settings
 
 
-from .models import Contact, Event, PublicEvent
+from .models import Contact, Event, PublicEvent, MessageTemplate
 from .helper import EventFormSetHelper
 
 
@@ -138,22 +138,22 @@ class NewContactForm(forms.ModelForm):
             #'user_group': _('Group'),
         }
 
-class RecipientsChoices(ModelSelect2MultipleWidget):
-
-    search_fields = [
-        'first_name__icontains',
-        ]
-       
 class PublicEventForm(forms.ModelForm):
     
+    date = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS,\
+                           widget=forms.DateInput(attrs={'class':'event-form-date'}))
+    
     def __init__(self, *args, **kwargs):
+        
+        super(PublicEventForm, self).__init__(*args, **kwargs)
         
         self.helper = FormHelper()
         self.helper.form_action = '.'
         self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
         self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
         
-        super(PublicEventForm, self).__init__(*args, **kwargs)
+        
+    
     
     class Meta:
         model = PublicEvent    
@@ -162,3 +162,20 @@ class PublicEventForm(forms.ModelForm):
             'recipients': Select2MultipleWidget,
             'message' : Select2Widget
         }  
+        
+        
+class MessageTemplateForm(forms.ModelForm):
+    
+    
+    
+    def __init__(self, *args, **kwargs):
+        super(MessageTemplateForm, self).__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.form_action = '.'
+        self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
+        self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+    
+    class Meta:
+        model = MessageTemplate
+        fields = ['title', 'email_template', 'sms_template', 'cou_group', 'smtp_setting', 'send_sms']

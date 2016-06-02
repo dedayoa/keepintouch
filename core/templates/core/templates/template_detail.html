@@ -14,7 +14,7 @@
 		{{ block.super }}
 		{% crispy form %}
 				
-		<form method="POST" action="{% url 'core:public-event-delete' publiceventid %}">
+		<form method="POST" action="#">
 		   {% csrf_token %}
 		   <input type="submit" value="Delete" class="button alert float-left" 
 		   onclick="return confirm('Are you sure you want to delete this Public Event?');">

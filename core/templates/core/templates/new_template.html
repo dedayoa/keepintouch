@@ -13,12 +13,6 @@
 	<div class="row">
 		{{ block.super }}
 		{% crispy form %}
-				
-		<form method="POST" action="{% url 'core:public-event-delete' publiceventid %}">
-		   {% csrf_token %}
-		   <input type="submit" value="Delete" class="button alert float-left" 
-		   onclick="return confirm('Are you sure you want to delete this Public Event?');">
-		</form>
 	</div>
 {% endblock %}
 {% block foot_base_js %}
