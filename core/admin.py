@@ -12,7 +12,7 @@ class ContactAdmin(admin.ModelAdmin):
 class KITUserAdmin(admin.ModelAdmin):
     
     def user_group(self, obj):
-        return ", ".join(p.title for p in obj.cousergroup_set.all())
+        return ", ".join(p.title for p in obj.groups_adminover.all())
     user_group.short_description = "Groups Admin Over"
     
     list_display = ('user','parent','is_admin','user_group')
