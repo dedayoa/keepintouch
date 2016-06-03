@@ -52,6 +52,14 @@
 	</div>
 {% endblock %}
 {% block foot_base_js %}
-	{{block.super}}
 	<script src="{% static "js/foundation-datepicker.js" %}"></script>
+	<script>
+	$(document).ready(function() {
+		$('.event-form-date').fdatepicker({
+		format: 'dd-mm-yyyy',
+		disableDblClickSelection: true
+		});
+	});
+	</script>
+	{{block.super}}
 {% endblock %}
