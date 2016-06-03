@@ -268,9 +268,9 @@ class MessageTemplate(models.Model):
     email_template = models.TextField(blank=True)
     sms_template = models.TextField(blank=True)
     smtp_setting = models.ForeignKey(SMTPSetting)
-    send_sms = models.BooleanField()
+    send_sms = models.BooleanField(verbose_name="Send SMS")
     
-    cou_group = models.ForeignKey(CoUserGroup,models.SET_NULL, null=True)
+    cou_group = models.ForeignKey(CoUserGroup,models.SET_NULL, null=True, verbose_name="Group Availability")
     kit_admin = models.ForeignKey(KITUser, models.PROTECT, blank=True)
     
     active = models.BooleanField()

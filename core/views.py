@@ -298,3 +298,14 @@ class MessageTemplateUpdateView(UpdateView):
     model = MessageTemplate
     form_class = MessageTemplateForm
     template_name = 'core/templates/template_detail.html'
+    
+class MessageTemplateCreateView(CreateView):
+    
+    model = MessageTemplate
+    form_class = MessageTemplateForm
+    template_name = 'core/templates/new_template.html'
+    
+    def form_valid(self, form):
+        form.instance.kit_admin = self.request.user.kituser
+
+        return super(MessageTemplateCreateView, self).form_valid(form)

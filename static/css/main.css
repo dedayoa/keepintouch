@@ -32,3 +32,33 @@ table.events-set-list-table select{
 .select2-container{
 	margin-bottom: 1rem;
 }
+
+.new-template-settings-fieldset{
+	padding: 1rem;
+	margin: 1rem 0;
+	background-color: rgba(255, 153, 0, 0.47);
+}
+
+.new-template-settings-fieldset legend{
+	padding: 5px;
+	font-weight: bold;
+	font-size: 1.05rem;
+	background-color: rgba(255, 153, 0, 0.47);
+}
+
+
+.sms-textarea-status-bar{
+    background-color: #ddd;
+    font-size: 0.8em;
+    border: 1px solid rgba(10, 10, 10, 0.25);
+    margin-bottom: 1rem;
+}
+
+div.email-template{
+	margin-bottom: 1rem;
+}
+
+
+#id_sms_template{
+	margin-bottom: 0;
+}

@@ -5,7 +5,7 @@ Created on May 23, 2016
 '''
 
 from django import forms
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, ugettext
 from django.views.generic.edit import ModelFormMixin
 from django.forms.models import formset_factory, inlineformset_factory
 from django.conf import settings
@@ -17,9 +17,13 @@ from .helper import EventFormSetHelper
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
-from crispy_forms_foundation.layout import ButtonGroup, ButtonHolder, Submit, Reset, Button, Layout
+from crispy_forms_foundation.layout import ButtonGroup, ButtonHolder, Div,\
+                                            Submit, Reset, Button, Layout, Fieldset, Row, Column
 from django_select2.forms import Select2Widget, Select2MultipleWidget,\
     ModelSelect2MultipleWidget
+from tinymce.widgets import TinyMCE
+from tinymce_4.widgets import TinyMCEWidget, TinyMCESmallWidget, TinyMCEFullWidget
+from crispy_forms.templatetags.crispy_forms_field import css_class
 
 class ContactForm(forms.ModelForm):
     
@@ -166,16 +170,45 @@ class PublicEventForm(forms.ModelForm):
         
 class MessageTemplateForm(forms.ModelForm):
     
-    
+    #cou_group = forms.MultipleChoiceField(label=_("Group Availability"), widget=Select2Widget)
     
     def __init__(self, *args, **kwargs):
         super(MessageTemplateForm, self).__init__(*args, **kwargs)
+        
+        #self.fields['cou_group'].label = "Group Availability"
         
         self.helper = FormHelper()
         self.helper.form_action = '.'
         self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
         self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+        
+        self.helper.layout = Layout(
+            Row(Column('title')),
+            Row(Column('email_template'), css_class = "email-template"),
+            Row(Column('sms_template')),
+            HTML('''
+                <div class="sms-textarea-status-bar row columns">
+                    <div class="column small-4">Length: <span class="length"></span></div>
+                    <div class="column small-4">Messages: <span class="messages"></span></div>
+                    <div class="column small-4">Remaining: <span class="remaining"></span></div>
+                </div>'''
+                ),
+            Row(Column('active')),                      
+            Fieldset(
+                 ugettext('Delivery settings'),
+                 Row(Column('cou_group')),
+                 Row(Column('smtp_setting')),
+                 Row(Column('send_sms')),
+                 css_class = "new-template-settings-fieldset"
+                 ),                       
+            )
     
     class Meta:
         model = MessageTemplate
-        fields = ['title', 'email_template', 'sms_template', 'cou_group', 'smtp_setting', 'send_sms']
+        fields = ['title', 'email_template', 'sms_template', 'active', 'cou_group', 'smtp_setting', 'send_sms']        
+        widgets = {
+            'cou_group': Select2Widget,
+            'smtp_setting' : Select2Widget,
+            'email_template' : TinyMCE(attrs={'cols': 20,'rows':10}),
+            'sms_template' : forms.Textarea(attrs={'rows':5})
+        }  

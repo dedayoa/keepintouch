@@ -16,7 +16,7 @@
 	</div>
 {% endblock %}
 {% block foot_base_js %}
-	{{block.super}}
-	<script src="{% static "js/foundation-datepicker.js" %}"></script>
 	{{ form.media.js }}
+	<script src="{% static "js/sms_counter.js" %}"></script>
+	{{block.super}}
 {% endblock %}
