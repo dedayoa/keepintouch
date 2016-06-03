@@ -299,6 +299,11 @@ class MessageTemplateUpdateView(UpdateView):
     form_class = MessageTemplateForm
     template_name = 'core/templates/template_detail.html'
     
+    def get_context_data(self, **kwargs):
+        params = super(MessageTemplateUpdateView, self).get_context_data(**kwargs)
+        params["msgtemplateid"] = self.object.pk
+        return params
+    
 class MessageTemplateCreateView(CreateView):
     
     model = MessageTemplate
@@ -309,3 +314,13 @@ class MessageTemplateCreateView(CreateView):
         form.instance.kit_admin = self.request.user.kituser
 
         return super(MessageTemplateCreateView, self).form_valid(form)
+    
+class MessageTemplateDeleteView(DeleteView):
+    
+    model = MessageTemplate
+    success_url = reverse_lazy('core:templates-list')
+    
+    def get_context_data(self, **kwargs):
+        params = super(MessageTemplateDeleteView, self).get_context_data(**kwargs)
+        params["title"] = "Deleting Template {} ".format(self.object.title)
+        return params
