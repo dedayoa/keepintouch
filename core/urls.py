@@ -29,5 +29,6 @@ urlpatterns = [
     url(r'^templates/$', templates, name='templates-list'),
     url(r'^template/', include([
                 url(r'^(?P<pk>\d+)/$', MessageTemplateUpdateView.as_view(), name='templates-detail'),
+                url(r'^new/$', MessageTemplateCreateView.as_view(), name='template-new')
     ])),
 ]
