@@ -24,5 +24,8 @@
 {% block foot_base_js %}
 	{{ form.media.js }}
 	<script src="{% static "js/sms_counter.js" %}"></script>
+	<script>
+		$('#id_sms_template').countSms('.sms-textarea-status-bar')
+	</script>
 	{{block.super}}
 {% endblock %}
