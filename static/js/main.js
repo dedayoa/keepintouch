@@ -2,20 +2,9 @@
  * 
  */
 $(document).foundation();
-$('#id_sms_template').countSms('.sms-textarea-status-bar')
 
+//$('.django-select2').djangoSelect2();
 
-$(document).ready(function() {
-	$('.event-form-date').fdatepicker({
-		/*initialDate: '02-12-1989',*/
-		format: 'dd-mm-yyyy',
-		disableDblClickSelection: true
-	});
-	
-	
-	
-	//$('.django-select2').djangoSelect2();
-});
 
 /*
 function DjangoFilebrowser(field_name, url, type, win) {
