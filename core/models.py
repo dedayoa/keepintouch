@@ -92,6 +92,9 @@ class KITUser(models.Model):
         if self.user.first_name: return self.user.first_name
         else: return self.user.username
         
+    def get_absolute_url(self):
+        return reverse('core:kituser-detail',args=[self.pk])
+        
     def get_parent(self):
         if self.is_admin:
             return False
@@ -133,6 +136,27 @@ class KITUser(models.Model):
             return MessageTemplate.objects.filter(kit_admin = self.pk)
         else:
             return MessageTemplate.objects.filter(cou_group__kit_users = self.pk)
+        
+    #####Admin Things#######
+    
+    def get_kituser(self):
+        if self.is_admin:
+            return KITUser.objects.get(parent=self.pk)
+    
+    def get_kitusers(self):
+        '''
+        Admin, get child users
+        '''
+        if self.is_admin:
+            return KITUser.objects.filter(parent=self.pk)
+        
+    def get_user_groups(self):
+        if self.is_admin:
+            return CoUserGroup.objects.filter(groups_adminover=self.pk)
+        
+    def get_smtp_items(self):
+        if self.is_admin:
+            return SMTPSetting.objects.filter(kit_admin=self.pk)
             
 
 post_save.connect(create_and_set_default_user_group, sender=KITUser)      
@@ -175,6 +199,7 @@ class KITAdminAccount(models.Model):
     kit_admin = models.OneToOneField(KITUser)
     sms_balance = models.DecimalField(max_digits=12, decimal_places=4)
     last_subscribed = models.DateTimeField()
+    is_multicompany = models.BooleanField()
     subscription_expires = models.DateField()
     
 
@@ -201,6 +226,9 @@ class SMTPSetting(models.Model):
     
     def __str__(self):
         return "%s - %s"%(self.description,self.smtp_server)
+    
+    def get_absolute_url(self):
+        return reverse('core:smtp-detail',args=[self.pk])
 
 
 def set_m2m_contact_usergroup(sender, instance, created, **kwargs):

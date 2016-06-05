@@ -6,10 +6,12 @@ from django.contrib import messages
 
 from django_tables2   import RequestConfig
 
-from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate
-from .forms import ContactForm, NewContactForm, EventFormSet,\
-                    EventFormSetHelper, PublicEventForm, MessageTemplateForm
-from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable
+from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate,\
+                    SMTPSetting
+from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, \
+                    EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm
+from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
+                    KITUsersTable, SMTPSettingsTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django_select2.views import AutoResponseView
 
@@ -323,4 +325,80 @@ class MessageTemplateDeleteView(DeleteView):
     def get_context_data(self, **kwargs):
         params = super(MessageTemplateDeleteView, self).get_context_data(**kwargs)
         params["title"] = "Deleting Template {} ".format(self.object.title)
+        return params
+    
+
+def kituser_settings(request):
+    
+    if request.method == "GET":
+        q_admin = KITUser.objects.get(user=request.user)
+
+        kituserstable = KITUsersTable(q_admin.get_kitusers())
+        RequestConfig(request, paginate={'per_page': 10}).configure(kituserstable)
+        params = {}
+        params["title"] = "User Settings"
+        params["table"] = kituserstable
+        return render(request, 'core/settings/users/index.html', params)
+
+class KITUserUpdateView(UpdateView):
+    
+    model = KITUser
+    form_class = KITUserForm
+    template_name = 'core/settings/users/kituser_detail.html'
+    
+    def get_object(self, *args, **kwargs):
+        '''
+        Admin Should be able to view only his own users, not all
+        Users should be able to view only his own profile
+        '''
+        q_admin = KITUser.objects.get(user=self.request.user)
+        if not q_admin:
+            return get_object_or_404(KITUser, pk=self.kwargs['pk'],parent=q_admin )
+        else:
+            print(self.request.user.kituser)
+            return get_object_or_404(KITUser, pk=self.request.user.kituser.pk)
+    
+    
+def smtp_settings(request):
+    
+    if request.method == "GET":
+        q_admin = KITUser.objects.get(user=request.user)
+
+        smtpsetstable = SMTPSettingsTable(q_admin.get_smtp_items())
+        RequestConfig(request, paginate={'per_page': 25}).configure(smtpsetstable)
+        params = {}
+        params["title"] = "SMTP Settings"
+        params["table"] = smtpsetstable
+        return render(request, 'core/settings/smtp/index.html', params)
+    
+class SMTPUpdateView(UpdateView):
+    
+    model = SMTPSetting
+    form_class = SMTPSettingForm
+    template_name = 'core/settings/smtp/smtp_setting_detail.html'
+    
+    def get_context_data(self, **kwargs):
+        params = super(SMTPUpdateView, self).get_context_data(**kwargs)
+        params["smtpsettingid"] = self.object.pk
+        return params
+    
+class SMTPCreateView(CreateView):
+    
+    model = SMTPSetting
+    form_class = SMTPSettingForm
+    template_name = 'core/settings/smtp/new_smtp_setting.html'
+    
+    def form_valid(self, form):
+        form.instance.kit_admin = self.request.user.kituser
+
+        return super(SMTPCreateView, self).form_valid(form)
+    
+class SMTPDeleteView(DeleteView):
+    
+    model = SMTPSetting
+    success_url = reverse_lazy('core:smtp-settings-list')
+    
+    def get_context_data(self, **kwargs):
+        params = super(SMTPDeleteView, self).get_context_data(**kwargs)
+        params["title"] = "Deleting SMTP Setting {} ".format(self.object.title)
         return params

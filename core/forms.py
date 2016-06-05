@@ -11,7 +11,7 @@ from django.forms.models import formset_factory, inlineformset_factory
 from django.conf import settings
 
 
-from .models import Contact, Event, PublicEvent, MessageTemplate
+from .models import Contact, Event, PublicEvent, MessageTemplate, KITUser, SMTPSetting
 from .helper import EventFormSetHelper
 
 
@@ -211,4 +211,33 @@ class MessageTemplateForm(forms.ModelForm):
             'smtp_setting' : Select2Widget,
             'email_template' : TinyMCE(attrs={'cols': 20,'rows':10}),
             'sms_template' : forms.Textarea(attrs={'rows':5})
-        }  
+        }
+        
+        
+class KITUserForm(forms.ModelForm):
+    
+    class Meta:
+        model = KITUser
+        fields = ['user','company']
+        
+        
+        
+class SMTPSettingForm(forms.ModelForm):
+    
+    
+    smtp_password = forms.CharField(widget=forms.PasswordInput(render_value=True))
+    
+    def __init__(self, *args, **kwargs):
+        super(SMTPSettingForm, self).__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.form_action = '.'
+        self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
+        self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+    
+    class Meta:
+        model = SMTPSetting
+        fields = [
+                  'description','smtp_server','smtp_port','connection_security',\
+                  'smtp_user','smtp_password', 'active'
+                  ]

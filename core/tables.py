@@ -70,3 +70,49 @@ class TemplateTable(tables.Table):
     class Meta:
         model = MessageTemplate
         fields = ('title','smtp_setting', 'cou_group', 'send_sms')
+        
+        
+class KITUsersTable(tables.Table):
+    
+    '''
+    user = tables.LinkColumn(verbose_name="User")
+    groups = tables.Column(verbose_name="Groups", accessor='pk')
+    company = tables.Column()
+    phone_number = tables.Column()
+    last_login = tables.DateTimeColumn(verbose_name="Last Login")
+    
+    def __init__(self, *args, **kwargs):
+        super(KITUsersTable, self).__init__(*args, **kwargs)
+        
+    def render_last_login(self, record):
+        if record.user:
+            return record.user.last_login
+    
+    def render_user(self, record):
+        if record.user:
+            return format_html(
+                    '<a href="{}">{}</a>', record.get_absolute_url(),\
+                    "{} {}".format(record.user.first_name, record.user.last_name)   
+                    )
+    
+    def render_groups(self, record):
+        if record.user:
+            #return format_html('{}',record.user.first_name)
+            return (", ".join(t.title for t in record.groups_belongto.all()))
+    '''
+    
+    class Meta:
+        Model = KITUser
+        #fields = ('user', 'company', 'phone_number', 'groups')
+        
+class SMTPSettingsTable(tables.Table):
+    
+    description = tables.LinkColumn(verbose_name="Description", args=[A('pk')])
+    smtp_server = tables.Column(verbose_name="SMTP Server")
+    smtp_user = tables.Column(verbose_name="SMTP User")
+    active = tables.BooleanColumn()
+    
+    
+    class Meta:
+        Model = SMTPSetting
+        fields = ('description', 'smtp_server', 'smtp_user','active')

@@ -1,0 +1,28 @@
+{% extends "core/base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+
+{% block title %}{{title}}{% endblock %}
+{% block head_base_links %}
+	<link href="//cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css" rel="stylesheet">
+	<link href="{% static "css/foundation-datepicker.css" %}" rel="stylesheet">
+	{{ form.media.css }}
+	{{ block.super }}
+{% endblock %}
+{% block content %}
+	<div class="row">
+		{{ block.super }}
+		{% crispy form %}
+				
+		<form method="POST" action="">
+		   {% csrf_token %}
+		   <input type="submit" value="Delete" class="button alert float-left" 
+		   onclick="return confirm('Are you sure you want to delete this Public Event?');">
+		</form>
+	</div>
+{% endblock %}
+{% block foot_base_js %}
+	{{block.super}}
+	<script src="{% static "js/foundation-datepicker.js" %}"></script>
+	{{ form.media.js }}
+{% endblock %}

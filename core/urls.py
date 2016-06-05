@@ -13,6 +13,16 @@ from .views import *
 urlpatterns = [
     url(r'^$', Index.as_view(), name='index'),
     url(r'^settings/$', settings, name='settings'),
+    url(r'^settings/', include([
+                url(r'^users/$', kituser_settings, name='kituser-settings-list'),
+                url(r'^user/(?P<pk>\d+)/$', KITUserUpdateView.as_view(), name='kituser-detail'),
+                
+                url(r'^smtps/$', smtp_settings, name='smtp-settings-list'),
+                url(r'^smtp/(?P<pk>\d+)/$', SMTPUpdateView.as_view(), name='smtp-detail'),
+                url(r'^smtp/new/$', SMTPCreateView.as_view(), name='smtp-new'),
+                url(r'^smtp/(?P<pk>\d+)/delete/$', SMTPDeleteView.as_view(), name='smtp-delete'),
+    ])),
+    
     url(r'^contacts/$', contacts, name='contacts-list'), #lists all contacts
     url(r'^contact/', include([
                 url(r'^(?P<pk>[A-Z0-9]{9})/$', ContactViewView.as_view(), name='contact-detail'),

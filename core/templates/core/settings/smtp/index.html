@@ -1,0 +1,14 @@
+{% extends "core/base_generic.html" %}
+{% load render_table from django_tables2 %}
+{% block head_base_links %}
+	{{ block.super }}
+{% endblock %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="row">
+	<a class="small button" href="{% url 'core:smtp-new' %}">New SMTP Server</a>
+	{{ block.super }}
+	{% render_table table %}
+</div>
+{% endblock %}
