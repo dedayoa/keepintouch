@@ -3,10 +3,19 @@
  */
 $(document).foundation();
 
+
+/*
+
+$('input.test-smtp-button').on('click', function(event){
+		event.preventDefault();
+		console.log("Clicked")
+});
+
+
 //$('.django-select2').djangoSelect2();
 
 
-/*
+
 function DjangoFilebrowser(field_name, url, type, win) {
 
 	  var editor = win.tinyMCE.activeEditor,
