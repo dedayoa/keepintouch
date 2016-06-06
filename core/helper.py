@@ -12,3 +12,8 @@ class EventFormSetHelper(FormHelper):
         super(EventFormSetHelper, self).__init__(*args, **kwargs)
         self.form_method = 'post'
         
+
+from django.core.mail import send_mail
+
+class TestSMTPSetting():
+    pass
