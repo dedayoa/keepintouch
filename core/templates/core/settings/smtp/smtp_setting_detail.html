@@ -11,7 +11,12 @@
 	<div class="row">
 		{{ block.super }}
 		{% crispy form %}
-				
+
+		<form method="POST" action="{% url 'core:smtp-check' smtpsettingid %}">
+		   {% csrf_token %}
+		   <input type="submit" value="Test Server" class="button warning float-right test-smtp-button" 
+		    id="button-id-test_smtp_server">
+		</form>		
 		<form method="POST" action="{% url 'core:smtp-delete' smtpsettingid %}">
 		   {% csrf_token %}
 		   <input type="submit" value="Delete" class="button alert float-left" 
