@@ -232,8 +232,9 @@ class SMTPSettingForm(forms.ModelForm):
         
         self.helper = FormHelper()
         self.helper.form_action = '.'
-        self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
+        self.helper.add_input(Submit('submit', _('Save'), css_class="success float-right"))
         self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+        #self.helper.add_input(Button('test_smtp_server', _('Test Server'), css_class="warning float-right test-smtp-button"))
     
     class Meta:
         model = SMTPSetting
