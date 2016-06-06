@@ -1,3 +1,5 @@
+import sys
+
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from django.http.response import HttpResponse, HttpResponseRedirect
@@ -14,6 +16,12 @@ from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateT
                     KITUsersTable, SMTPSettingsTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django_select2.views import AutoResponseView
+
+from django.core import mail
+from django.core.mail import send_mail
+from django.core.mail.backends.smtp import EmailBackend
+from django.contrib.messages.api import get_messages
+
 
 # Create your views here.
 
@@ -380,6 +388,7 @@ class SMTPUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         params = super(SMTPUpdateView, self).get_context_data(**kwargs)
         params["smtpsettingid"] = self.object.pk
+        params["messages"] = get_messages(self.request)
         return params
     
 class SMTPCreateView(CreateView):
@@ -402,3 +411,64 @@ class SMTPDeleteView(DeleteView):
         params = super(SMTPDeleteView, self).get_context_data(**kwargs)
         params["title"] = "Deleting SMTP Setting {} ".format(self.object.title)
         return params
+    
+class CheckSMTPServerView(View):
+    
+    params = {}
+    
+    def post(self, request, pk):
+        
+        if request.user.kituser.is_admin:
+            #pulling from DB, not Form
+            smtp_profile = get_object_or_404(SMTPSetting, pk=pk, kit_admin=request.user.kituser)
+            
+            smtp_server = smtp_profile.smtp_server
+            smtp_port = smtp_profile.smtp_port
+            connection_security = smtp_profile.connection_security
+            smtp_user = smtp_profile.smtp_user
+            smtp_password = smtp_profile.smtp_password
+        
+            try:
+                
+                if smtp_profile.connection_security == 'SSLTLS':
+                    connection = mail.get_connection(
+                            host = smtp_server,
+                            port = smtp_port,
+                            username = smtp_user,
+                            password = smtp_password,
+                            use_ssl = lambda: True if connection_security == 'SSLTLS' else None,
+                            )
+                elif smtp_profile.connection_security == 'STARTTLS':
+                    connection = mail.get_connection(
+                            host = smtp_server,
+                            port = smtp_port,
+                            username = smtp_user,
+                            password = smtp_password,
+                            use_tls = lambda: True if connection_security == 'STARTTLS' else None,
+                            )
+                else:
+                    connection = mail.get_connection(
+                            host = smtp_server,
+                            port = smtp_port,
+                            username = smtp_user,
+                            password = smtp_password,
+                            )                   
+                
+                with connection as smtp_connection:
+                                    mail.EmailMessage(
+                                        'Test Email from IntouchNG',
+                                        'This is a test email to check your SMTP setup',
+                                        smtp_user,
+                                        ['dayo@windom.biz'],
+                                        connection=smtp_connection,
+                                    ).send()
+                
+                messages.add_message(request, messages.INFO, "Email SMTP - Test OK" )
+                
+                                    
+            except:
+                print(sys.exc_info())
+                messages.add_message(request, messages.INFO,'Email SMTP - Test Failed')
+                messages.add_message(request, messages.INFO, sys.exc_info()[1])
+            
+            return HttpResponseRedirect(reverse('core:smtp-detail', args=[pk]))
