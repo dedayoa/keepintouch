@@ -62,3 +62,7 @@ div.email-template{
 #id_sms_template{
 	margin-bottom: 0;
 }
+
+input.test-smtp-button{
+	margin-right: 0.5rem;
+}
