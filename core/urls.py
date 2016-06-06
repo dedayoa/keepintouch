@@ -21,6 +21,7 @@ urlpatterns = [
                 url(r'^smtp/(?P<pk>\d+)/$', SMTPUpdateView.as_view(), name='smtp-detail'),
                 url(r'^smtp/new/$', SMTPCreateView.as_view(), name='smtp-new'),
                 url(r'^smtp/(?P<pk>\d+)/delete/$', SMTPDeleteView.as_view(), name='smtp-delete'),
+                url(r'^smtp/(?P<pk>\d+)/check/$', CheckSMTPServerView.as_view(), name='smtp-check'),
     ])),
     
     url(r'^contacts/$', contacts, name='contacts-list'), #lists all contacts
