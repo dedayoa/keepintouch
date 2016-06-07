@@ -24,6 +24,7 @@ from django_select2.forms import Select2Widget, Select2MultipleWidget,\
 from tinymce.widgets import TinyMCE
 from tinymce_4.widgets import TinyMCEWidget, TinyMCESmallWidget, TinyMCEFullWidget
 from crispy_forms.templatetags.crispy_forms_field import css_class
+from core.models import CoUserGroup
 
 class ContactForm(forms.ModelForm):
     
@@ -161,7 +162,7 @@ class PublicEventForm(forms.ModelForm):
     
     class Meta:
         model = PublicEvent    
-        fields = ['title','date','message','recipients']
+        fields = ['title','date','message','all_contacts','recipients']
         widgets = {
             'recipients': Select2MultipleWidget,
             'message' : Select2Widget
@@ -242,3 +243,22 @@ class SMTPSettingForm(forms.ModelForm):
                   'description','smtp_server','smtp_port','connection_security',\
                   'smtp_user','smtp_password', 'active'
                   ]
+        
+class UserGroupSettingForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        
+        super(UserGroupSettingForm, self).__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.form_action = '.'
+        self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
+        self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))    
+    
+    class Meta:
+        model = CoUserGroup
+        fields = ['title','description','active','kit_users']
+        widgets = {
+            'kit_users' : Select2MultipleWidget,
+                   }
+        labels = {'kit_users' : _('Users')}
