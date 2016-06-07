@@ -11,9 +11,10 @@ from django_tables2   import RequestConfig
 from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate,\
                     SMTPSetting
 from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, \
-                    EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm
+                    EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
+                    UserGroupSettingForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
-                    KITUsersTable, SMTPSettingsTable
+                    KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django_select2.views import AutoResponseView
 
@@ -430,21 +431,21 @@ class CheckSMTPServerView(View):
         
             try:
                 
-                if smtp_profile.connection_security == 'SSLTLS':
+                if connection_security == 'SSLTLS':
                     connection = mail.get_connection(
                             host = smtp_server,
                             port = smtp_port,
                             username = smtp_user,
                             password = smtp_password,
-                            use_ssl = lambda: True if connection_security == 'SSLTLS' else None,
+                            use_ssl = True
                             )
-                elif smtp_profile.connection_security == 'STARTTLS':
+                elif connection_security == 'STARTTLS':
                     connection = mail.get_connection(
                             host = smtp_server,
                             port = smtp_port,
                             username = smtp_user,
                             password = smtp_password,
-                            use_tls = lambda: True if connection_security == 'STARTTLS' else None,
+                            use_tls = True
                             )
                 else:
                     connection = mail.get_connection(
@@ -472,3 +473,29 @@ class CheckSMTPServerView(View):
                 messages.add_message(request, messages.INFO, sys.exc_info()[1])
             
             return HttpResponseRedirect(reverse('core:smtp-detail', args=[pk]))
+        
+        
+def usergroup_settings(request):
+    
+    if request.method == "GET":
+        q_admin = KITUser.objects.get(user=request.user)
+    
+        ugroupsstable = UserGroupsSettingsTable(q_admin.get_user_groups())
+        RequestConfig(request, paginate={'per_page': 25}).configure(ugroupsstable)
+        params = {}
+        params["title"] = "User Groups"
+        params["table"] = ugroupsstable
+        return render(request, 'core/settings/user_groups/index.html', params)
+    
+class UserGroupUpdateView(UpdateView):
+    
+    model = CoUserGroup
+    form_class = UserGroupSettingForm
+    template_name = 'core/settings/user_groups/user_group_detail.html'
+    
+    def get_context_data(self, **kwargs):
+        params = super(UserGroupUpdateView, self).get_context_data(**kwargs)
+        params["usergroupid"] = self.object.pk
+        #params["messages"] = get_messages(self.request)
+        return params
+    
