@@ -7,7 +7,7 @@ Created on May 23, 2016
 import django_tables2 as tables
 from django_tables2.utils import A
 from .models import Contact, MessageTemplate, Event, PublicEvent,\
-                    KITUser, KITAdminAccount, SMTPSetting
+                    KITUser, KITAdminAccount, SMTPSetting, CoUserGroup
 from django.utils.html import format_html
 
 
@@ -102,7 +102,7 @@ class KITUsersTable(tables.Table):
     '''
     
     class Meta:
-        Model = KITUser
+        model = KITUser
         #fields = ('user', 'company', 'phone_number', 'groups')
         
 class SMTPSettingsTable(tables.Table):
@@ -114,5 +114,17 @@ class SMTPSettingsTable(tables.Table):
     
     
     class Meta:
-        Model = SMTPSetting
+        model = SMTPSetting
         fields = ('description', 'smtp_server', 'smtp_user','active')
+        
+        
+class UserGroupsSettingsTable(tables.Table):
+    
+    title = tables.LinkColumn(verbose_name="Title", args=[A('pk')])
+    description = tables.Column(verbose_name="Description")
+    active = tables.BooleanColumn(verbose_name="Active")
+    
+    class Meta:
+        model = CoUserGroup
+        fields = ('title','description','active')
+        
