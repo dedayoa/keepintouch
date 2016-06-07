@@ -155,7 +155,7 @@ class KITUser(models.Model):
             Only KIT_ADMINS can configure SMTP
         '''
         if self.is_admin:
-            return CoUserGroup.objects.filter(groups_adminover=self.pk)
+            return CoUserGroup.objects.filter(kit_admin=self.pk)
         
     def get_smtp_items(self):
         if self.is_admin:
@@ -180,6 +180,10 @@ class CoUserGroup(models.Model):
     
     def __str__(self):
         return self.title
+    
+        
+    def get_absolute_url(self):
+        return reverse('core:usergroup-detail',args=[self.pk])
     
     def get_contact_managed_by_group(self):
         if self.active:
@@ -365,7 +369,7 @@ class PublicEvent(models.Model):
     message = models.ForeignKey(MessageTemplate)
     #applies_to = models.CharField(max_length=3, choices=APPLIESTO, default='ALL')
     recipients = models.ManyToManyField(Contact, blank=True)
-    
+    all_contacts = models.BooleanField(default=False)
     #event_group = models.ForeignKey(CoUserGroup,models.SET_NULL, null=True)
     kit_user = models.ForeignKey(KITUser, models.PROTECT, blank=True)
     created = models.DateTimeField(auto_now=True)
