@@ -3,8 +3,29 @@
  */
 $(document).foundation();
 
+if ($('#id_all_contacts').prop('checked')){
+	$('#div_id_recipients').hide()
+}else{
+	$('#div_id_recipients').show()
+}
 
+
+
+
+
+
+	
 /*
+ * 
+ $("#id_all_contacts").change( function(){
+	  if ($('#div_id_recipients').is(':visible'))
+	  {
+		  $('#div_id_recipients').hide()
+	  }else{
+		  $('#div_id_recipients').show()
+	  }
+	  
+	});
 
 $('input.test-smtp-button').on('click', function(event){
 		event.preventDefault();
