@@ -16,7 +16,7 @@
 		<ul class="menu vertical nested">
 		{% if request.user.kituser.is_admin %}
 			<li><a href="{% url 'core:kituser-settings-list' %}">Users</a></li>
-			<li><a href="#">User Groups</a></li>
+			<li><a href="{% url 'core:usergroup-list' %}">User Groups</a></li>
 			<li><a href="#">Account</a></li>
 			<li><a href="{% url 'core:smtp-settings-list' %}">SMTP</a></li>
 		{% endif %}
