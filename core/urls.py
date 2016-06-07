@@ -17,6 +17,10 @@ urlpatterns = [
                 url(r'^users/$', kituser_settings, name='kituser-settings-list'),
                 url(r'^user/(?P<pk>\d+)/$', KITUserUpdateView.as_view(), name='kituser-detail'),
                 
+                #User Groups
+                url(r'^user-groups/$', usergroup_settings, name='usergroup-list'),
+                url(r'^user-groups/(?P<pk>\d+)/$', UserGroupUpdateView.as_view(), name='usergroup-detail'),
+                #SMTP
                 url(r'^smtps/$', smtp_settings, name='smtp-settings-list'),
                 url(r'^smtp/(?P<pk>\d+)/$', SMTPUpdateView.as_view(), name='smtp-detail'),
                 url(r'^smtp/new/$', SMTPCreateView.as_view(), name='smtp-new'),
