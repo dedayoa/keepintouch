@@ -33,13 +33,14 @@ table.events-set-list-table select{
 	margin-bottom: 1rem;
 }
 
-.new-template-settings-fieldset{
+.new-template-settings-fieldset, .new-message-settings-fieldset {
 	padding: 1rem;
 	margin: 1rem 0;
 	background-color: rgba(255, 153, 0, 0.47);
 }
 
-.new-template-settings-fieldset legend{
+.new-template-settings-fieldset legend,
+.new-message-settings-fieldset legend{
 	padding: 5px;
 	font-weight: bold;
 	font-size: 1.05rem;
@@ -63,7 +64,7 @@ div.email-template{
 }
 
 
-#id_sms_template{
+#id_sms_template,#id_sms_message{
 	margin-bottom: 0;
 }
 

@@ -6,14 +6,25 @@
 {% block head_base_links %}
 	<link href="//cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css" rel="stylesheet">
 	<link href="{% static "css/foundation-datepicker.css" %}" rel="stylesheet">
-	{{ form.media.css }}
+	{{ form_2.media.css }}
 	{{ block.super }}
 {% endblock %}
 {% block content %}
 	<div class="row">
 		{{ block.super }}
-		{% crispy form %}
-				
+		<form action="." method="post">
+			{% crispy form_1 %}
+			{% crispy form_2 %}
+			<div class="row column" style="margin-bottom: 1rem;">
+				<div><b>Last Login:</b> {{last_login}}</div>
+				<div><b>Date Registered:</b> {{date_joined}}</div>
+			</div>
+			<div class="button-holder">
+				<input type="submit" name="submit" value="Submit" class="submit button success float-right" id="submit-id-submit">
+				<input type="reset" name="reset" value="Reset" class="reset button float-right" id="reset-id-reset">
+			</div>
+		</form>
+		<input type="submit" value="Reset Password" class="button warning float-right reset-user-button">	
 		<form method="POST" action="">
 		   {% csrf_token %}
 		   <input type="submit" value="Delete" class="button alert float-left" 
@@ -22,7 +33,7 @@
 	</div>
 {% endblock %}
 {% block foot_base_js %}
+	{{ form_2.media.js }}
 	{{block.super}}
 	<script src="{% static "js/foundation-datepicker.js" %}"></script>
-	{{ form.media.js }}
 {% endblock %}

@@ -1,4 +1,5 @@
 import sys
+import datetime
 
 from django.db import models, transaction
 
@@ -15,6 +16,9 @@ from django.db.models.signals import post_save, pre_save, m2m_changed
 from django.core.exceptions import ValidationError
 from django.http import request
 from django.dispatch.dispatcher import receiver
+from django.conf import settings
+
+
 
 
 ### Managers
@@ -73,17 +77,26 @@ class KITUser(models.Model):
         ('OTHER','Other')
     )
     
+    STATE = (
+        ('OYO','Oyo'),
+        ('ABIA','Abia'),
+        ('LAG','Lagos'),
+        ('ABJ','Abuja'),
+        ('ONDO','Ondo'),
+        ('KANO','Kano'),
+             )
+    
     user = models.OneToOneField(User)
     dob = models.DateField(blank=False)
     
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, limit_choices_to={'is_admin':True})
     phone_number = PhoneNumberField(blank=True, null=True, unique=True)
     company = models.CharField(max_length=255, blank=True)
     industry = models.CharField(max_length=50, choices=INDUSTRY, blank=False)
     address_1 = models.CharField(max_length=100, blank=False)
     address_2 = models.CharField(max_length=100, blank=True)
     city_town = models.CharField(max_length=100, blank=False)
-    state = models.CharField(max_length=100, blank=False)
+    state = models.CharField(max_length=100, blank=False, choices=STATE, default="LAG")
     is_admin = models.BooleanField(default=False)
     
     objects = KITUserManager()
@@ -174,8 +187,10 @@ def prevent_save_of_group_titled_default(sender, instance, *args, **kwargs):
 class CoUserGroup(models.Model):
     title = models.CharField(max_length=100, blank=False)
     description = models.CharField(max_length=255, blank=True)
-    kit_admin = models.ForeignKey(KITUser, on_delete=models.CASCADE, related_name='groups_adminover', blank=False)
-    kit_users = models.ManyToManyField(KITUser, related_name='groups_belongto', blank=True)
+    kit_admin = models.ForeignKey(KITUser, on_delete=models.CASCADE, related_name='groups_adminover', \
+                                  blank=False, limit_choices_to={'is_admin':True})
+    kit_users = models.ManyToManyField(KITUser, related_name='groups_belongto', \
+                                       blank=True, limit_choices_to={'is_admin':False})
     active = models.BooleanField() #when deactivated, 
     
     def __str__(self):
@@ -226,10 +241,10 @@ class SMTPSetting(models.Model):
     smtp_password = EncryptedCharField(max_length=255,blank=True)
     active = models.BooleanField()
     
-    kit_admin = models.ForeignKey(KITUser, models.CASCADE, blank=False)
+    kit_admin = models.ForeignKey(KITUser, models.CASCADE, blank=False, limit_choices_to={'is_admin':True})
     
-    created = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return "%s - %s"%(self.description,self.smtp_server)
@@ -265,11 +280,11 @@ class Contact(models.Model):
     #slug = modelx.SlugField(max_length=100)
     active = models.BooleanField(default=True)
     
-    kit_user = models.ForeignKey(KITUser, models.PROTECT)
+    kit_user = models.ForeignKey(KITUser, models.PROTECT) #limit to not admin i.e admin cannot create contact
     #cou_group = modelx.ManyToManyField('CoUserGroup', blank=True)
     
-    created = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.first_name
@@ -303,15 +318,17 @@ class MessageTemplate(models.Model):
     email_template = models.TextField(blank=True)
     sms_template = models.TextField(blank=True)
     smtp_setting = models.ForeignKey(SMTPSetting)
+    
     send_sms = models.BooleanField(verbose_name="Send SMS")
+    send_email = models.BooleanField(verbose_name="Send Email")
     
     cou_group = models.ForeignKey(CoUserGroup,models.SET_NULL, null=True, verbose_name="Group Availability")
-    kit_admin = models.ForeignKey(KITUser, models.PROTECT, blank=True)
+    kit_admin = models.ForeignKey(KITUser, models.PROTECT, blank=True, limit_choices_to={'is_admin':True})
     
     active = models.BooleanField()
     
-    created = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return self.title
@@ -321,8 +338,7 @@ class MessageTemplate(models.Model):
         return '{}'.format(self.kit_admin.user_group)
     
     def get_absolute_url(self):
-        return reverse('core:templates-detail',
-                       args=[self.pk])
+        return reverse('core:templates-detail',args=[self.pk])
 
 
 
@@ -341,8 +357,8 @@ class Event(models.Model):
     
     #created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
     #couser = models.ForeignKey(CoUser, models.SET_NULL, blank=True)
-    created = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     
     def __str__(self):
@@ -372,8 +388,9 @@ class PublicEvent(models.Model):
     all_contacts = models.BooleanField(default=False)
     #event_group = models.ForeignKey(CoUserGroup,models.SET_NULL, null=True)
     kit_user = models.ForeignKey(KITUser, models.PROTECT, blank=True)
-    created = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now_add=True)
+    
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
     
     
     def __str__(self):
@@ -393,8 +410,11 @@ class PublicEvent(models.Model):
 class SentMessage(models.Model):
     event = models.ForeignKey(Event)
     
-    created = models.DateTimeField(auto_now=True)
-    last_modified = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return self.event
+
+
+    

@@ -26,4 +26,5 @@ urlpatterns = [
     url(r'^select2/', include('django_select2.urls')),
     url(r'^tinymce/', include('tinymce.urls')),
     url(r'^', include('core.urls', namespace='core', app_name='core')),
+    url(r'^messaging/', include('messaging.urls', namespace='messaging', app_name='messaging')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)#+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

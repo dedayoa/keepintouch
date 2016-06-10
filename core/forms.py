@@ -25,6 +25,7 @@ from tinymce.widgets import TinyMCE
 from tinymce_4.widgets import TinyMCEWidget, TinyMCESmallWidget, TinyMCEFullWidget
 from crispy_forms.templatetags.crispy_forms_field import css_class
 from core.models import CoUserGroup
+from django.contrib.auth.models import User
 
 class ContactForm(forms.ModelForm):
     
@@ -213,13 +214,67 @@ class MessageTemplateForm(forms.ModelForm):
             'email_template' : TinyMCE(attrs={'cols': 20,'rows':10}),
             'sms_template' : forms.Textarea(attrs={'rows':5})
         }
+
+
+class ExistingUserForm(forms.ModelForm):
+    
+    username = forms.CharField(disabled=True)
+    
+    def __init__(self, *args, **kwargs):
+        super(ExistingUserForm, self).__init__(*args, **kwargs)
         
+        self.helper = FormHelper()
+        self.helper.form_action = '.'
+        self.helper.form_tag = False
+        #self.helper.add_input(Submit('submit', _('Save'), css_class="success float-right"))
+        #self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+    
+    class Meta:
+        model = User
+        fields = ['username','email','first_name','last_name',\
+                  'is_active'
+                  ]  
+        
+class NewUserForm(forms.ModelForm):
+    
+    email = forms.EmailField(required=True)
+    first_name = forms.CharField(required=True)
+    
+    def __init__(self, *args, **kwargs):
+        super(NewUserForm, self).__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.form_action = '.'
+        self.helper.form_tag = False
+    
+    class Meta:
+        model = User
+        fields = ['username','email','first_name','last_name',\
+                  'is_active'
+                  ]       
         
 class KITUserForm(forms.ModelForm):
     
+    dob = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS,\
+                           widget=forms.DateInput(attrs={'class':'dob-form-date'}))   
+    
+    def __init__(self, *args, **kwargs):
+        super(KITUserForm, self).__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.form_action = '.'
+        self.helper.form_tag = False
+        #self.helper.add_input(Submit('submit', _('Save'), css_class="success float-right"))
+        #self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+    
     class Meta:
         model = KITUser
-        fields = ['user','company']
+        fields = ['dob','phone_number','industry','company','address_1',\
+                  'address_2','city_town','state']
+        exclude = ['user']
+        widgets = {
+            'state': Select2Widget,
+                   }
         
         
         
@@ -253,7 +308,7 @@ class UserGroupSettingForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_action = '.'
         self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
-        self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))    
+        self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
     
     class Meta:
         model = CoUserGroup

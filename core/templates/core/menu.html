@@ -1,16 +1,37 @@
 <ul class="vertical menu" data-accordion-menu>
 	<li><a href="#">Dashboard</a></li>
-	<li><a href="{% url 'core:contacts-list' %}">Contacts</a></li>
-	<li><a href="#">Messaging</a></li>
+	<li>
+		<a href="#">Contact</a>
+		<ul class="menu vertical nested">
+			<li><a href="{% url 'core:contacts-list' %}">Contacts</a></li>
+			<li><a href="">Groups</a></li>
+		</ul>
+	</li>
+	<li>
+		<a href="#">Messaging</a>
+		<ul class="menu vertical nested">
+			<li><a href="{% url 'messaging:new-standard-message' %}">Standard</a></li>
+			<li><a href="{% url 'messaging:new-advanced-message' %}">Advanced</a></li>
+			<hr>
+			<li><a href="#">Drafts</a></li>
+			<li><a href="#">Waiting</a></li>
+			<li><a href="#">Processed</a></li>
+		</ul>
+	</li>
 	<li><a href="{% url 'core:templates-list' %}">Templates</a></li>
-			<li>
+	<li>
 		<a href="#">Events</a>
 		<ul class="menu vertical nested">
 			<li><a href="{% url 'core:events-list' %}">Private</a></li>
 			<li><a href="{% url 'core:public-events-list' %}">Public</a></li>
 		</ul>
 	</li>
-	<li><a href="#">Reports</a></li>
+	<li>
+		<a href="#">Reports</a>
+		<ul class="menu vertical nested">
+			<li><a href="#">Messages</a></li>
+		</ul>
+	</li>
 	<li>
 		<a href="#">Settings</a>
 		<ul class="menu vertical nested">

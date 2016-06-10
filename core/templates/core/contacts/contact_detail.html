@@ -11,7 +11,7 @@
 {% block content %}
 	<div class="row">
 		{{ block.super }}
-		<form action="" method="post">
+		<form action="." method="post">
 			{% crispy form %} {# I have set helper not to generate the form tag #}
 			<fieldset class="fieldset">
 				<legend>Events</legend>

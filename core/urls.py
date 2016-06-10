@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^settings/', include([
                 url(r'^users/$', kituser_settings, name='kituser-settings-list'),
                 url(r'^user/(?P<pk>\d+)/$', KITUserUpdateView.as_view(), name='kituser-detail'),
+                url(r'^user/new/$', UserCreateView.as_view(), name='kituser-new'),
                 
                 #User Groups
                 url(r'^user-groups/$', usergroup_settings, name='usergroup-list'),

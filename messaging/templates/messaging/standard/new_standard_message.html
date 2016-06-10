@@ -1,0 +1,53 @@
+{% extends "core/base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+
+{% block title %}{{title}}{% endblock %}
+{% block head_base_links %}
+	<link href="//cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css" rel="stylesheet">
+	<link href="{% static "css/foundation-datepicker.css" %}" rel="stylesheet">
+	{{ form.media.css }}
+	{{ block.super }}
+{% endblock %}
+{% block content %}
+	<div class="row">
+		{{ block.super }}
+		<form action="." method="post">
+			{% crispy form %}
+			<input type="reset" name="reset" value="Reset" class="reset button secondary float-left" id="reset-id-reset">
+			<input type="submit" name="submit" value="Save Draft" class="submit button float-left" id="submit-id-submit">
+		</form>
+		<form method="POST" action="">
+		   {% csrf_token %}
+		   <input type="submit" value="Send" class="button success float-right" 
+		   onclick="return confirm('Are you sure you want to Send?');">
+		</form>
+	</div>
+{% endblock %}
+{% block foot_base_js %}
+	{{ form.media.js }}
+	<script src="{% static "js/sms_counter.js" %}"></script>
+	<script src="{% static "js/foundation-datepicker.js" %}"></script>
+	<script>
+		$('#id_sms_message').countSms('.sms-textarea-status-bar');
+		
+		var nowTemp = new Date();
+		var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+		$(function(){
+			$('#id_delivery_time').fdatepicker({
+				format: 'dd-mm-yyyy hh:ii',
+				disableDblClickSelection: true,
+				language: 'vi',
+				pickTime: true,
+				onRender: function(date){
+					return date.valueOf() < now.valueOf() ? 'disabled' : '';
+				}
+			});
+		});
+		
+		/*$('.email-template, #div_id_sms_message, .sms-textarea-status-bar,.ss-recipients, .ss-deliver-at, .ss-sms-sender,.ss-smtp-setting').hide()*/
+
+		
+	</script>
+	{{block.super}}
+{% endblock %}

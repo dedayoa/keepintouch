@@ -10,9 +10,9 @@ from django_tables2   import RequestConfig
 
 from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate,\
                     SMTPSetting
-from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, \
+from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, ExistingUserForm,\
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
-                    UserGroupSettingForm
+                    UserGroupSettingForm, NewUserForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
@@ -22,6 +22,7 @@ from django.core import mail
 from django.core.mail import send_mail
 from django.core.mail.backends.smtp import EmailBackend
 from django.contrib.messages.api import get_messages
+from django.contrib.auth.models import User
 
 
 # Create your views here.
@@ -341,6 +342,7 @@ def kituser_settings(request):
     
     if request.method == "GET":
         q_admin = KITUser.objects.get(user=request.user)
+        #q_admin = User.objects.get(username = request.user)
 
         kituserstable = KITUsersTable(q_admin.get_kitusers())
         RequestConfig(request, paginate={'per_page': 10}).configure(kituserstable)
@@ -348,24 +350,97 @@ def kituser_settings(request):
         params["title"] = "User Settings"
         params["table"] = kituserstable
         return render(request, 'core/settings/users/index.html', params)
+    
+class UserCreateView(View):
+    
+    model_1 = User
+    model_2 = KITUser
+    template_name = 'core/settings/users/new_user.html'
+    params = {}
+    
+    form_1 = NewUserForm
+    form_2 = KITUserForm
+    
+    def get(self, request):
+        
+        q_admin = KITUser.objects.get(user=request.user)
+        
+        self.params["title"] = "New User"
+        self.params["form_1"] = self.form_1(instance=None, prefix="userform")
+        self.params["form_2"] = self.form_2(instance=None, prefix="kituform")
+        
+        return render(request, self.template_name, self.params)
+    
+    
+    def post(self, request):
 
-class KITUserUpdateView(UpdateView):
+        #k_user = get_object_or_404(KITUser, pk=pk,parent=request.user.kituser)
+        #uzr = k_user.user
+        
+        userform = self.form_1(request.POST or None, prefix="userform", instance=None)
+        kituform = self.form_2(request.POST or None, prefix="kituform", instance=None)
+        
+        if userform.is_valid() and kituform.is_valid():
+            
+            f1 = userform.save()
+            f2 = kituform.save(commit=False)
+            f2.user = f1
+            f2.parent= request.user.kituser
+            f2.save()
+                
+            
+        return HttpResponseRedirect(reverse('core:kituser-detail', args=[f2.pk]))      
+
     
-    model = KITUser
-    form_class = KITUserForm
+    def get_success_url(self):
+        return reverse('core:kituser-detail', kwargs={'pk': self.object.pk})
+    
+
+class KITUserUpdateView(View):
+    
+    model_1 = User
+    model_2 = KITUser
     template_name = 'core/settings/users/kituser_detail.html'
+    params = {}
     
-    def get_object(self, *args, **kwargs):
-        '''
-        Admin Should be able to view only his own users, not all
-        Users should be able to view only his own profile
-        '''
-        q_admin = KITUser.objects.get(user=self.request.user)
-        if not q_admin:
-            return get_object_or_404(KITUser, pk=self.kwargs['pk'],parent=q_admin )
-        else:
-            print(self.request.user.kituser)
-            return get_object_or_404(KITUser, pk=self.request.user.kituser.pk)
+    form_1 = ExistingUserForm
+    form_2 = KITUserForm
+    
+    def get(self, request, pk):
+        
+        q_admin = KITUser.objects.get(user=request.user)
+        
+        if q_admin:
+            k_user = get_object_or_404(KITUser, pk=pk,parent=q_admin)
+            uzr = k_user.user
+        
+        self.params["title"] = "User"
+        self.params["last_login"] = uzr.last_login
+        self.params["date_joined"] = uzr.date_joined
+        self.params["form_1"] = self.form_1(instance=uzr, prefix="userform")
+        self.params["form_2"] = self.form_2(instance=k_user, prefix="kituform")
+        
+        return render(request, self.template_name, self.params)
+    
+    
+    def post(self, request, pk):
+
+        k_user = get_object_or_404(KITUser, pk=pk,parent=request.user.kituser)
+        uzr = k_user.user
+        
+        userform = self.form_1(request.POST, prefix="userform", instance=uzr)
+        kituform = self.form_2(request.POST, prefix="kituform", instance=k_user)
+        
+        if userform.is_valid() and kituform.is_valid():
+            
+            f1 = userform.save()
+            f2 = kituform.save(commit=False)
+            f2.user = f1
+            f2.save()
+                
+            
+        return HttpResponseRedirect(reverse('core:kituser-detail', args=[pk]))   
+
     
     
 def smtp_settings(request):
@@ -498,4 +573,6 @@ class UserGroupUpdateView(UpdateView):
         params["usergroupid"] = self.object.pk
         #params["messages"] = get_messages(self.request)
         return params
-    
+
+
+

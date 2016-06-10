@@ -11,7 +11,7 @@
 
 {% block content %}
 <div class="row">
-	<a class="small button" href="{% url 'core:template-new' %}">New User</a>
+	<a class="small button" href="{% url 'core:kituser-new' %}">New User</a>
 	{{ block.super }}
 	
 	<div class="table-container">
@@ -30,10 +30,11 @@
 					{# for record in row #}
 						<td><a href="{{row.record.get_absolute_url}}">{{row.record.user.first_name}}</a></td>
 						<td colspan=4>
-							<b>Company</b>: {{row.record.company}}<br />
+							<!-- <b>Company</b>: {#row.record.company#}<br /> -->
 							<b>Phone</b>: {{row.record.phone_number}}<br />
-							<b>Group</b>: {{ row.record.groups_belongto.all|join:", " }}<br />
-							<b>Last Login</b>: {{row.record.user.last_login}}
+							<b>Groups</b>: {{ row.record.groups_belongto.all|join:", " }}<br />
+							<b>Last Login</b>: {{row.record.user.last_login}}<br />
+							<b>Active?</b>: {{ row.record.user.is_active|yesno:"Yes,No" }}
 						</td>
 					{# endfor #}
 				</tr>
