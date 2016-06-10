@@ -6,6 +6,7 @@ Created on Jun 10, 2016
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _, ugettext
+from django.conf import settings
 
 from .models import StandardMessaging
 
@@ -89,6 +90,14 @@ class StandardMessagingForm(forms.ModelForm):
             raise forms.ValidationError(
                 'Your Delivery Date Cannot be in the past'
                                         )
+        
+        if cleaned_data["recipients"].count() > settings.MAX_MSG_RECIPIENT:
+            raise forms.ValidationError(
+                'To check Spam, only {} recipients are allowed. \
+                To send to a greater number of recipients, please \
+                use the Advanced Messaging'.format(settings.MAX_MSG_RECIPIENT)
+                                        )
+            
         
     '''      
     def clean_delivery_time(self):
