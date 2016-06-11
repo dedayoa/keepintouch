@@ -308,7 +308,6 @@ class ContactGroup(models.Model):
     description = models.CharField(max_length=255, blank=True)
     contacts = models.ManyToManyField(Contact, blank=False)
     kit_user = models.ForeignKey(KITUser, models.PROTECT, blank=False)
-    active = models.BooleanField()
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
