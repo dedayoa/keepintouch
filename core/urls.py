@@ -28,7 +28,10 @@ urlpatterns = [
                 url(r'^smtp/(?P<pk>\d+)/delete/$', SMTPDeleteView.as_view(), name='smtp-delete'),
                 url(r'^smtp/(?P<pk>\d+)/check/$', CheckSMTPServerView.as_view(), name='smtp-check'),
     ])),
-    
+
+    #User Groups
+    url(r'^contact-groups/$', contactgroups, name='contactgroup-list'),
+    url(r'^contact-group/(?P<pk>\d+)/$', ContactGroupUpdateView.as_view(), name='contactgroup-detail'),
     url(r'^contacts/$', contacts, name='contacts-list'), #lists all contacts
     url(r'^contact/', include([
                 url(r'^(?P<pk>[A-Z0-9]{9})/$', ContactViewView.as_view(), name='contact-detail'),
