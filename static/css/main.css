@@ -86,3 +86,17 @@ input.test-smtp-button{
 .kitapp-lsm-submenu{
 	font-size: 0.85em;
 }
+
+small.error{
+	display: block;
+    background-color: rgba(255,0,0,0.45);
+    padding: 5px;
+    margin-bottom: 1rem;
+    /* color: orange; */
+    font-weight: bold;    
+	border-top: 2px solid red;
+}
+
+.input-highlight-error{
+	margin-bottom: 0px;
+}
