@@ -6,9 +6,10 @@ Created on May 23, 2016
 
 import django_tables2 as tables
 from django_tables2.utils import A
-from .models import Contact, MessageTemplate, Event, PublicEvent,\
+from .models import Contact, MessageTemplate, Event, PublicEvent, ContactGroup, \
                     KITUser, KITAdminAccount, SMTPSetting, CoUserGroup
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
+from django.utils.safestring import mark_safe
 
 
 class TableSelectColumn(tables.CheckBoxColumn):
@@ -127,4 +128,31 @@ class UserGroupsSettingsTable(tables.Table):
     class Meta:
         model = CoUserGroup
         fields = ('title','description','active')
+        
+        
+class ContactGroupsSettingsTable(tables.Table):
+    
+    title = tables.LinkColumn(verbose_name="Title", args=[A('pk')])
+    description = tables.Column(verbose_name="Description")
+    last_modified = tables.DateTimeColumn(verbose_name="Modified")
+    contacts = tables.Column(verbose_name="Contacts")
+    
+    def render_contacts(self, record):
+        if record.contacts:
+            if record.contacts.count() > 3:
+                #return mark_safe('{} <span class="and-more">and more</span>'.format(", ".join(t.first_name for t in record.contacts.all()[0:2])))
+            
+                return mark_safe((format_html_join(', ', '<span>{} {}</span>',\
+                                         ((t.first_name,t.last_name) for t in record.contacts.all()[0:3])
+                                         ))+'<span class="and-more"> and more</span>')
+            
+            return format_html_join(', ', '<span>{} {}</span>',\
+                                     ((t.first_name,t.last_name) for t in record.contacts.all())
+                                    )
+            #return record.contacts.count()
+            
+    
+    class Meta:
+        model = ContactGroup
+        fields = ('title','description','contacts','last_modified')
         
