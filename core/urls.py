@@ -32,6 +32,7 @@ urlpatterns = [
     #User Groups
     url(r'^contact-groups/$', contactgroups, name='contactgroup-list'),
     url(r'^contact-group/', include([
+                url(r'^new/$', ContactGroupCreateView.as_view(), name='contactgroup-new'),
                 url(r'^(?P<pk>\d+)/$', ContactGroupUpdateView.as_view(), name='contactgroup-detail'),
                 url(r'^(?P<pk>\d+)/delete/$', ContactGroupDeleteView.as_view(), name='contactgroup-delete'),
     ])),
