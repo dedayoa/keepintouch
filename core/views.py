@@ -14,7 +14,7 @@ from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, Exist
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
                     UserGroupSettingForm, NewUserForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
-                    KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable
+                    KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django_select2.views import AutoResponseView
 
@@ -563,6 +563,32 @@ def usergroup_settings(request):
         return render(request, 'core/settings/user_groups/index.html', params)
     
 class UserGroupUpdateView(UpdateView):
+    
+    model = CoUserGroup
+    form_class = UserGroupSettingForm
+    template_name = 'core/settings/user_groups/user_group_detail.html'
+    
+    def get_context_data(self, **kwargs):
+        params = super(UserGroupUpdateView, self).get_context_data(**kwargs)
+        params["usergroupid"] = self.object.pk
+        #params["messages"] = get_messages(self.request)
+        return params
+    
+    
+    
+def contactgroups(request):
+    
+    if request.method == "GET":
+        q_user = KITUser.objects.get(user=request.user)
+    
+        congrpstable = ContactGroupsSettingsTable(q_user.contactgroup_set.all())
+        RequestConfig(request, paginate={'per_page': 25}).configure(congrpstable)
+        params = {}
+        params["title"] = "Contact Groups"
+        params["table"] = congrpstable
+        return render(request, 'core/contacts/groups/index.html', params)
+    
+class ContactGroupUpdateView(UpdateView):
     
     model = CoUserGroup
     form_class = UserGroupSettingForm
