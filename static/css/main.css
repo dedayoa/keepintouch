@@ -71,3 +71,9 @@ div.email-template{
 input.test-smtp-button{
 	margin-right: 0.5rem;
 }
+
+.and-more{
+	font-size: 0.8em;
+	font-style: italic;
+	color: #555;
+}
