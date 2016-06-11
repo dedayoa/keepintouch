@@ -59,7 +59,8 @@ div.email-template{
 	margin-bottom: 1rem;
 }
 
-#div_id_kit_users{
+#div_id_kit_users,
+#div_id_contacts{
 	margin-bottom: 1rem;
 }
 
@@ -76,4 +77,12 @@ input.test-smtp-button{
 	font-size: 0.8em;
 	font-style: italic;
 	color: #555;
+}
+
+.kitapp-lsm hr{
+	margin: 0;
+}
+
+.kitapp-lsm-submenu{
+	font-size: 0.85em;
 }
