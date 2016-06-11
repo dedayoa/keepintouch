@@ -310,8 +310,15 @@ class ContactGroup(models.Model):
     kit_user = models.ForeignKey(KITUser, models.PROTECT, blank=False)
     active = models.BooleanField()
     
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
     def __str__(self):
-        return self.title    
+        return self.title
+    
+    
+    def get_absolute_url(self):
+        return reverse('core:contactgroup-detail',args=[self.pk])
 
 class MessageTemplate(models.Model):
     title = models.CharField(max_length=100)
