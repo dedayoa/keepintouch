@@ -190,7 +190,7 @@ class CoUserGroup(models.Model):
     kit_admin = models.ForeignKey(KITUser, on_delete=models.CASCADE, related_name='groups_adminover', \
                                   blank=False, limit_choices_to={'is_admin':True})
     kit_users = models.ManyToManyField(KITUser, related_name='groups_belongto', \
-                                       blank=True, limit_choices_to={'is_admin':False})
+                                       blank=True, limit_choices_to={'is_admin':False,'user.is_active':True})
     active = models.BooleanField() #when deactivated, 
     
     def __str__(self):
