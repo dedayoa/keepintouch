@@ -609,3 +609,13 @@ class ContactGroupDeleteView(DeleteView):
         params = super(ContactGroupDeleteView, self).get_context_data(**kwargs)
         params["title"] = "Deleting Contact Group"
         return params
+    
+class ContactGroupCreateView(CreateView):
+    
+    model = ContactGroup
+    form_class = ContactGroupForm
+    template_name = 'core/contacts/groups/new_contactgroup.html'
+    
+    def form_valid(self, form):
+        form.instance.kit_user = self.request.user.kituser
+        return super(ContactGroupCreateView, self).form_valid(form)
