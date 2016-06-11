@@ -1,0 +1,20 @@
+{% extends "core/base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+
+{% block title %}{{title}}{% endblock %}
+{% block head_base_links %}
+	{{ block.super }}
+	{{form.media.css}}
+{% endblock %}
+{% block content %}
+	<div class="row">
+		<h3>New Contact Group</h3>
+		{{ block.super }}
+		{% crispy form %}
+	</div>
+{% endblock %}
+{% block foot_base_js %}
+	{{block.super}}
+	{{form.media.js}}
+{% endblock %}
