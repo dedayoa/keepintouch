@@ -9,10 +9,10 @@ from django.contrib import messages
 from django_tables2   import RequestConfig
 
 from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate,\
-                    SMTPSetting
+                    SMTPSetting, ContactGroup
 from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, ExistingUserForm,\
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
-                    UserGroupSettingForm, NewUserForm
+                    UserGroupSettingForm, NewUserForm, ContactGroupForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
@@ -590,15 +590,22 @@ def contactgroups(request):
     
 class ContactGroupUpdateView(UpdateView):
     
-    model = CoUserGroup
-    form_class = UserGroupSettingForm
-    template_name = 'core/settings/user_groups/user_group_detail.html'
+    model = ContactGroup
+    form_class = ContactGroupForm
+    template_name = 'core/contacts/groups/contactgroup_detail.html'
     
     def get_context_data(self, **kwargs):
-        params = super(UserGroupUpdateView, self).get_context_data(**kwargs)
-        params["usergroupid"] = self.object.pk
-        #params["messages"] = get_messages(self.request)
+        params = super(ContactGroupUpdateView, self).get_context_data(**kwargs)
+        params["contactgroupid"] = self.object.pk
         return params
 
 
-
+class ContactGroupDeleteView(DeleteView):
+    
+    model = ContactGroup
+    success_url = reverse_lazy('core:contactgroup-detail')
+    
+    def get_context_data(self, **kwargs):
+        params = super(ContactGroupDeleteView, self).get_context_data(**kwargs)
+        params["title"] = "Deleting Contact Group"
+        return params
