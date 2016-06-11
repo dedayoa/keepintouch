@@ -11,7 +11,7 @@ from django.forms.models import formset_factory, inlineformset_factory
 from django.conf import settings
 
 
-from .models import Contact, Event, PublicEvent, MessageTemplate, KITUser, SMTPSetting
+from .models import Contact, Event, PublicEvent, MessageTemplate, KITUser, SMTPSetting, ContactGroup
 from .helper import EventFormSetHelper
 
 
@@ -317,3 +317,22 @@ class UserGroupSettingForm(forms.ModelForm):
             'kit_users' : Select2MultipleWidget,
                    }
         labels = {'kit_users' : _('Users')}
+        
+        
+class ContactGroupForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        
+        super(ContactGroupForm, self).__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.form_action = '.'
+        self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
+        self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+    
+    class Meta:
+        model = ContactGroup
+        fields = ['title','description','contacts']
+        widgets = {
+            'contacts' : Select2MultipleWidget,
+                   }
