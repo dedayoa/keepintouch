@@ -29,12 +29,7 @@
 	{% endblock %}
 	{% block foot_base_js %}
 		<script src="{% static "js/vendor/what-input.js" %}"></script>
-		<script src="{% static "js/vendor/foundation.js" %}"></script>		
-		<script>
-			$( document ).ready(function() {
-				$('small.error').prev('input').addClass('input-highlight-error');
-			});		
-		</script>
+		<script src="{% static "js/vendor/foundation.js" %}"></script>
 		<script src="{% static "js/main.js" %}"></script>
 	{% endblock %}
 </body>
