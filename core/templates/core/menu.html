@@ -1,4 +1,4 @@
-<ul class="vertical menu" data-accordion-menu>
+<ul class="vertical menu kitapp-lsm" data-accordion-menu>
 	<li><a href="#">Dashboard</a></li>
 	<li>
 		<a href="#">Contact</a>
@@ -13,9 +13,9 @@
 			<li><a href="{% url 'messaging:new-standard-message' %}">Standard</a></li>
 			<li><a href="{% url 'messaging:new-advanced-message' %}">Advanced</a></li>
 			<hr>
-			<li><a href="#">Drafts</a></li>
-			<li><a href="#">Waiting</a></li>
-			<li><a href="#">Processed</a></li>
+			<li class="kitapp-lsm-submenu"><a href="#">Drafts</a></li>
+			<li class="kitapp-lsm-submenu"><a href="#">Waiting</a></li>
+			<li class="kitapp-lsm-submenu" ><a href="#">Processed</a></li>
 		</ul>
 	</li>
 	<li><a href="{% url 'core:templates-list' %}">Templates</a></li>
