@@ -320,6 +320,8 @@ class UserGroupSettingForm(forms.ModelForm):
         
         
 class ContactGroupForm(forms.ModelForm):
+    
+    title = forms.CharField(label=_('Title'), widget=forms.TextInput(attrs={'required':''}), required=True)
 
     def __init__(self, *args, **kwargs):
         
