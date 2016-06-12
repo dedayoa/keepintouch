@@ -25,19 +25,22 @@ class StandardMessaging(models.Model):
     send_sms = models.BooleanField(verbose_name="Send SMS")
     send_email = models.BooleanField(verbose_name="Send Email")
     recipients = models.ManyToManyField(Contact)
+    delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
     
-    created_by = models.ForeignKey(KITUser, models.PROTECT)
     smtp_setting = models.ForeignKey(SMTPSetting, null=True, blank=True)
     sms_sender = models.CharField(max_length=11, blank=True)
     
+    
+    created_by = models.ForeignKey(KITUser, models.PROTECT)
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     
     status = StatusField()
     waiting_at = MonitorField(monitor='status', when=['waiting'])
+    processed_at = MonitorField(monitor='status', when=['processed'])
     
     
-    delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
+    
 
     def __str__(self):
         if self.send_sms:
@@ -55,15 +58,22 @@ class AdvancedMessaging(models.Model):
     
     STATUS = Choices('draft', 'waiting', 'processed')
     
-    message = models.ForeignKey(MessageTemplate)    
+    title = models.CharField(max_length=100, blank=False)
+    message_template = models.ForeignKey(MessageTemplate, blank=False)
     contact_group = models.ManyToManyField(ContactGroup)
-    delivery_time = models.DateTimeField(default=(timezone.now()+datetime.timedelta(seconds=settings.MSG_WAIT_TIME)),\
-                                         verbose_name = "Deliver at")
-    
+    delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
+       
     created_by = models.ForeignKey(KITUser, models.PROTECT)
     
     status = StatusField()
-    draft_at = MonitorField(monitor='status', when=['draft'])
+    waiting_at = MonitorField(monitor='status', when=['waiting'])
+    processed_at = MonitorField(monitor='status', when=['processed'])
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title
+            
+    def get_absolute_url(self):
+        return reverse('messaging:advanced-message-draft',args=[self.pk]) 
