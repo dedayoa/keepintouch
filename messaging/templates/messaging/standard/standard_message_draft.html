@@ -14,7 +14,7 @@
 		{{ block.super }}
 		<form action="." method="post">
 			{% crispy form %}
-			<input type="reset" name="reset" value="Reset" class="reset button secondary float-left" id="reset-id-reset">
+			<!-- <input type="reset" name="reset" value="Reset" class="reset button secondary float-left" id="reset-id-reset">  -->
 			<input type="submit" name="submit" value="Save Draft" class="submit button float-left" id="submit-id-submit">
 		   
 			{% if draft_time %}
@@ -25,6 +25,11 @@
 		   {% csrf_token %}
 		   <input type="submit" value="Send" class="button success float-right" 
 		   onclick="return confirm('Are you sure you want to Send?');">
+		</form>		
+		<form method="POST" action="{% url 'messaging:standard-message-delete' messageid %}">
+		   {% csrf_token %}
+		   <input type="submit" value="Delete" class="button alert float-right" style="margin-right: 0.5rem;"
+		   onclick="return confirm('Are you sure you want to Delete?');">
 		</form>
 	</div>
 {% endblock %}
