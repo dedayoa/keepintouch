@@ -17,7 +17,7 @@ class DraftStandardMessagesTable(tables.Table):
     
     __str__ = tables.Column(verbose_name="Message")
     recipients = tables.Column(verbose_name=_("Recipients"))
-    delivery_time = tables.DateTimeColumn()
+    last_modified = tables.DateTimeColumn(verbose_name="Last Edited")
     sms_sender = tables.Column(verbose_name="Sender")
     table_model_action = tables.LinkColumn(verbose_name="", \
                                            text=mark_safe('<span class="button small warning">Edit</span>'), \
@@ -40,7 +40,7 @@ class DraftStandardMessagesTable(tables.Table):
             
     class Meta:
         model = StandardMessaging
-        fields = ('__str__','recipients','delivery_time','sms_sender','table_model_action')
+        fields = ('__str__','recipients','sms_sender','last_modified','table_model_action')
         
         
 class DraftAdvancedMessagesTable(tables.Table):
