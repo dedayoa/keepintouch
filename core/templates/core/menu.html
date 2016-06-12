@@ -13,9 +13,8 @@
 			<li><a href="{% url 'messaging:new-standard-message' %}">Standard</a></li>
 			<li><a href="{% url 'messaging:new-advanced-message' %}">Advanced</a></li>
 			<hr>
-			<li class="kitapp-lsm-submenu"><a href="#">Drafts</a></li>
-			<li class="kitapp-lsm-submenu"><a href="#">Waiting</a></li>
-			<li class="kitapp-lsm-submenu" ><a href="#">Processed</a></li>
+			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:standard-messages-list' 'draft' %}">Drafts</a></li>
+			<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:standard-messages-list' 'processed' %}">Processed</a></li>
 		</ul>
 	</li>
 	<li><a href="{% url 'core:templates-list' %}">Templates</a></li>
