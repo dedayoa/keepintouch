@@ -6,7 +6,7 @@ from django_tables2   import RequestConfig
 from .models import StandardMessaging, AdvancedMessaging
 from core.models import KITUser 
 from .forms import StandardMessagingForm, AdvancedMessagingForm
-from .tables import DraftStandardMessagesTable
+from .tables import DraftStandardMessagesTable, DraftAdvancedMessagesTable
 from django.http.response import HttpResponse
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
@@ -132,7 +132,7 @@ class AdvancedMessageDeleteView(DeleteView):
         return params
     
     
-def message_status_view(request, msgstat):
+def standard_message_status_view(request, msgstat):
     
     if request.method == "GET":
         if msgstat == "draft":
@@ -143,6 +143,21 @@ def message_status_view(request, msgstat):
             params["title"] = "Draft Messages"
             params["table"] = draft_msgs_table
             return render(request, 'messaging/standard/draft_standard_messages_list.html', params)
+        if msgstat == "processed":
+            return HttpResponse("Processed")
+        
+        
+def advanced_message_status_view(request, msgstat):
+    
+    if request.method == "GET":
+        if msgstat == "draft":
+            query = AdvancedMessaging.objects.filter(status="draft", created_by=request.user.kituser)
+            draft_msgs_table = DraftAdvancedMessagesTable(query)
+            RequestConfig(request, paginate={'per_page': 25}).configure(draft_msgs_table)
+            params = {}
+            params["title"] = "Draft Messages"
+            params["table"] = draft_msgs_table
+            return render(request, 'messaging/advanced/draft_advanced_messages_list.html', params)
         if msgstat == "processed":
             return HttpResponse("Processed")
         

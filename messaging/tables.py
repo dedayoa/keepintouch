@@ -7,7 +7,7 @@ Created on Jun 10, 2016
 import django_tables2 as tables
 from django_tables2.utils import A
 
-from .models import StandardMessaging
+from .models import StandardMessaging, AdvancedMessaging
 from django.utils.html import format_html_join
 from django.utils.safestring import mark_safe
 
@@ -41,4 +41,30 @@ class DraftStandardMessagesTable(tables.Table):
     class Meta:
         model = StandardMessaging
         fields = ('__str__','recipients','delivery_time','sms_sender','table_model_action')
+        
+        
+class DraftAdvancedMessagesTable(tables.Table):
+    
+    title = tables.Column(verbose_name="Title")
+    message_template = tables.Column(verbose_name=_("Template"))
+    contact_group = tables.Column(verbose_name="Recipient")
+    last_modified = tables.DateTimeColumn(verbose_name="Last Edited")
+    table_model_action = tables.LinkColumn(verbose_name="", \
+                                           text=mark_safe('<span class="button small warning">Edit</span>'), \
+                                           args=[A('pk')])
+
+
+    
+    def render_contact_group(self, record):
+        if record.contact_group:
+            if record.contact_group.count() > 2:
+
+                return mark_safe(", ".join(t.title for t in record.contact_group.all()[0:2])+\
+                                 '<span class="and-more"> and more</span>')
+            
+            return ", ".join(t.title for t in record.contact_group.all())
+            
+    class Meta:
+        model = AdvancedMessaging
+        fields = ('title','message_template','contact_group','last_modified','table_model_action')
     

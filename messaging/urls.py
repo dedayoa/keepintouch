@@ -16,13 +16,13 @@ urlpatterns = [
     url(r'^standard/', include([
                 url(r'^new/$', StandardMessageCreateView.as_view(), name='new-standard-message'),
                 url(r'^draft/(?P<pk>\d+)/$', StandardMessageUpdateDraftView.as_view(), name='standard-message-draft'),
-                url(r'^(?P<msgstat>draft|processed)/messages/$', message_status_view, name='standard-messages-list'),
+                url(r'^(?P<msgstat>draft|processed)/messages/$', standard_message_status_view, name='standard-messages-list'),
                 url(r'^message/(?P<pk>\d+)/delete/$', StandardMessageDeleteView.as_view(), name='standard-message-delete'),
                 ])),
     url(r'^advanced/', include([
                 url(r'^new/$', AdvancedMessageCreateView.as_view(), name='new-advanced-message'),
                 url(r'^draft/(?P<pk>\d+)/$', AdvancedMessageUpdateDraftView.as_view(), name='advanced-message-draft'),
-                url(r'^(?P<msgstat>draft|processed)/messages/$', message_status_view, name='advanced-messages-list'),
+                url(r'^(?P<msgstat>draft|processed)/messages/$', advanced_message_status_view, name='advanced-messages-list'),
                 url(r'^message/(?P<pk>\d+)/delete/$', AdvancedMessageDeleteView.as_view(), name='advanced-message-delete'),
                 
                 ])),
