@@ -1,0 +1,16 @@
+{% extends "core/base_generic.html" %}
+{% load render_table from django_tables2 %}
+{% block head_base_links %}
+	{{ block.super }}
+{% endblock %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="row">
+	<h3>Draft <small>Standard Messages</small></h3>
+	{{ block.super }}
+	<a class="small button float-right hollow" href="{% url 'messaging:advanced-messages-list' 'draft' %}">Advanced</a>
+	<a class="small button float-right" href="{% url 'messaging:standard-messages-list' 'draft' %}">Standard</a>
+	{% render_table table %}
+</div>
+{% endblock %}
