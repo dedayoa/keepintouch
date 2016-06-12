@@ -6,7 +6,7 @@ from django_tables2   import RequestConfig
 from .models import StandardMessaging, AdvancedMessaging
 from core.models import KITUser 
 from .forms import StandardMessagingForm, AdvancedMessagingForm
-from .tables import *
+from .tables import DraftStandardMessagesTable
 from django.http.response import HttpResponse
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
@@ -69,8 +69,8 @@ class StandardMessageUpdateDraftView(UpdateView):
         return params
     
     def get_object(self, queryset=None):
-        return self.model.objects.get(status="draft", created_by=self.request.user.kituser)
-        
+        return self.model.objects.get(pk=self.kwargs.get('pk',None),status="draft", created_by=self.request.user.kituser)
+
     
     
 class AdvancedMessageCreateView(CreateView):
@@ -108,7 +108,7 @@ class AdvancedMessageUpdateDraftView(UpdateView):
         return params
     
     def get_object(self, queryset=None):
-        return self.model.objects.get(status="draft", created_by=self.request.user.kituser)
+        return self.model.objects.get(pk=self.kwargs.get('pk',None),status="draft", created_by=self.request.user.kituser)
     
 class StandardMessageDeleteView(DeleteView):
     
@@ -136,6 +136,14 @@ def message_status_view(request, msgstat):
     
     if request.method == "GET":
         if msgstat == "draft":
-            return HttpResponse("Draft")
+            query = StandardMessaging.objects.filter(status="draft", created_by=request.user.kituser)
+            draft_msgs_table = DraftStandardMessagesTable(query)
+            RequestConfig(request, paginate={'per_page': 25}).configure(draft_msgs_table)
+            params = {}
+            params["title"] = "Draft Messages"
+            params["table"] = draft_msgs_table
+            return render(request, 'messaging/standard/draft_standard_messages_list.html', params)
+        if msgstat == "processed":
+            return HttpResponse("Processed")
         
     
