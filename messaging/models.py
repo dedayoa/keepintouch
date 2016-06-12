@@ -4,13 +4,14 @@ import html2text
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-
+from django.contrib.postgres.fields import JSONField
 
 from core.models import KITUser, Contact, SMTPSetting, ContactGroup, MessageTemplate
 
 from model_utils.fields import StatusField, MonitorField
 from model_utils import Choices
 from django.core.urlresolvers import reverse
+from django.utils.safestring import mark_safe
 
 
 def get_default_time():
@@ -39,8 +40,6 @@ class StandardMessaging(models.Model):
     waiting_at = MonitorField(monitor='status', when=['waiting'])
     processed_at = MonitorField(monitor='status', when=['processed'])
     
-    
-    
 
     def __str__(self):
         if self.send_sms:
@@ -66,7 +65,7 @@ class AdvancedMessaging(models.Model):
     created_by = models.ForeignKey(KITUser, models.PROTECT)
     
     status = StatusField()
-    waiting_at = MonitorField(monitor='status', when=['waiting'])
+    #waiting_at = MonitorField(monitor='status', when=['waiting'])
     processed_at = MonitorField(monitor='status', when=['processed'])
     
     last_modified = models.DateTimeField(auto_now=True)
@@ -77,3 +76,19 @@ class AdvancedMessaging(models.Model):
             
     def get_absolute_url(self):
         return reverse('messaging:advanced-message-draft',args=[self.pk]) 
+    
+
+class ProcessedMessages(models.Model):
+    
+    MSG_TYPE = (
+        ('ADVANCED',' Advanced'),
+        ('STANDARD',' Standard'),
+                )
+    
+    message_type = models.CharField(max_length=10, choices=MSG_TYPE)
+    message = JSONField()
+    message_id = models.IntegerField()
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "{} message {}".format(self.message_type,self.message_id)
