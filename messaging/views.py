@@ -67,6 +67,9 @@ class StandardMessageUpdateDraftView(UpdateView):
         params["messageid"] = self.object.pk  
         
         return params
+    
+    def get_object(self, queryset=None):
+        return self.model.objects.get(status="draft", created_by=self.request.user.kituser)
         
     
     
@@ -104,6 +107,9 @@ class AdvancedMessageUpdateDraftView(UpdateView):
         params["messageid"] = self.object.pk       
         return params
     
+    def get_object(self, queryset=None):
+        return self.model.objects.get(status="draft", created_by=self.request.user.kituser)
+    
 class StandardMessageDeleteView(DeleteView):
     
     model = StandardMessaging
@@ -124,3 +130,12 @@ class AdvancedMessageDeleteView(DeleteView):
         params = super(AdvancedMessageDeleteView, self).get_context_data(**kwargs)
         params["title"] = "Deleting Message"
         return params
+    
+    
+def message_status_view(request, msgstat):
+    
+    if request.method == "GET":
+        if msgstat == "draft":
+            return HttpResponse("Draft")
+        
+    
