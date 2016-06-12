@@ -8,7 +8,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.conf import settings
 
-from .models import StandardMessaging
+from .models import StandardMessaging, AdvancedMessaging
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
@@ -87,9 +87,7 @@ class StandardMessagingForm(forms.ModelForm):
         
         send_at = cleaned_data.get("delivery_time")
         if send_at < timezone.now():
-            raise forms.ValidationError(
-                'Your Delivery Date Cannot be in the past'
-                                        )
+            raise forms.ValidationError('Your Delivery Date Cannot be in the past')
         
         if cleaned_data["recipients"].count() > settings.MAX_MSG_RECIPIENT:
             raise forms.ValidationError(
@@ -107,4 +105,24 @@ class StandardMessagingForm(forms.ModelForm):
         if send_at < timezone.now():
             msg = 'Your Delivery Date Cannot be in the past'
             self.add_error('delivery_time', msg)
-    '''    
+    '''
+            
+            
+            
+class AdvancedMessagingForm(forms.ModelForm):
+    
+    def __init__(self, *args, **kwargs):
+        super(AdvancedMessagingForm, self).__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.form_action = '.'
+        self.helper.form_tag = False
+    
+    class Meta:
+        model = AdvancedMessaging
+        fields = ['title','message_template', 'contact_group', 'delivery_time']
+        widgets = {
+            'contact_group': Select2MultipleWidget,
+            'message_template' : Select2Widget
+        }
+        
