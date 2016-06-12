@@ -323,6 +323,8 @@ class MessageTemplate(models.Model):
     title = models.CharField(max_length=100)
     email_template = models.TextField(blank=True)
     sms_template = models.TextField(blank=True)
+    
+    sms_sender = models.CharField(max_length=11, blank=True)
     smtp_setting = models.ForeignKey(SMTPSetting)
     
     send_sms = models.BooleanField(verbose_name="Send SMS")
