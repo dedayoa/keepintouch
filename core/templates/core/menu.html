@@ -12,9 +12,9 @@
 		<ul class="menu vertical nested">
 			<li><a href="{% url 'messaging:new-standard-message' %}">Standard</a></li>
 			<li><a href="{% url 'messaging:new-advanced-message' %}">Advanced</a></li>
-			<hr>
-			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:standard-messages-list' 'draft' %}">Drafts</a></li>
-			<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:standard-messages-list' 'processed' %}">Processed</a></li>
+			<hr style="padding: 0 1rem">
+			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:standard-draft-messages' %}">Drafts</a></li>
+			<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:messages-processed-status' %}">Processed</a></li>
 		</ul>
 	</li>
 	<li><a href="{% url 'core:templates-list' %}">Templates</a></li>
