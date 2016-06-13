@@ -7,11 +7,13 @@ Created on Jun 10, 2016
 import django_tables2 as tables
 from django_tables2.utils import A
 
-from .models import StandardMessaging, AdvancedMessaging
+from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages
 from django.utils.html import format_html_join
 from django.utils.safestring import mark_safe
 
 from django.utils.translation import ugettext_lazy as _
+
+import json
 
 class DraftStandardMessagesTable(tables.Table):
     
@@ -67,4 +69,18 @@ class DraftAdvancedMessagesTable(tables.Table):
     class Meta:
         model = AdvancedMessaging
         fields = ('title','message_template','contact_group','last_modified','table_model_action')
+        
+        
+class ProcessedMessagesTable(tables.Table):
+    
+    message = tables.Column(verbose_name="Message")
+    message_type = tables.Column("Type")
+    created = tables.DateTimeColumn(verbose_name="Processed at")
+    
+    def render_message(self, record):
+        pass
+    
+    class Meta:
+        model = ProcessedMessages
+        fields = ['message','message_type','created']
     
