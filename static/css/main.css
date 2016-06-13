@@ -101,3 +101,11 @@ small.error{
 .input-highlight-error{
 	margin-bottom: 0px;
 }
+
+.proc-msg-filter-submit{
+	margin: 1.5rem 0 0 0.5rem;
+}
+
+.proc-msg-filter-form .helptext{
+	display: none;
+}
