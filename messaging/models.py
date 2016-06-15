@@ -50,7 +50,11 @@ class StandardMessaging(models.Model):
             
     
     def get_absolute_url(self):
-        return reverse('messaging:standard-message-draft',args=[self.pk]) 
+        return reverse('messaging:standard-message-draft',args=[self.pk])
+    
+    
+    class Meta:
+        verbose_name_plural = "Standard Messaging"
     
     
 class AdvancedMessaging(models.Model):
@@ -75,8 +79,36 @@ class AdvancedMessaging(models.Model):
         return self.title
             
     def get_absolute_url(self):
-        return reverse('messaging:advanced-message-draft',args=[self.pk]) 
+        return reverse('messaging:advanced-message-draft',args=[self.pk])
     
+    class Meta:
+        verbose_name_plural = "Advanced Messaging"
+    
+
+class QueuedMessages(models.Model):
+    
+    MSG_TYPE = (
+        ('ADVANCED',' Advanced'),
+        ('STANDARD',' Standard')
+                )
+    
+    message_type = models.CharField(max_length=10, choices=MSG_TYPE)
+    message_id = models.PositiveIntegerField()   
+    message = JSONField() #message, recipients
+    delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
+    
+    created_by = models.ForeignKey(KITUser, models.PROTECT)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "{} Message {}".format(self.message_type,self.message_id)
+    
+    def get_absolute_url(self):
+        return None
+    
+    class Meta:
+        verbose_name_plural = "Queued Messages"
+
 
 class ProcessedMessages(models.Model):
     
@@ -87,8 +119,7 @@ class ProcessedMessages(models.Model):
     
     message_type = models.CharField(max_length=10, choices=MSG_TYPE)
     message = JSONField()
-    message_id = models.IntegerField()
-    
+
     created_by = models.ForeignKey(KITUser, models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
     
@@ -97,3 +128,6 @@ class ProcessedMessages(models.Model):
     
     def get_absolute_url(self):
         return None
+    
+    class Meta:
+        verbose_name_plural = "Processed Messages"
