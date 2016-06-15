@@ -184,12 +184,13 @@ def message_queued_status_view(request):
         q_msgs_table = QueuedMessagesTable(queryset, order_by="delivery_time")
         RequestConfig(request, paginate={'per_page': 50}).configure(q_msgs_table)
         params = {}
+        
         params["title"] = "Queued Messages"
         params["table"] = q_msgs_table
         return render(request, 'messaging/queued_messages.html', params)
     
     
-def queued_message_dequeue_view(request):
+def queued_message_dequeue_view(request, pk):
     
     if request.method == "POST":
         pass
