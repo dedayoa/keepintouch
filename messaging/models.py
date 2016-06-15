@@ -98,7 +98,7 @@ class QueuedMessages(models.Model):
     delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
     
     created_by = models.ForeignKey(KITUser, models.PROTECT)
-    created = models.DateTimeField(auto_now_add=True)
+    queued_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return "{} Message {}".format(self.message_type,self.message_id)
@@ -121,7 +121,7 @@ class ProcessedMessages(models.Model):
     message = JSONField()
 
     created_by = models.ForeignKey(KITUser, models.PROTECT)
-    created = models.DateTimeField(auto_now_add=True)
+    processed_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return "{} Message {}".format(self.message_type,self.message_id)
