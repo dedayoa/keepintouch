@@ -13,6 +13,8 @@ from .views import *
 urlpatterns = [
     url(r'^create/success/$', StandardMessageCreateView.as_view(), name=''),
     url(r'^processed/messages/$', message_processed_status_view, name='messages-processed-status'),
+    url(r'^queued/messages/$', message_queued_status_view, name='messages-queued-status'),
+    url(r'^queued/message/(?P<pk>\d+)/dequeue/$', queued_message_dequeue_view, name='queued-message-dequeue'),
     url(r'^standard/', include([
                 url(r'^new/$', StandardMessageCreateView.as_view(), name='new-standard-message'),
                 url(r'^draft/(?P<pk>\d+)/$', StandardMessageUpdateDraftView.as_view(), name='standard-message-draft'),

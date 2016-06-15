@@ -7,14 +7,15 @@ Created on Jun 10, 2016
 import django_tables2 as tables
 from django_tables2.utils import A
 
-from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages
-from django.utils.html import format_html_join
+from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages, QueuedMessages
+from django.utils.html import format_html_join, format_html
 from django.utils.safestring import mark_safe
 
 from django.utils.translation import ugettext_lazy as _
 
 import json
 from django.forms.models import model_to_dict
+from django.core.urlresolvers import reverse
 
 class DraftStandardMessagesTable(tables.Table):
     
@@ -88,4 +89,29 @@ class ProcessedMessagesTable(tables.Table):
     class Meta:
         model = ProcessedMessages
         fields = ['message','message_type','created']
+        
+        
+class QueuedMessagesTable(tables.Table):
+    
+    message = tables.Column(verbose_name="Message")
+    message_type = tables.Column("Type")
+    delivery_time = tables.DateTimeColumn(verbose_name="Deliver at")
+    message_id = tables.Column(verbose_name="Action")
+    
+    def render_message_id(self, record):
+        return format_html('''
+            <form method="POST" action="{}">
+                <input type="submit" value="Remove & Edit" class="button alert small" />
+            </form>''',reverse('messaging:queued-message-dequeue',kwargs={'pk':record.message_id}))
+    
+    def render_message(self, record):
+        
+        serialized_m = json.dumps(record.message)
+        
+        return mark_safe('<a href="#" data-kitmsg=\'{}\' class="show-message-modal">{}</a>'.\
+            format(serialized_m, (record.message)['title']))
+    
+    class Meta:
+        model = QueuedMessages
+        fields = ['message','message_type','delivery_time','message_id']
     

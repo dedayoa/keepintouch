@@ -3,11 +3,13 @@ from django.utils.translation import ugettext_lazy as _, ugettext
 
 from django_tables2   import RequestConfig
 
-from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages
+from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages,\
+                    QueuedMessages
 from core.models import KITUser
  
 from .forms import StandardMessagingForm, AdvancedMessagingForm
-from .tables import DraftStandardMessagesTable, DraftAdvancedMessagesTable, ProcessedMessagesTable
+from .tables import DraftStandardMessagesTable, DraftAdvancedMessagesTable, ProcessedMessagesTable,\
+                    QueuedMessagesTable
 from .filters import ProcessedMessagesFilter
 
 from django.http.response import HttpResponse
@@ -168,8 +170,27 @@ def message_processed_status_view(request):
         p_msgs_table = ProcessedMessagesTable(f.qs)
         RequestConfig(request, paginate={'per_page': 50}).configure(p_msgs_table)
         params = {}
-        params["title"] = "Draft Messages"
+        params["title"] = "Processed Messages"
         params["table"] = p_msgs_table
         params["filter"] = f
         return render(request, 'messaging/processed_messages.html', params)
+    
+    
+def message_queued_status_view(request):
+    
+    if request.method == "GET":
+        
+        queryset = QueuedMessages.objects.filter(created_by=request.user.kituser)
+        q_msgs_table = QueuedMessagesTable(queryset, order_by="delivery_time")
+        RequestConfig(request, paginate={'per_page': 50}).configure(q_msgs_table)
+        params = {}
+        params["title"] = "Queued Messages"
+        params["table"] = q_msgs_table
+        return render(request, 'messaging/queued_messages.html', params)
+    
+    
+def queued_message_dequeue_view(request):
+    
+    if request.method == "POST":
+        pass
     
