@@ -83,7 +83,7 @@ class ProcessedMessagesTable(tables.Table):
         serialized_m = json.dumps(record.message)
         
         return mark_safe('<a href="#" data-kitmsg=\'{}\' class="show-message-modal">{}</a>'.\
-            format(serialized_m, "Hi"))
+            format(serialized_m, (record.message)['title']))
     
     class Meta:
         model = ProcessedMessages
