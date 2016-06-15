@@ -14,6 +14,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 import json
+from django.forms.models import model_to_dict
 
 class DraftStandardMessagesTable(tables.Table):
     
@@ -78,7 +79,11 @@ class ProcessedMessagesTable(tables.Table):
     created = tables.DateTimeColumn(verbose_name="Processed at")
     
     def render_message(self, record):
-        pass
+        
+        serialized_m = json.dumps(record.message)
+        
+        return mark_safe('<a href="#" data-kitmsg=\'{}\' class="show-message-modal">{}</a>'.\
+            format(serialized_m, "Hi"))
     
     class Meta:
         model = ProcessedMessages
