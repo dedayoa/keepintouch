@@ -109,3 +109,7 @@ small.error{
 .proc-msg-filter-form .helptext{
 	display: none;
 }
+
+form.qu-re-form input[type="submit"]{
+	margin-bottom: 0;
+}
