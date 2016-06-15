@@ -2,14 +2,14 @@
 	<li><a href="#">Dashboard</a></li>
 	<li>
 		<a href="#">Contact</a>
-		<ul class="menu vertical nested">
+		<ul class="menu vertical nested is-active">
 			<li><a href="{% url 'core:contacts-list' %}">Contacts</a></li>
 			<li><a href="{% url 'core:contactgroup-list' %}">Groups</a></li>
 		</ul>
 	</li>
 	<li>
 		<a href="#">Messaging</a>
-		<ul class="menu vertical nested">
+		<ul class="menu vertical nested is-active">
 			<li><a href="{% url 'messaging:new-standard-message' %}">Standard</a></li>
 			<li><a href="{% url 'messaging:new-advanced-message' %}">Advanced</a></li>
 			<hr style="padding: 0 1rem">
