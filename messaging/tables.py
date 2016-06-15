@@ -77,7 +77,7 @@ class ProcessedMessagesTable(tables.Table):
     
     message = tables.Column(verbose_name="Message")
     message_type = tables.Column("Type")
-    created = tables.DateTimeColumn(verbose_name="Processed at")
+    processed_at = tables.DateTimeColumn(verbose_name="Processed at")
     
     def render_message(self, record):
         
@@ -88,28 +88,10 @@ class ProcessedMessagesTable(tables.Table):
     
     class Meta:
         model = ProcessedMessages
-        fields = ['message','message_type','created']
+        fields = ['message','message_type','processed_at']
         
         
 class QueuedMessagesTable(tables.Table):
-    
-    message = tables.Column(verbose_name="Message")
-    message_type = tables.Column("Type")
-    delivery_time = tables.DateTimeColumn(verbose_name="Deliver at")
-    message_id = tables.Column(verbose_name="Action")
-    
-    def render_message_id(self, record):
-        return format_html('''
-            <form method="POST" action="{}">
-                <input type="submit" value="Remove & Edit" class="button alert small" />
-            </form>''',reverse('messaging:queued-message-dequeue',kwargs={'pk':record.message_id}))
-    
-    def render_message(self, record):
-        
-        serialized_m = json.dumps(record.message)
-        
-        return mark_safe('<a href="#" data-kitmsg=\'{}\' class="show-message-modal">{}</a>'.\
-            format(serialized_m, (record.message)['title']))
     
     class Meta:
         model = QueuedMessages
