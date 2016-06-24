@@ -190,8 +190,11 @@ def message_queued_status_view(request):
         return render(request, 'messaging/queued_messages.html', params)
     
     
-def queued_message_dequeue_view(request, pk):
+def queued_message_dequeue_view(request, mtype, pk):
     
     if request.method == "POST":
-        pass
+        if mtype == "ADVANCED":
+            return HttpResponse("Advanced")
+        elif mtype == "STANDARD":
+            return HttpResponse("Standard")
     
