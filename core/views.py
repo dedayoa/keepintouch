@@ -414,7 +414,8 @@ class KITUserUpdateView(View):
             k_user = get_object_or_404(KITUser, pk=pk,parent=q_admin)
             uzr = k_user.user
         
-        self.params["title"] = "User"
+        self.params["title"] = "Edit User"
+        self.params["uzrname"] = uzr.username
         self.params["last_login"] = uzr.last_login
         self.params["date_joined"] = uzr.date_joined
         self.params["form_1"] = self.form_1(instance=uzr, prefix="userform")

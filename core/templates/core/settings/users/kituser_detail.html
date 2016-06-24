@@ -10,7 +10,8 @@
 	{{ block.super }}
 {% endblock %}
 {% block content %}
-	<div class="row">
+	<div class="row">	
+		<h3>Edit User <small>{{uzrname}}</small></h3>
 		{{ block.super }}
 		<form action="." method="post">
 			{% crispy form_1 %}
