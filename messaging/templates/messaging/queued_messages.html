@@ -34,7 +34,7 @@
 							<td>{{ row.record.message_type|lower|title }}</td>
 							<td>{{ row.record.delivery_time|date:"d/m/Y G:i" }}</td>
 							<td>
-								<form class="qu-re-form" method="POST" action="{% url 'messaging:queued-message-dequeue' row.record.message_id %}">
+								<form class="qu-re-form" method="POST" action="{% url 'messaging:queued-message-dequeue' row.record.message_type row.record.message_id %}">
 	                				{% csrf_token %}
 	                				<input type="submit" value="Remove & Edit" class="button alert small" />
 	            				</form>
