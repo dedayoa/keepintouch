@@ -572,7 +572,7 @@ class UserGroupUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         params = super(UserGroupUpdateView, self).get_context_data(**kwargs)
         params["usergroupid"] = self.object.pk
-        #params["messages"] = get_messages(self.request)
+        params["gptitle"] = self.object.title
         return params
     
     
