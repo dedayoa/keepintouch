@@ -66,7 +66,7 @@ def create_and_set_default_user_group(sender, instance, *args, **kwargs):
         except:
             print("Error:", sys.exc_info())
 
-
+    
 class KITUser(models.Model):
     
     INDUSTRY = (
@@ -149,6 +149,7 @@ class KITUser(models.Model):
             return MessageTemplate.objects.filter(kit_admin = self.pk)
         else:
             return MessageTemplate.objects.filter(cou_group__kit_users = self.pk)
+
         
     #####Admin Things#######
     
@@ -190,12 +191,11 @@ class CoUserGroup(models.Model):
     kit_admin = models.ForeignKey(KITUser, on_delete=models.CASCADE, related_name='groups_adminover', \
                                   blank=False, limit_choices_to={'is_admin':True})
     kit_users = models.ManyToManyField(KITUser, related_name='groups_belongto', \
-                                       blank=True, limit_choices_to={'is_admin':False,'user.is_active':True})
+                                       blank=True, limit_choices_to={'is_admin':False})
     active = models.BooleanField() #when deactivated, 
     
     def __str__(self):
         return self.title
-    
         
     def get_absolute_url(self):
         return reverse('core:usergroup-detail',args=[self.pk])
