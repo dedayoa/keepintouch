@@ -22,7 +22,6 @@ from crispy_forms_foundation.layout import ButtonGroup, ButtonHolder, Div,\
 from django_select2.forms import Select2Widget, Select2MultipleWidget,\
     ModelSelect2MultipleWidget
 from tinymce.widgets import TinyMCE
-from tinymce_4.widgets import TinyMCEWidget, TinyMCESmallWidget, TinyMCEFullWidget
 from crispy_forms.templatetags.crispy_forms_field import css_class
 from core.models import CoUserGroup
 from django.contrib.auth.models import User
