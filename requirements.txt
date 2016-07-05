@@ -30,6 +30,7 @@ Django-Select2==5.8.5
 django-smsish==1.3.2
 django-smtp-ssl==1.0
 django-tables2==1.2.1
+django-timezone-utils==0.10
 django-tinymce==2.3.0
 html2text==2016.5.29
 idna==2.1
