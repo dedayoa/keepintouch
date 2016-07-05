@@ -18,7 +18,8 @@ from django.http import request
 from django.dispatch.dispatcher import receiver
 from django.conf import settings
 
-
+from timezone_utils.fields import TimeZoneField
+from timezone_utils.choices import PRETTY_ALL_TIMEZONES_CHOICES, PRETTY_COMMON_TIMEZONES_CHOICES
 
 
 ### Managers
@@ -88,6 +89,7 @@ class KITUser(models.Model):
     
     user = models.OneToOneField(User)
     dob = models.DateField(blank=False)
+    timezone = TimeZoneField(choices=PRETTY_COMMON_TIMEZONES_CHOICES)
     
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, limit_choices_to={'is_admin':True})
     phone_number = PhoneNumberField(blank=True, null=True, unique=True)
