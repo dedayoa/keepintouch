@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy, reverse
-from django.contrib import messages
+from django.contrib import messages as flash_messages
 
 from django_tables2   import RequestConfig
 
@@ -23,6 +23,8 @@ from django.core.mail import send_mail
 from django.core.mail.backends.smtp import EmailBackend
 from django.contrib.messages.api import get_messages
 from django.contrib.auth.models import User
+
+from messaging.helper import SMTPHelper
 
 
 # Create your views here.
@@ -165,7 +167,7 @@ class ContactViewView(UpdateView):
     
     def form_invalid(self, form, event_line_item_form):
         
-        messages.add_message(self.request, messages.INFO, 'The last action failed due to error in submission.')
+        flash_messages.add_message(self.request, flash_messages.INFO, 'The last action failed due to error in submission.')
         return HttpResponseRedirect(reverse('core:contact-detail', args=[self.object.pk]))
         '''
         return self.render_to_response(
@@ -499,54 +501,15 @@ class CheckSMTPServerView(View):
             #pulling from DB, not Form
             smtp_profile = get_object_or_404(SMTPSetting, pk=pk, kit_admin=request.user.kituser)
             
-            smtp_server = smtp_profile.smtp_server
-            smtp_port = smtp_profile.smtp_port
-            connection_security = smtp_profile.connection_security
-            smtp_user = smtp_profile.smtp_user
-            smtp_password = smtp_profile.smtp_password
-        
-            try:
+            eh = SMTPHelper(smtp_profile)
+            er = eh.test_smtp_server()
+            
+            if er == True:
+                flash_messages.add_message(request, flash_messages.INFO, "Email SMTP - Test OK" )
+            else:
+                flash_messages.add_message(request, flash_messages.INFO,'Email SMTP - Test Failed')
+                flash_messages.add_message(request, flash_messages.INFO, er[1])
                 
-                if connection_security == 'SSLTLS':
-                    connection = mail.get_connection(
-                            host = smtp_server,
-                            port = smtp_port,
-                            username = smtp_user,
-                            password = smtp_password,
-                            use_ssl = True
-                            )
-                elif connection_security == 'STARTTLS':
-                    connection = mail.get_connection(
-                            host = smtp_server,
-                            port = smtp_port,
-                            username = smtp_user,
-                            password = smtp_password,
-                            use_tls = True
-                            )
-                else:
-                    connection = mail.get_connection(
-                            host = smtp_server,
-                            port = smtp_port,
-                            username = smtp_user,
-                            password = smtp_password,
-                            )                   
-                
-                with connection as smtp_connection:
-                                    mail.EmailMessage(
-                                        'Test Email from IntouchNG',
-                                        'This is a test email to check your SMTP setup',
-                                        smtp_user,
-                                        ['dayo@windom.biz'],
-                                        connection=smtp_connection,
-                                    ).send()
-                
-                messages.add_message(request, messages.INFO, "Email SMTP - Test OK" )
-                
-                                    
-            except:
-                print(sys.exc_info())
-                messages.add_message(request, messages.INFO,'Email SMTP - Test Failed')
-                messages.add_message(request, messages.INFO, sys.exc_info()[1])
             
             return HttpResponseRedirect(reverse('core:smtp-detail', args=[pk]))
         
