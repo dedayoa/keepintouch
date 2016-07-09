@@ -298,7 +298,7 @@ class SMTPSettingForm(forms.ModelForm):
     class Meta:
         model = SMTPSetting
         fields = [
-                  'description','smtp_server','smtp_port','connection_security',\
+                  'description','from_user','smtp_server','smtp_port','connection_security',\
                   'smtp_user','smtp_password', 'active'
                   ]
         
