@@ -199,14 +199,18 @@ class MessageTemplateForm(forms.ModelForm):
                  ugettext('Delivery settings'),
                  Row(Column('cou_group')),
                  Row(Column('smtp_setting')),
-                 Row(Column('send_sms')),
+                 Row(
+                     Column('send_sms', css_class="float-left small-6"),
+                     Column('send_email', css_class="float-left small-6")
+                     ),
                  css_class = "new-template-settings-fieldset"
                  ),                       
             )
     
     class Meta:
         model = MessageTemplate
-        fields = ['title', 'email_template', 'sms_template', 'active', 'cou_group', 'smtp_setting', 'send_sms']        
+        fields = ['title', 'email_template', 'sms_template', 'active', 'cou_group', \
+                  'smtp_setting', 'send_sms','send_email']        
         widgets = {
             'cou_group': Select2Widget,
             'smtp_setting' : Select2Widget,
