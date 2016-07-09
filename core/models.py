@@ -236,6 +236,7 @@ class SMTPSetting(models.Model):
               )
     
     description = models.CharField(max_length=100, blank=True)
+    from_user = models.EmailField()
     smtp_server = models.CharField(max_length=255, blank=False)
     smtp_port = models.PositiveSmallIntegerField(blank=False)
     connection_security = models.CharField(max_length=20, choices=CONSEC, default='NO', blank=False)
@@ -369,6 +370,8 @@ class Event(models.Model):
     #couser = models.ForeignKey(CoUser, models.SET_NULL, blank=True)
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
+    
+    last_run = models.DateField(blank=True) #date message based on event was last sent
 
     
     def __str__(self):
