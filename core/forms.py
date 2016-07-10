@@ -26,6 +26,10 @@ from crispy_forms.templatetags.crispy_forms_field import css_class
 from core.models import CoUserGroup
 from django.contrib.auth.models import User
 
+import datetime
+
+
+
 class ContactForm(forms.ModelForm):
     
     error_css_class = 'alerterror'
@@ -158,7 +162,15 @@ class PublicEventForm(forms.ModelForm):
         self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
         
         
-    
+    def clean(self):
+        cleaned_data = super(PublicEventForm, self).clean()
+        ev_date = cleaned_data.get("date")
+        print(ev_date)
+        
+        if ev_date < datetime.date.today():
+            self.add_error('date','')
+            raise forms.ValidationError("PublicEvent date has to be in the future")
+        
     
     class Meta:
         model = PublicEvent    
