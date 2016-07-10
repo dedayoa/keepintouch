@@ -23,14 +23,22 @@
 {% endblock %}
 {% block foot_base_js %}
 	{{block.super}}
+	{{ form.media.js }}
 	<script src="{% static "js/foundation-datepicker.js" %}"></script>
 	<script>
-	$(document).ready(function() {
+	var nowTemp = new Date();
+	var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+	$(function(){
 		$('.event-form-date').fdatepicker({
 		format: 'dd-mm-yyyy',
-		disableDblClickSelection: true
+		onRender: function(date){
+			return date.valueOf() < now.valueOf() ? 'disabled' : '';
+			},
+		disableDblClickSelection: true,
+		startView: 2,
+		minView: 2,
+		maxView: 4
 		});
 	});
 	</script>
-	{{ form.media.js }}
 {% endblock %}
