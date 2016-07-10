@@ -385,7 +385,8 @@ class Event(models.Model):
         return reverse('core:event-detail',
                        args=[self.pk])
     
-    
+
+   
 class PublicEvent(models.Model):
     
     APPLIESTO = (
@@ -412,6 +413,14 @@ class PublicEvent(models.Model):
     @property
     def get_group(self):
         return '{}'.format(self.kit_user.user_group)
+    
+    def get_recipients(self):
+        #get contacts that belong to the group to which this user belongs
+        if self.all_contacts == True:
+            return self.kit_user.get_contacts()
+        else:
+            return self.recipients.all()
+    
     
     def get_absolute_url(self):
         return reverse('core:public-event-detail',
