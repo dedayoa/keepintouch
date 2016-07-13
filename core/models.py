@@ -112,7 +112,7 @@ class KITUser(models.Model):
         
     def get_parent(self):
         if self.is_admin:
-            return False
+            return self
         return self.parent
     
     def get_contacts(self):
