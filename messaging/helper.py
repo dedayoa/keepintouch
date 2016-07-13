@@ -13,6 +13,52 @@ from django.core.mail import send_mail, EmailMessage
 from django.core.mail.backends.smtp import EmailBackend
 
 from django.core.validators import validate_email
+from .models import SMSReport, EmailReport
+
+
+
+
+
+def temp_log_to_db(m_type, **kwargs):
+    
+    if m_type == 'email':
+        EmailReport.objects.create(
+            to_email = kwargs['email_msg'][3],
+            from_email = kwargs['email_msg'][2],
+            status = 0,
+            owner = kwargs['owner'],
+            email_message = {
+                'title' : kwargs['email_msg'][0],
+                'body' : kwargs['email_msg'][1]
+                           },
+            email_gateway = {
+                'email_id' :'',
+                'gateway_id' : '',
+                'gateway_error_preamble' : kwargs['gw_err_preamble']
+                
+                           }
+        )
+    
+    if m_type == 'sms':
+        SMSReport.objects.create(
+            to_phone = kwargs['sms_msg'][2],
+            status = 0,
+            owner = kwargs['owner'],
+            sms_message = {
+                'sender_id' : kwargs['sms_msg'][0],
+                'body' : kwargs['sms_msg'][1],
+                'message_type' : '0'
+                           },
+            sms_gateway = {
+                'message_id' : kwargs['message_id'],
+                'gateway_id' : '',
+                'gateway_error_code' : kwargs['gw_err_code']
+                           },
+        )
+    
+    
+    
+
 
 class SMTPHelper():
     
@@ -60,7 +106,7 @@ class SMTPHelper():
                     )
             return connection
             
-    def test_smtp_server(self):
+    def test_smtp_server(self, **kwargs):
         
         try:
             
@@ -71,7 +117,7 @@ class SMTPHelper():
                     'Test Email from IntouchNG',
                     'This is a test email to check your SMTP setup',
                     self.smtp_user,
-                    ['server-test@intouch.com.ng'],
+                    ['dayo@windom.biz','server-test@intouch.com.ng'],
                     connection=smtp_connection,
                 ).send()
                                 
@@ -80,24 +126,45 @@ class SMTPHelper():
             return(sys.exc_info())
 
     
-    def send_email(self, email_message):
+    def send_email(self, email_message, **kwargs):
         
-        conn = self._get_connection() 
-        
-        with conn as smtp_connection:    
-            msg = EmailMessage(
-                subject = email_message[0], #title
-                body = email_message[1], #body
-                from_email = self.from_sender,
-                to = email_message[2], #recipient
-                connection=smtp_connection,
-                #headers={'Message-ID': 'foo'},
+        try:
+            conn = self._get_connection() 
+            
+            with conn as smtp_connection:    
+                msg = EmailMessage(
+                    subject = email_message[0], #title
+                    body = email_message[1], #body
+                    from_email = self.from_sender,
+                    to = email_message[2], #recipient
+                    connection=smtp_connection,
+                    #headers={'Message-ID': 'foo'},
+                )
+                msg.content_subtype = "html"
+                msg.send()
+                
+                temp_log_to_db(
+                    'email',
+                    [email_message[0],email_message[1],email_message[2], email_message[3]],
+                    owner = kwargs['owner']
+                )
+        except Exception:
+            temp_log_to_db(
+                'email',
+                [email_message[0],email_message[1],email_message[2], email_message[3]],
+                gw_err_preamble = str(sys.exc_info()),
+                owner = kwargs['owner']
             )
-            msg.content_subtype = "html"
-            msg.send()
-    
-#todo :    
+            return(sys.exc_info())
+
+#todo :
+
 class SMSHelper():
+    
+    def __init__(self):
+        return SMSLive247Helper()
+
+class SMSLive247Helper():
     
     def __init__(self):
         
@@ -110,18 +177,35 @@ class SMSHelper():
     def sms_login(self):
         pass
     
-    def send_sms(self, message_payload):
+    def send_sms(self, message_payload, **kwargs):
         try:
             payload = {'cmd': 'sendmsg',
                        'sessionid': urlencode(self.sessid),
                        'message' : urlencode(message_payload[1]),
                        'sender' : urlencode(message_payload[0]),
-                       'sendto' : urlencode(message_payload[2]),
+                       'sendto' : urlencode((message_payload[2])[1:]), #remove leading +
                        'msgtype' : 0                   
                        }
             r = requests.post("http://www.smslive247.com/http/index.aspx", data=payload)
-            messageid = (r.split(':')[1]).strip()
-            #OK: 54142800
+            if r.split(':')[0] is not 'OK':
+                temp_log_to_db(
+                    'sms',
+                    [message_payload[0],message_payload[1],message_payload[2]],
+                    message_err_code = (r.split(':')[1]).strip(),
+                    owner = kwargs['owner']
+                )
+            else:
+                messageid = (r.split(':')[1]).strip()
+                #OK: 54142800
+                #log message
+                temp_log_to_db(
+                    'sms',
+                    sms_msg = [message_payload[0],message_payload[1],message_payload[2]],
+                    message_id = messageid,
+                    owner = kwargs['owner']
+                )
+            
+                return(messageid)
         except Exception:
             print('Exception')
     
@@ -130,7 +214,7 @@ class SMSHelper():
         try:
             payload = {'cmd': 'querymsgstatus',
                        'sessionid': urlencode(self.sessid),
-                       'messageid' : urlencode(messageid)            
+                       'messageid' : urlencode(messageid)    
                        }
             r = requests.get("http://www.smslive247.com/http/index.aspx", data=payload)
             return r
