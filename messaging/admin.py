@@ -1,9 +1,20 @@
 from django.contrib import admin
 
 from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages,\
-                    QueuedMessages
+                    QueuedMessages, EmailReport, SMSReport
+
+class EmailReportAdmin(admin.ModelAdmin):
+    
+    list_display = ('__str__','status','created')
+    
+class SMSReportAdmin(admin.ModelAdmin):
+    
+    list_display = ('status','created')
+
 
 admin.site.register(StandardMessaging)
 admin.site.register(AdvancedMessaging)
 admin.site.register(ProcessedMessages)
 admin.site.register(QueuedMessages)
+admin.site.register(EmailReport, EmailReportAdmin)
+admin.site.register(SMSReport, SMSReportAdmin)
