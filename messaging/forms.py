@@ -19,6 +19,7 @@ from tinymce.widgets import TinyMCE
 from django_select2.forms import Select2Widget, Select2MultipleWidget,\
     ModelSelect2MultipleWidget
 from django.utils import timezone
+from datetime import datetime
 
 
 
@@ -87,7 +88,9 @@ class StandardMessagingForm(forms.ModelForm):
         
         send_at = cleaned_data.get("delivery_time")
         if send_at < timezone.now():
-            raise forms.ValidationError('Your Delivery Date Cannot be in the past')
+            #raise forms.ValidationError('Your Delivery Date Cannot be in the past')
+            cleaned_data["delivery_time"] = datetime.now() 
+            
         
         if cleaned_data["recipients"].count() > settings.MAX_MSG_RECIPIENT:
             raise forms.ValidationError(
@@ -95,7 +98,8 @@ class StandardMessagingForm(forms.ModelForm):
                 To send to a greater number of recipients, please \
                 use the Advanced Messaging'.format(settings.MAX_MSG_RECIPIENT)
                                         )
-            
+        
+        return cleaned_data   
         
     '''      
     def clean_delivery_time(self):
