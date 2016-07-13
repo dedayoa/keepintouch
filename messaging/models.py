@@ -13,6 +13,8 @@ from model_utils import Choices
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
+from phonenumber_field.modelfields import PhoneNumberField
+
 
 def get_default_time():
     return timezone.now()+datetime.timedelta(seconds=settings.MSG_WAIT_TIME)
@@ -118,7 +120,7 @@ class ProcessedMessages(models.Model):
                 )
     
     message_type = models.CharField(max_length=10, choices=MSG_TYPE)
-    message = JSONField()
+    message = JSONField() #template, recipient_ids
 
     created_by = models.ForeignKey(KITUser, models.PROTECT)
     processed_at = models.DateTimeField(auto_now_add=True)
@@ -131,3 +133,55 @@ class ProcessedMessages(models.Model):
     
     class Meta:
         verbose_name_plural = "Processed Messages"
+        
+        
+class SMSReport(models.Model):
+    
+    STATUS = (
+        (0,'Delivered'),
+        (1,'Accepted'),
+        (2,'Expired'),
+        (3,'Undelivered'),
+        (4,'Rejected'),
+              )
+    
+    to_phone = PhoneNumberField(blank=False)
+    sms_message = JSONField() #body, messageid, 
+    sms_gateway = JSONField()
+    status = StatusField()
+    
+    owner = models.ForeignKey(KITUser, models.PROTECT)
+    last_modified = models.DateTimeField(auto_now=True)
+    
+    #datetime sms was sent,which may be different from when it entered the processing queue
+    created = models.DateTimeField(auto_now_add=True)  
+    
+    def __str__(self):
+        return "SMS from to {}".format(self.to_phone)
+    
+    
+class EmailReport(models.Model):
+    
+    STATUS = (
+        (0,'Sent'),
+        (1,'Delivered'),
+        (2,'Deferred'),
+        (3,'Bounce'),
+        #(4,'Spam Report'),
+              )
+    
+    status = StatusField()
+    to_email = models.EmailField()
+    from_email = models.EmailField()
+    email_message = JSONField()
+    email_gateway = JSONField()
+    
+    owner = models.ForeignKey(KITUser, models.PROTECT)
+    last_modified = models.DateTimeField(auto_now=True)
+    
+    #datetime email was sent,which may be different from when it entered the processing queue
+    created = models.DateTimeField(auto_now_add=True)  
+    
+    
+    def __str__(self):
+        return "Email from {} to {}".format(self.from_email,self.to_email)
