@@ -46,7 +46,7 @@ class StandardMessagingForm(forms.ModelForm):
                 </div>'''
                 ),                     
             Fieldset(
-                 ugettext('Sending Settings'),
+                 ugettext('Delivery Settings'),
                  Row(Column('recipients'), css_class="ss-recipients"),
                  Row(Column('delivery_time'), css_class="ss-deliver-at"),
                  Row(
@@ -89,7 +89,7 @@ class StandardMessagingForm(forms.ModelForm):
         send_at = cleaned_data.get("delivery_time")
         if send_at < timezone.now():
             #raise forms.ValidationError('Your Delivery Date Cannot be in the past')
-            cleaned_data["delivery_time"] = datetime.now() 
+            cleaned_data["delivery_time"] = datetime.now()
             
         
         if cleaned_data["recipients"].count() > settings.MAX_MSG_RECIPIENT:
@@ -129,4 +129,13 @@ class AdvancedMessagingForm(forms.ModelForm):
             'contact_group': Select2MultipleWidget,
             'message_template' : Select2Widget
         }
+        
+        
+    def clean(self, *args, **kwargs):
+        cleaned_data = super(AdvancedMessagingForm, self).clean(*args, **kwargs)
+        
+        send_at = cleaned_data.get("delivery_time")
+        if send_at < timezone.now():
+            #raise forms.ValidationError('Your Delivery Date Cannot be in the past')
+            cleaned_data["delivery_time"] = datetime.now()
         
