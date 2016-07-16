@@ -32,9 +32,13 @@ django-smtp-ssl==1.0
 django-tables2==1.2.1
 django-timezone-utils==0.10
 django-tinymce==2.3.0
+djangoajax==2.3.6
+djangorestframework==3.3.3
 html2text==2016.5.29
 idna==2.1
+Jinja2==2.8
 Logbook==0.12.5
+MarkupSafe==0.23
 phonenumberslite==7.3.2
 Pillow==3.2.0
 progressbar2==3.6.2
@@ -44,6 +48,7 @@ pycparser==2.14
 python-dateutil==2.5.3
 pytz==2016.4
 redis==2.10.5
+requests==2.10.0
 rq==0.6.0
 rq-scheduler==0.6.1
 six==1.10.0
