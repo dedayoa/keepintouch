@@ -9,9 +9,12 @@ from django.conf.urls import url, include
 
 
 from .views import *
+from .ajax import prepare_to_send_message, send_message
 
 urlpatterns = [
     url(r'^create/success/$', StandardMessageCreateView.as_view(), name=''),
+    url(r'^prepare-to-send-message/$', prepare_to_send_message, name='messages-prepare-send-message'),
+    url(r'^send-message/$', send_message, name='messages-send-message'),
     url(r'^processed/messages/$', message_processed_status_view, name='messages-processed-status'),
     url(r'^queued/messages/$', message_queued_status_view, name='messages-queued-status'),
     url(r'^queued/message/(?P<mtype>ADVANCED|STANDARD)/(?P<pk>\d+)/dequeue/$', queued_message_dequeue_view, name='queued-message-dequeue'),
