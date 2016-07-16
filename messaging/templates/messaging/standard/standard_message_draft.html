@@ -12,7 +12,7 @@
 {% block content %}
 	<div class="row">
 		{{ block.super }}
-		<form action="." method="post">
+		<form action="." method="post" id="standard-message-form">
 			{% crispy form %}
 			<!-- <input type="reset" name="reset" value="Reset" class="reset button secondary float-left" id="reset-id-reset">  -->
 			<input type="submit" name="submit" value="Save Draft" class="submit button float-left" id="submit-id-submit">
@@ -20,17 +20,26 @@
 			{% if draft_time %}
 		   		<span class="float-left hide-for-small-only" style="font-size: 0.7rem; margin: 1em 0 0 1em; line-height: 1rem;">Draft Saved: {{draft_time}}</span>
 		   	{% endif %}
+		   	<input type="button" id="prepare-send-message" value="Prepare" class="button warning float-right">
 		</form>
-		<form method="POST" action="">
-		   {% csrf_token %}
-		   <input type="submit" value="Send" class="button success float-right" 
-		   onclick="return confirm('Are you sure you want to Send?');">
-		</form>		
 		<form method="POST" action="{% url 'messaging:standard-message-delete' messageid %}">
 		   {% csrf_token %}
 		   <input type="submit" value="Delete" class="button alert float-right" style="margin-right: 0.5rem;"
 		   onclick="return confirm('Are you sure you want to Delete?');">
 		</form>
+	</div>
+	<div class="reveal" id="message-modal" data-reveal>
+		<h3>Sending...</h3>
+		<p id="modal-rpt"></p>
+		<button class="close-button" data-close aria-label="Close modal" type="button">
+	    <span aria-hidden="true">&times;</span>
+	  </button>
+	</div>
+	<div class="reveal" id="message-sent-modal" data-reveal>
+  		<h2>Message Sent!</h2>
+  		<button class="close-button" data-close aria-label="Close reveal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
 	</div>
 {% endblock %}
 {% block foot_base_js %}
@@ -55,6 +64,45 @@
 		});
 		
 		/*$('.email-template, #div_id_sms_message, .sms-textarea-status-bar,.ss-recipients, .ss-deliver-at, .ss-sms-sender,.ss-smtp-setting').hide()*/
+		
+		(function(){
+			
+			var donditcode;
+			
+	   		$('#prepare-send-message').click(function(){
+	   			//response = confirm('Are you sure you want to Send?');
+	   			//if (response == true){
+	  			var payload = $("#standard-message-form").serialize();
+	   			ajaxPost('/messaging/prepare-to-send-message/',payload, function(content){
+	   				//onSuccess
+	           		
+	   				if (content.result.nocwe == 0 && content.result.total_sms_count == 0){
+	   					return;
+	   				}else{
+	   					donditcode = content.result.idtdt
+	   					console.log(donditcode);
+		    			$('#message-modal p#modal-rpt').html(""+
+		    					(content.result.nocwe != 0 ? "Email will be sent to "+content.result.nocwe+" recipient(s) via "+content.result.mail_server+"<p />":"")+
+		    					(content.result.total_sms_count != 0 ? "Total of "+content.result.total_sms_count+" SMSs to be sent<p />":"")+
+		    					'<input type="button" id="send-message" value="Send" class="button success float-right">'+
+		    					"");
+		    			$('#message-modal').foundation('open');	   					
+	   				}
+
+	   			});
+	   			//}
+	   		});
+	   		
+	   		$('#message-modal p#modal-rpt').on('click', '#send-message', function(){
+	   			var payload = $("#standard-message-form").serializeArray();
+	   			payload.push({name:'idtdt', value:donditcode });
+	   			
+	   			ajaxPost('/messaging/send-message/',payload, function(content){
+	   				alert(content.result)
+	   				//$('#message-sent-modal').foundation('open');
+	   			});
+	   		});
+		})();
 
 		
 	</script>
