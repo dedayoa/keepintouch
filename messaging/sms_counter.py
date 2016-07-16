@@ -171,6 +171,9 @@ class SMSCounter():
         return returnset
     
     
+    def get_messages_count_only(self, plaintext):
+        return (self.count(plaintext))['messages']
+    
     def truncate(self, plaintext, limitsms):
         
         count = self.count(plaintext)
