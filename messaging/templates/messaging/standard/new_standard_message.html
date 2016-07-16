@@ -17,11 +17,7 @@
 			{% crispy form %}
 			<input type="reset" name="reset" value="Reset" class="reset button secondary float-left" id="reset-id-reset">
 			<input type="submit" name="submit" value="Save Draft" class="submit button float-left" id="submit-id-submit">
-		</form>
-		<form method="POST" action="">
-		   {% csrf_token %}
-		   <input type="submit" value="Send" class="button success float-right" 
-		   onclick="return confirm('Are you sure you want to Send?');">
+			<input type="button" value="Send" class="button success float-right" onclick="return confirm('Are you sure you want to Send?');">
 		</form>
 	</div>
 {% endblock %}
