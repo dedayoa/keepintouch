@@ -11,6 +11,7 @@
 {% endblock %}
 {% block content %}
 	<div class="row">
+	<h3>Draft <small>Standard Message</small></h3>
 		{{ block.super }}
 		<form action="." method="post" id="standard-message-form">
 			{% crispy form %}
@@ -36,7 +37,7 @@
 	  </button>
 	</div>
 	<div class="reveal" id="message-sent-modal" data-reveal>
-  		<h2>Message Sent!</h2>
+  		<h4></h4>
   		<button class="close-button" data-close aria-label="Close reveal" type="button">
     		<span aria-hidden="true">&times;</span>
   		</button>
@@ -67,38 +68,53 @@
 		
 		(function(){
 			
-			var donditcode;
-			
 	   		$('#prepare-send-message').click(function(){
 	   			//response = confirm('Are you sure you want to Send?');
 	   			//if (response == true){
 	  			var payload = $("#standard-message-form").serialize();
 	   			ajaxPost('/messaging/prepare-to-send-message/',payload, function(content){
 	   				//onSuccess
+	   				
+	           		if (content.errors){
+	           			var errors = $.parseJSON(content.errors);	
 	           		
-	   				if (content.result.nocwe == 0 && content.result.total_sms_count == 0){
-	   					return;
-	   				}else{
-	   					donditcode = content.result.idtdt
-	   					console.log(donditcode);
-		    			$('#message-modal p#modal-rpt').html(""+
-		    					(content.result.nocwe != 0 ? "Email will be sent to "+content.result.nocwe+" recipient(s) via "+content.result.mail_server+"<p />":"")+
-		    					(content.result.total_sms_count != 0 ? "Total of "+content.result.total_sms_count+" SMSs to be sent<p />":"")+
-		    					'<input type="button" id="send-message" value="Send" class="button success float-right">'+
-		    					"");
-		    			$('#message-modal').foundation('open');	   					
-	   				}
+	           			$.each(errors, function(index, value){
+	           				if (index === '__all__'){
+	           					$('div.nonfield-ajax-error').remove();
+	           					$("#standard-message-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+	           				}else{
+	           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+	           				}
+	           			});
+	           			
+	           			return;
+	           			
+	           		}else{
+		   				if (content.result.nocwe == 0 && content.result.total_sms_count == 0){
+		   					return;
+		   				}else{
+			    			$('#message-modal p#modal-rpt').html(""+
+			    					(content.result.nocwe != 0 ? "Email will be sent to "+content.result.nocwe+" recipient"+(content.result.nocwe > 1 ?"s":"")+" via "+content.result.mail_server+"<p />":"")+
+			    					(content.result.total_sms_count != 0 ? "Total of "+content.result.total_sms_count+" SMS"+(content.result.total_sms_count > 1 ?"s":"")+" to be sent<p />":"")+
+			    					'<input type="button" id="send-message" value="Send" class="button success float-right">'+
+			    					"");
+			    			$('#message-modal').foundation('open');	   					
+		   				}
+		   			}
 
 	   			});
-	   			//}
 	   		});
 	   		
 	   		$('#message-modal p#modal-rpt').on('click', '#send-message', function(){
 	   			var payload = $("#standard-message-form").serializeArray();
-	   			payload.push({name:'idtdt', value:donditcode });
+	   			//payload.push({name:'idtdt', value:donditcode });
 	   			
 	   			ajaxPost('/messaging/send-message/',payload, function(content){
-	   				alert(content.result)
+	   				$('#message-sent-modal h4').html(content.result);
+	   				$('#message-sent-modal').foundation('open');
+	   				setTimeout(function(){
+	   					window.location.replace("/messaging/queued/messages/");
+	   				}, 2500);
 	   				//$('#message-sent-modal').foundation('open');
 	   			});
 	   		});
