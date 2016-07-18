@@ -371,7 +371,7 @@ class Event(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     
-    last_run = models.DateField(blank=True) #date message based on event was last sent
+    last_run = models.DateField(blank=True, default=timezone.now) #date message based on event was last sent
 
     
     def __str__(self):
