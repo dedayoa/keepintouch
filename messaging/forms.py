@@ -12,7 +12,7 @@ from .models import StandardMessaging, AdvancedMessaging
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
-from crispy_forms_foundation.layout import ButtonGroup, ButtonHolder, Div,\
+from crispy_forms_foundation.layout import ButtonGroup, ButtonHolder, Div, Hidden,\
                                             Submit, Reset, Button, Layout, Fieldset, Row, Column
 
 from tinymce.widgets import TinyMCE
@@ -36,6 +36,7 @@ class StandardMessagingForm(forms.ModelForm):
         self.helper.form_tag = False
         
         self.helper.layout = Layout(
+            Row(Column('title'), css_class = "email-title"),
             Row(Column('email_message'), css_class = "email-template"),
             Row(Column('sms_message')),
             HTML('''
@@ -44,7 +45,9 @@ class StandardMessagingForm(forms.ModelForm):
                     <div class="column small-4">Messages: <span class="messages"></span></div>
                     <div class="column small-4">Remaining: <span class="remaining"></span></div>
                 </div>'''
-                ),                     
+                ), 
+            Hidden('message_type', 'STANDARD'),
+            Hidden('message_id', '{{messageid}}'),                  
             Fieldset(
                  ugettext('Delivery Settings'),
                  Row(Column('recipients'), css_class="ss-recipients"),
@@ -62,7 +65,7 @@ class StandardMessagingForm(forms.ModelForm):
     
     class Meta:
         model = StandardMessaging
-        fields = ['email_message','sms_message','recipients','delivery_time','send_sms', 'send_email', \
+        fields = ['title','email_message','sms_message','recipients','delivery_time','send_sms', 'send_email', \
                   'sms_sender','smtp_setting']
         widgets = {
             'recipients': Select2MultipleWidget,
@@ -77,22 +80,39 @@ class StandardMessagingForm(forms.ModelForm):
         User must Check either Send SMS or Send Email before sending
         """
         cleaned_data = super(StandardMessagingForm, self).clean()
-        send_sms = cleaned_data.get("send_sms")
-        send_email = cleaned_data.get("send_email")
+        
+        if cleaned_data.get("recipients") == None:
+            raise forms.ValidationError('Recipients Cannot be Empty')
+        
+        send_sms = cleaned_data.get("send_sms", False)
+        send_email = cleaned_data.get("send_email", False)
         
         if not (send_sms or send_email):
             #msg = 'You must enter at least a phone number or an email address'
             raise forms.ValidationError(
                 'You must select either "Send SMS" or "Send Email", or both.'
                                         )
+        if send_sms and not bool(cleaned_data.get('sms_message')):
+            raise forms.ValidationError('By checking "send sms", you must create an SMS template')
         
+        if send_sms and not cleaned_data.get('sms_sender', False):
+            self.add_error('sms_sender', 'SMS Sender is required')
+            raise forms.ValidationError('SMS Sender ID is required to send SMS')
+        
+        if send_email and not bool(cleaned_data.get('email_message')):
+            raise forms.ValidationError("Send Email checked, you must create an Email template")
+        
+        if send_email and not bool(cleaned_data.get('title')):
+            raise forms.ValidationError("Send Email checked, email should have a Title/Subject")
+        
+        # clean delivery time
         send_at = cleaned_data.get("delivery_time")
-        if send_at < timezone.now():
+        
+        if send_at == None or send_at < timezone.now():
             #raise forms.ValidationError('Your Delivery Date Cannot be in the past')
             cleaned_data["delivery_time"] = datetime.now()
-            
         
-        if cleaned_data["recipients"].count() > settings.MAX_MSG_RECIPIENT:
+        if cleaned_data.get("recipients").count() > settings.MAX_MSG_RECIPIENT:
             raise forms.ValidationError(
                 'To check Spam, only {} recipients are allowed. \
                 To send to a greater number of recipients, please \
@@ -121,6 +141,7 @@ class AdvancedMessagingForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_action = '.'
         self.helper.form_tag = False
+        self.helper.add_input(Hidden('message_type', 'ADVANCED'))
     
     class Meta:
         model = AdvancedMessaging
