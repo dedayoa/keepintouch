@@ -11,7 +11,9 @@
 		<link href="{% static "css/main.css" %}" rel="stylesheet">
 		
 		
-		<script src="{% static 'js/jquery.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+		<script type="text/javascript" src="{% static 'django_ajax/js/jquery.ajax.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'django_ajax/js/jquery.ajax-plugin.min.js' %}"></script>
 	{% endblock %}
 </head>
 <body>
@@ -28,9 +30,9 @@
 
 	{% endblock %}
 	{% block foot_base_js %}
-		<script src="{% static "js/vendor/what-input.js" %}"></script>
-		<script src="{% static "js/vendor/foundation.js" %}"></script>
-		<script src="{% static "js/main.js" %}"></script>
+		<script type="text/javascript" src="{% static "js/vendor/what-input.js" %}"></script>
+		<script type="text/javascript" src="{% static "js/vendor/foundation.js" %}"></script>
+		<script type="text/javascript" src="{% static "js/main.js" %}"></script>
 	{% endblock %}
 </body>
 </html>
