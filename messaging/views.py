@@ -51,7 +51,7 @@ class StandardMessageCreateView(CreateView):
     
     def get_context_data(self, **kwargs):
         self.params = super(StandardMessageCreateView, self).get_context_data(**kwargs)
-        self.params["title"] = _("Create Standard Message")        
+        self.params["title"] = _("Create Standard Message")  
         return self.params
     
     def get_success_url(self):
@@ -69,7 +69,7 @@ class StandardMessageUpdateDraftView(UpdateView):
         params = super(StandardMessageUpdateDraftView, self).get_context_data(**kwargs)
         params["title"] = _("Message")
         params["draft_time"] = self.object.last_modified
-        params["messageid"] = self.object.pk  
+        params["messageid"] = self.object.pk
         
         return params
     
