@@ -14,12 +14,13 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 import json
+import re
 from django.forms.models import model_to_dict
 from django.core.urlresolvers import reverse
 
 class DraftStandardMessagesTable(tables.Table):
     
-    __str__ = tables.Column(verbose_name="Message")
+    title = tables.Column(verbose_name="Title")
     recipients = tables.Column(verbose_name=_("Recipients"))
     last_modified = tables.DateTimeColumn(verbose_name="Last Edited")
     sms_sender = tables.Column(verbose_name="Sender")
@@ -41,10 +42,19 @@ class DraftStandardMessagesTable(tables.Table):
             return format_html_join(', ', '<span>{} {}</span>',\
                                      ((t.first_name,t.last_name) for t in record.recipients.all())
                                     )
+    
+    def render_title(self, record):
+        if record.title:
+            text_2_wordlist = re.sub("[^\w]", " ",  record.title).split()
+            return format_html('<span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex=1 title="{}">{}</span>',\
+                               record.__str__(),
+                               #nltk.sent_tokenize(record.title)[0:5].join(" ")
+                               (" ".join(text_2_wordlist[0:3])+"...") if len(text_2_wordlist) > 3 else record.title 
+                               )
             
     class Meta:
         model = StandardMessaging
-        fields = ('__str__','recipients','sms_sender','last_modified','table_model_action')
+        fields = ('title','recipients','sms_sender','last_modified','table_model_action')
         
         
 class DraftAdvancedMessagesTable(tables.Table):
