@@ -23,6 +23,7 @@ class StandardMessaging(models.Model):
     
     STATUS = Choices('draft', 'waiting', 'processed')
     
+    title = models.CharField(max_length=100, blank=False)
     email_message = models.TextField(blank=True)
     sms_message = models.TextField(blank=True)
     send_sms = models.BooleanField(verbose_name="Send SMS")
@@ -45,9 +46,13 @@ class StandardMessaging(models.Model):
 
     def __str__(self):
         if self.send_sms:
-            return "{}...".format(self.sms_message[0:25])
+            sms_m = self.sms_message
+            length = 75
+            return ("S: {}...".format(sms_m[0:length]) if len(sms_m) > length else "{}".format(sms_m))
         elif self.send_email:
-            return "{}...".format(html2text.html2text(self.email_message)[0:35])
+            email_m = html2text.html2text(self.email_message)
+            length = 90
+            return "{}...".format(email_m[0:length]) if len(email_m) > length else "{}".format(email_m)
             
             
     
