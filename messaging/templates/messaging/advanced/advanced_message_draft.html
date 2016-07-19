@@ -12,7 +12,7 @@
 {% block content %}
 	<div class="row">
 		{{ block.super }}
-		<form action="." method="post">
+		<form action="." method="post" id="advanced-message-form">
 			{% crispy form %}
 			<!-- <input type="reset" name="reset" value="Reset" class="reset button secondary float-left" id="reset-id-reset">  -->
 			<input type="submit" name="submit" value="Save Draft" class="submit button float-left" id="submit-id-submit">
@@ -20,17 +20,26 @@
 			{% if draft_time %}
 		   		<span class="float-left hide-for-small-only" style="font-size: 0.7rem; margin: 1em 0 0 1em; line-height: 1rem;">Draft Saved: {{draft_time}}</span>
 		   	{% endif %}
-		</form>
-		<form method="POST" action="">
-		   {% csrf_token %}
-		   <input type="submit" value="Send" class="button success float-right"
-		   onclick="return confirm('Are you sure you want to Send?');">
-		</form>		
+		   	<input type="button" id="prepare-send-message" value="Prepare" class="button warning float-right">
+		</form>	
 		<form method="POST" action="{% url 'messaging:advanced-message-delete' messageid %}">
 		   {% csrf_token %}
 		   <input type="submit" value="Delete" class="button alert float-right" style="margin-right: 0.5rem;"
 		   onclick="return confirm('Are you sure you want to Delete?');">
 		</form>
+	</div>
+	<div class="reveal" id="message-modal" data-reveal>
+		<h3>Sending...</h3>
+		<p id="modal-rpt"></p>
+		<button class="close-button" data-close aria-label="Close modal" type="button">
+	    <span aria-hidden="true">&times;</span>
+	  </button>
+	</div>
+	<div class="reveal" id="message-sent-modal" data-reveal>
+  		<h4></h4>
+  		<button class="close-button" data-close aria-label="Close reveal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
 	</div>
 {% endblock %}
 {% block foot_base_js %}
@@ -54,7 +63,63 @@
 		});
 		
 		/*$('.email-template, #div_id_sms_message, .sms-textarea-status-bar,.ss-recipients, .ss-deliver-at, .ss-sms-sender,.ss-smtp-setting').hide()*/
-
+		
+		(function(){
+			
+	   		$('#prepare-send-message').click(function(){
+	   			
+	  			var payload = $("#advanced-message-form").serialize();
+	   			ajaxPost('/messaging/prepare-to-send-message/',payload, function(content){
+	   				
+	           		if (content.hasOwnProperty("errors")){
+	           			var errors = $.parseJSON(content.errors);	
+	           		
+	           			$.each(errors, function(index, value){
+	           				if (index === '__all__'){
+	           					$('div.nonfield-ajax-error').remove();
+	           					$("#advanced-message-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+	           				}else{
+	           					$("small.error").remove();
+	           					//select field with error and apply text after it
+	           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+	           				}
+	           			});
+	           			
+	           			return;
+	           			
+	           		}else{
+	           			$('div.nonfield-ajax-error').remove();
+	           			$("small.error").remove();
+	           			//alert(content.result)}
+		           		
+		   				if (content.result.nocwe == 0 && content.result.total_sms_count == 0){
+		   					return;
+		   				}else{
+			    			$('#message-modal p#modal-rpt').html(""+
+			    					(content.result.nocwe != 0 ? "Email will be sent to "+content.result.nocwe+" recipient"+(content.result.nocwe > 1 ?"s":"")+" via "+content.result.mail_server+"<p />":"")+
+			    					(content.result.total_sms_count != 0 ? "Total of "+content.result.total_sms_count+" SMS"+(content.result.total_sms_count > 1 ?"s":"")+" to be sent<p />":"")+
+			    					'<input type="button" id="send-message" value="Send" class="button success float-right">'+
+			    					"");
+			    			$('#message-modal').foundation('open');	   					
+		   				}
+	   				}
+	   			});
+	   		});
+	   		
+	   		$('#message-modal p#modal-rpt').on('click', '#send-message', function(){
+	   			var payload = $("#advanced-message-form").serializeArray();
+	   			//payload.push({name:'idtdt', value:donditcode });
+	   			
+	   			ajaxPost('/messaging/send-message/',payload, function(content){
+	   				$('#message-sent-modal h4').html(content.result);
+	   				$('#message-sent-modal').foundation('open');
+	   				setTimeout(function(){
+	   					window.location.replace("/messaging/queued/messages/");
+	   				}, 2500);
+	   				//$('#message-sent-modal').foundation('open');
+	   			});
+	   		});
+		})();
 		
 	</script>
 	{{block.super}}
