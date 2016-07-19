@@ -26,7 +26,8 @@ from crispy_forms.templatetags.crispy_forms_field import css_class
 from core.models import CoUserGroup
 from django.contrib.auth.models import User
 
-import datetime
+from django.utils import timezone
+from datetime import datetime
 
 
 
@@ -219,6 +220,46 @@ class MessageTemplateForm(forms.ModelForm):
                  css_class = "new-template-settings-fieldset"
                  ),                       
             )
+    
+    
+    def clean(self):
+        """
+        User must Check either Send SMS or Send Email before sending
+        """
+        cleaned_data = super(MessageTemplateForm, self).clean()
+
+        
+        send_sms = cleaned_data.get("send_sms", False)
+        send_email = cleaned_data.get("send_email", False)
+        
+        if not (send_sms or send_email):
+            #msg = 'You must enter at least a phone number or an email address'
+            raise forms.ValidationError(
+                'You must select either "Send SMS" or "Send Email", or both.'
+                                        )
+        if send_sms and not bool(cleaned_data.get('sms_template')):
+            raise forms.ValidationError('By checking "send sms", you must create an SMS template')
+        
+        if send_sms and not cleaned_data.get('sms_sender', False):
+            self.add_error('sms_sender', 'SMS Sender is required')
+            raise forms.ValidationError('SMS Sender ID is required to send SMS')
+        
+        if send_email and not bool(cleaned_data.get('email_template')):
+            raise forms.ValidationError("Send Email checked, you must create an Email template")
+        
+        if send_email and not bool(cleaned_data.get('title')):
+            raise forms.ValidationError("Send Email checked, email should have a Title/Subject")
+        
+        # clean delivery time
+        send_at = cleaned_data.get("delivery_time")
+        
+        if send_at == None or send_at < timezone.now():
+            #raise forms.ValidationError('Your Delivery Date Cannot be in the past')
+            cleaned_data["delivery_time"] = datetime.now()
+
+        
+        return cleaned_data  
+    
     
     class Meta:
         model = MessageTemplate
