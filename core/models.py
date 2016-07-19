@@ -148,9 +148,9 @@ class KITUser(models.Model):
         
     def get_templates(self):
         if self.is_admin:
-            return MessageTemplate.objects.filter(kit_admin = self.pk)
+            return MessageTemplate.objects.filter(kit_admin = self.pk, active=True)
         else:
-            return MessageTemplate.objects.filter(cou_group__kit_users = self.pk)
+            return MessageTemplate.objects.filter(cou_group__kit_users = self.pk, active=True)
 
         
     #####Admin Things#######
