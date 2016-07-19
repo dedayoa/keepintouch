@@ -41,7 +41,7 @@ class StandardMessaging(models.Model):
     
     status = StatusField()
     #waiting_at = MonitorField(monitor='status', when=['waiting'])
-    processed_at = MonitorField(monitor='status', when=['processed'])
+    #processed_at = MonitorField(monitor='status', when=['processed'])
     
 
     def __str__(self):
@@ -77,7 +77,7 @@ class AdvancedMessaging(models.Model):
     
     status = StatusField()
     #waiting_at = MonitorField(monitor='status', when=['waiting'])
-    processed_at = MonitorField(monitor='status', when=['processed'])
+    #processed_at = MonitorField(monitor='status', when=['processed'])
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
