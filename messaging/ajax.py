@@ -199,6 +199,7 @@ def send_message(request):
                 message_type = request.POST.get("message_type"),
                 message_id = request.POST.get("message_id",0), #-1 means it was never saved to draft
                 message = {
+                    'message_id' : request.POST.get("message_id",0),
                     'title':myform.cleaned_data.get('title',''),
                     'email_template':myform.cleaned_data.get('email_message',''),
                     'sms_template':myform.cleaned_data.get('sms_message',''),
@@ -208,7 +209,7 @@ def send_message(request):
                     'recipients' : request.POST.getlist('recipients',[]),
                     'smtp_setting_id': myform.cleaned_data.get('smtp_setting').id,
                     'others' : {
-                                'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None 
+                                'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None                                
                                 }
                            },
                 delivery_time = timezone.make_aware(myform.cleaned_data.get('delivery_time'),timezone.get_current_timezone()),
@@ -231,6 +232,7 @@ def send_message(request):
                 message_type = request.POST.get("message_type"),
                 message_id = request.POST.get("message_id",0), #-1 means it was never saved to draft
                 message = {
+                    'message_id' : request.POST.get("message_id",0),
                     'title': my_adv_form[2].title, #myform.cleaned_data.get('title',''),
                     'email_template': my_adv_form[2].email_template,
                     'sms_template': my_adv_form[2].sms_template,
