@@ -94,6 +94,12 @@ class AdvancedMessageCreateView(CreateView):
         self.params["title"] = _("Create Advanced Message")
         return self.params
     
+    def get_form(self, form_class):
+        form = super(AdvancedMessageCreateView, self).get_form(form_class)
+        form.fields["message_template"].queryset = self.request.user.kituser.get_templates()
+        
+        return form
+    
     def get_success_url(self):
         return reverse('messaging:advanced-message-draft', kwargs={'pk': self.object.pk})
     
