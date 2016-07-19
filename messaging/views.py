@@ -94,7 +94,7 @@ class AdvancedMessageCreateView(CreateView):
         self.params["title"] = _("Create Advanced Message")
         return self.params
     
-    def get_form(self, form_class):
+    def get_form(self, form_class=form_class):
         form = super(AdvancedMessageCreateView, self).get_form(form_class)
         form.fields["message_template"].queryset = self.request.user.kituser.get_templates()
         
@@ -110,7 +110,7 @@ class AdvancedMessageUpdateDraftView(UpdateView):
     form_class = AdvancedMessagingForm
     template_name = 'messaging/advanced/advanced_message_draft.html'
     
-    def get_form(self, form_class):
+    def get_form(self, form_class=form_class):
         form = super(AdvancedMessageUpdateDraftView, self).get_form(form_class)
         form.fields["message_template"].queryset = self.request.user.kituser.get_templates()
         
