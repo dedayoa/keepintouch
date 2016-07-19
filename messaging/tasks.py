@@ -8,11 +8,12 @@ from django.template import Context, Template
 import logging
 import django_rq
 from datetime import date
-from core.models import MessageTemplate, Event, PublicEvent
+from django.utils import timezone
+from core.models import MessageTemplate, Event, PublicEvent, Contact, SMTPSetting
 from .helper import SMTPHelper, SMSHelper
 from dateutil.relativedelta import relativedelta
 
-from .models import AdvancedMessaging
+from .models import AdvancedMessaging, StandardMessaging, QueuedMessages, ProcessedMessages
 
 def _compose(template, convars):
     
@@ -49,9 +50,9 @@ def _send_mass_sms(sms_message, **kwargs):
 
 def process_private_anniversary():
     #get anniversaries that occur today and which have not been handled
-    due_private_events = Event.objects.select_related('contact','message').filter(date__day = date.today().day,
-                                                                      date__month = date.today().month,
-                                                                      last_run__year__lte = date.today().year)
+    due_private_events = Event.objects.select_related('contact','message').filter(date__day = timezone.now().day,
+                                                                      date__month = timezone.now().month,
+                                                                      last_run__year__lte = timezone.now().year)
     # For each due private anniversary, prepare email and sms
     
     for peven in due_private_events:
@@ -70,12 +71,12 @@ def process_private_anniversary():
                                     owner = peven.contact.kit_user
                                     )
 
-        peven.update(last_run=date.today()) 
+        peven.update(last_run=timezone.now().date()) 
     
     
 def process_public_anniversary():
     #get anniversaries that occur today
-    due_public_events = PublicEvent.objects.select_related('message').filter(date = date.today())
+    due_public_events = PublicEvent.objects.select_related('message').filter(date = timezone.now().date())
     # For each due private anniversary,
     for publicevent in due_public_events:
         for recipient_d in publicevent.get_recipients():
@@ -94,5 +95,36 @@ def process_public_anniversary():
                                 owner = publicevent.kit_user
                                 )
             
-        publicevent.update(date = date.today()+relativedelta(years=1))
+        publicevent.update(date = timezone.now().date()+relativedelta(years=1))
     
+def process_onetime_event():
+    
+    due_queued_messages = QueuedMessages.objects.filter(delivery_time__lte = timezone.now())
+    
+    for queued_message in due_queued_messages:
+        recipients_qs = Contact.objects.filter(pk__in = queued_message.message.recipients)
+        smtp_setting_qsv = SMTPSetting.objects.get(pk = queued_message.message.smtp_setting_id).values()
+        
+        for recipient_d in recipients_qs:
+            if queued_message.message.send_email and recipient_d.email and queued_message.message.email_template:
+                e_msg = _compose(queued_message.message.email_template, recipient_d)
+                e_title = _compose(queued_message.message.title, recipient_d)
+                _send_email.delay([e_title, e_msg, recipient_d.email],\
+                                  smtp_setting_qsv, owner = queued_message.created_by
+                                  )
+                
+            if queued_message.message.send_sms and recipient_d.phone and queued_message.message.sms_template:
+                s_msg = _compose(queued_message.message.sms_template, recipient_d)
+                s_sender = _compose(queued_message.message.title, recipient_d)
+                _send_email.delay([s_sender, s_msg, recipient_d.phone],\
+                                  owner = queued_message.created_by
+                                  )                
+        
+        # create entry in processed message
+        ProcessedMessages.objects.create(
+            message_type = queued_message.message_type,
+            message = queued_message.message,
+            created_by = queued_message.created_by            
+        )
+        # delete queued message from queuedmessage table
+        queued_message.delete()
