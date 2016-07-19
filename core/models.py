@@ -167,13 +167,13 @@ class KITUser(models.Model):
             return KITUser.objects.filter(parent=self.pk)
         
     def get_user_groups(self):
-        '''
-            Only KIT_ADMINS can configure SMTP
-        '''
         if self.is_admin:
             return CoUserGroup.objects.filter(kit_admin=self.pk)
         
     def get_smtp_items(self):
+        '''
+            Only KIT_ADMINS can configure SMTP
+        '''
         if self.is_admin:
             return SMTPSetting.objects.filter(kit_admin=self.pk)
             
