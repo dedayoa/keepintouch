@@ -91,7 +91,7 @@ class AdvancedMessageCreateView(CreateView):
     
     def get_context_data(self, **kwargs):
         self.params = super(AdvancedMessageCreateView, self).get_context_data(**kwargs)
-        self.params["title"] = _("Create Advanced Message")        
+        self.params["title"] = _("Create Advanced Message")
         return self.params
     
     def get_success_url(self):
@@ -104,12 +104,18 @@ class AdvancedMessageUpdateDraftView(UpdateView):
     form_class = AdvancedMessagingForm
     template_name = 'messaging/advanced/advanced_message_draft.html'
     
+    def get_form(self, form_class):
+        form = super(AdvancedMessageUpdateDraftView, self).get_form(form_class)
+        form.fields["message_template"].queryset = self.request.user.kituser.get_templates()
+        
+        return form
+        
     
     def get_context_data(self, **kwargs):
         params = super(AdvancedMessageUpdateDraftView, self).get_context_data(**kwargs)
         params["title"] = _("Advanced Message")
         params["draft_time"] = self.object.last_modified
-        params["messageid"] = self.object.pk       
+        params["messageid"] = self.object.pk
         return params
     
     def get_object(self, queryset=None):
