@@ -141,7 +141,14 @@ class AdvancedMessagingForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_action = '.'
         self.helper.form_tag = False
-        self.helper.add_input(Hidden('message_type', 'ADVANCED'))
+        self.helper.layout = Layout(
+            Row(Column('title'), css_class = "email-title"),
+            Row(Column('message_template'), css_class = "message-template"),
+            Row(Column('contact_group'), css_class = "contact-group"),
+            Row(Column('delivery_time'), css_class = "deliver-at"),
+            Hidden('message_type', 'ADVANCED'),
+            Hidden('message_id', '{{messageid}}')
+        )
     
     class Meta:
         model = AdvancedMessaging
@@ -156,7 +163,7 @@ class AdvancedMessagingForm(forms.ModelForm):
         cleaned_data = super(AdvancedMessagingForm, self).clean(*args, **kwargs)
         
         send_at = cleaned_data.get("delivery_time")
-        if send_at < timezone.now():
+        if send_at==None or send_at < timezone.now():
             #raise forms.ValidationError('Your Delivery Date Cannot be in the past')
             cleaned_data["delivery_time"] = datetime.now()
         
