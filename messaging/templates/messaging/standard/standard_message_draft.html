@@ -75,7 +75,7 @@
 	   			ajaxPost('/messaging/prepare-to-send-message/',payload, function(content){
 	   				//onSuccess
 	   				
-	           		if (content.errors){
+	           		if (content.hasOwnProperty('errors')){
 	           			var errors = $.parseJSON(content.errors);	
 	           		
 	           			$.each(errors, function(index, value){
