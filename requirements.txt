@@ -16,6 +16,7 @@ django-common-helpers==0.8.0
 django-crispy-forms==1.6.0
 django-cron==0.4.6
 django-debug-toolbar==1.4
+django-dynamic-fixture==1.9.0
 django-fernet-fields==0.4
 django-filebrowser==3.7.1
 django-filter==0.13.0
@@ -23,6 +24,7 @@ django-grappelli==2.8.1
 django-jsonify==0.3.0
 django-model-utils==2.5
 django-phonenumber-field==1.1.0
+django-pkgconf==0.2.0
 django-randomslugfield==0.3.0
 django-reversion==1.10.2
 django-rq==0.9.0
@@ -34,11 +36,14 @@ django-timezone-utils==0.10
 django-tinymce==2.3.0
 djangoajax==2.3.6
 djangorestframework==3.3.3
+factory-boy==2.7.0
+fake-factory==0.5.9
 html2text==2016.5.29
 idna==2.1
 Jinja2==2.8
 Logbook==0.12.5
 MarkupSafe==0.23
+nltk==3.2.1
 phonenumberslite==7.3.2
 Pillow==3.2.0
 progressbar2==3.6.2
