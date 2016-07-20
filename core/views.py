@@ -23,11 +23,24 @@ from django.core.mail import send_mail
 from django.core.mail.backends.smtp import EmailBackend
 from django.contrib.messages.api import get_messages
 from django.contrib.auth.models import User
+from django.contrib.auth import logout
 
 from messaging.helper import SMTPHelper
 
+from sitegate.decorators import signin_view, redirect_signedin
 
 # Create your views here.
+
+@signin_view(template='core/sitegate-myfoundation.html', redirect_to='core:dashboard-view')
+@redirect_signedin('core:dashboard-view')
+def entrance(request):
+    return render(request, 'core/access.html', {'title': 'Sign in & Sign up'})
+
+
+def exitdoor(request):
+    logout(request)
+    return HttpResponseRedirect('/frontdoor/')
+
 
 class Index(View):
     
