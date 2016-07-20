@@ -3,12 +3,9 @@
 {% load staticfiles %}
 
 {% block title %}{{title}}{% endblock %}
-{% block head_base_links %}
-	<link href="//cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css" rel="stylesheet">
-	{{ block.super }}
-{% endblock %}
 {% block content %}
 	<div class="row">
+		<h3>SMTP Settings <small>Detail</small></h3>
 		{{ block.super }}
 		{% crispy form %}
 

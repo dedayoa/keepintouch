@@ -7,6 +7,7 @@
 
 {% block content %}
 <div class="row">
+	<h3>Public Anniversaries <small></small></h3>
 	{{ block.super }}
 	<a class="small button" href="{% url 'core:public-event-new' %}">New Public Event</a>
 	{% render_table table %}

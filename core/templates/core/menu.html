@@ -1,43 +1,43 @@
 <ul class="vertical menu kitapp-lsm" data-accordion-menu>
-	<li><a href="#">Dashboard</a></li>
+	<li><a href="#"><i class="fi-home"></i>Dashboard</a></li>
 	<li>
-		<a href="#">Contact</a>
+		<a href="#"><i class="fi-address-book"></i>Contact</a>
 		<ul class="menu vertical nested is-active">
 			<li><a href="{% url 'core:contacts-list' %}">Contacts</a></li>
 			<li><a href="{% url 'core:contactgroup-list' %}">Groups</a></li>
 		</ul>
 	</li>
 	<li>
-		<a href="#">Messaging</a>
+		<a href="#"><i class="fi-mail"></i>Messaging</a>
 		<ul class="menu vertical nested is-active">
 			<li><a href="{% url 'messaging:new-standard-message' %}">Standard</a></li>
 			<li><a href="{% url 'messaging:new-advanced-message' %}">Advanced</a></li>
 			<hr style="padding: 0 1rem">
-			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:standard-draft-messages' %}">Drafts</a></li>
-			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:messages-queued-status' %}">Queued</a></li>
-			<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:messages-processed-status' %}">Processed</a></li>
+			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:standard-draft-messages' %}"><i class="fi-folder"></i>Drafts</a></li>
+			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:messages-queued-status' %}"><i class="fi-database"></i>Queued</a></li>
+			<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:messages-processed-status' %}"><i class="fi-checkbox"></i>Processed</a></li>
 		</ul>
 	</li>
-	<li><a href="{% url 'core:templates-list' %}">Templates</a></li>
+	<li><a href="{% url 'core:templates-list' %}"><i class="fi-page-multiple"></i>Templates</a></li>
 	<li>
-		<a href="#">Events</a>
+		<a href="#"><i class="fi-clock"></i>Events</a>
 		<ul class="menu vertical nested">
 			<li><a href="{% url 'core:events-list' %}">Private</a></li>
 			<li><a href="{% url 'core:public-events-list' %}">Public</a></li>
 		</ul>
 	</li>
 	<li>
-		<a href="#">Reports</a>
+		<a href="#"><i class="fi-page-csv"></i>Reports</a>
 		<ul class="menu vertical nested">
 			<li><a href="#">Messages</a></li>
 		</ul>
 	</li>
 	<li>
-		<a href="#">Settings</a>
+		<a href="#"><i class="fi-wrench"></i>Settings</a>
 		<ul class="menu vertical nested">
 		{% if request.user.kituser.is_admin %}
-			<li><a href="{% url 'core:kituser-settings-list' %}">Users</a></li>
-			<li><a href="{% url 'core:usergroup-list' %}">User Groups</a></li>
+			<li><a href="{% url 'core:kituser-settings-list' %}"><i class="fi-torsos-female-male"></i>Users</a></li>
+			<li><a href="{% url 'core:usergroup-list' %}"><i class="fi-torsos-all"></i>User Groups</a></li>
 			<li><a href="#">Account</a></li>
 			<li><a href="{% url 'core:smtp-settings-list' %}">SMTP</a></li>
 		{% endif %}

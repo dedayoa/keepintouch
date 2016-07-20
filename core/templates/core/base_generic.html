@@ -17,7 +17,7 @@
 				<div class="row columns kitapp-header">
 					<div class="title-bar">
 						<div class="title-bar-left">
-							<button class="menu-icon show-for-small-only" type="button" data-toggle="offCanvas"></button>
+							<button class="menu-icon hide-for-large" type="button" data-toggle="offCanvas"></button>
 							<span class="title-bar-title">InTouch</span>
 						</div>
 						<div class="title-bar-right">
@@ -28,12 +28,12 @@
 				{% endblock %}
 				<div class="row columns">
 					{% block container %}
-						<div class="hide-for-small-only medium-2 column">
+						<div class="show-for-large medium-3 column">
 							{% block lsb %}
 								{% include "core/menu.html" %}
 							{% endblock %}
 						</div>
-						<div class="small-12 medium-7 column kitapp-content">
+						<div class="small-12 large-7 column kitapp-content">
 							{% block content %}
 								{% if messages %}
 								<div class="alert callout">
@@ -44,7 +44,7 @@
 								{% endif %}
 							{% endblock %}
 						</div>
-					<div class="medium-3 hide-for-small-only column">{% block rsb %}{% endblock %}</div>
+					<div class="medium-2 show-for-large column">{% block rsb %}{% endblock %}</div>
 					{% endblock %}
 				</div>
 				<div class="row">
