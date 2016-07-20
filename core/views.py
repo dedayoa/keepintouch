@@ -1,7 +1,7 @@
 import sys
 
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import View
+from django.views.generic import View, TemplateView
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.contrib import messages as flash_messages
@@ -41,8 +41,19 @@ class Index(View):
     def post(self, request):
         return HttpResponse("Hallo World")
 
-def settings(request):
-    return HttpResponse("settings World")
+class DashboardView(TemplateView):
+    
+    template_name = 'core/dashboard.html'
+    params = {}
+    
+    def get_context_data(self, **kwargs):
+        self.params = super(DashboardView, self).get_context_data(**kwargs)
+        self.params["title"] = "InTouch Dashboard"
+        return self.params
+        
+    
+    def get(self,request):
+        return render(request,self.template_name, self.params)
 
 def contacts(request):
     
