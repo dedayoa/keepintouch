@@ -1,3 +1,8 @@
+
+i{
+	color: orangered;
+}
+
 div.kitapp-header{
 	margin-bottom: 1rem;
 }
@@ -78,6 +83,13 @@ input.test-smtp-button{
 	font-style: italic;
 	color: #555;
 }
+
+ul.kitapp-lsm li a:hover{
+	display: block;
+	background-color: #ccc;
+	color: #222;
+}
+
 
 .kitapp-lsm{
 	border: 1px dotted #ddd;
