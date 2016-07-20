@@ -13,7 +13,7 @@ from .views import *
 
 urlpatterns = [
     url(r'^$', Index.as_view(), name='index'),
-    url(r'^settings/$', settings, name='settings'),
+    url(r'^dashboard/$', DashboardView.as_view(), name='dashboard'),
     url(r'^settings/', include([
                 url(r'^users/$', kituser_settings, name='kituser-settings-list'),
                 url(r'^user/(?P<pk>\d+)/$', KITUserUpdateView.as_view(), name='kituser-detail'),
