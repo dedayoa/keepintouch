@@ -1,0 +1,15 @@
+{% extends "core/base_generic.html" %}
+{% load render_table from django_tables2 %}
+{% block head_base_links %}
+	{{ block.super }}
+{% endblock %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="row">
+	<h3>Dashboard <small>Welcome</small></h3>
+	<div class="table-scroll">
+		{{ block.super }}
+	</div>
+</div>
+{% endblock %}
