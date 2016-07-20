@@ -19,7 +19,6 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.conf.urls.static import static
 
-from controlcenter.views import controlcenter
 
 from filebrowser.sites import site
 
@@ -28,7 +27,6 @@ urlpatterns = [
     url(r'^select2/', include('django_select2.urls')),
     url(r'^tinymce/', include('tinymce.urls')),
     url(r'^qumon/', include('django_rq.urls')),
-    url(r'^admin/dashboard/', controlcenter.urls),
     url(r'^', include('core.urls', namespace='core', app_name='core')),
     url(r'^messaging/', include('messaging.urls', namespace='messaging', app_name='messaging')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)#+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
