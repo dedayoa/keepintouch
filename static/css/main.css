@@ -167,7 +167,7 @@ body.dashboard .kitapp-content h3{
 }
 /* 2 columns */
 .grid-item--width2 {
-	width: 40%;
+	width: 50%;
 	float: left;
 }
 
@@ -193,4 +193,31 @@ body.dashboard .kitapp-content h3{
 
 #dsb-disk_usage{
 	background-color: #FF1744;
+}
+
+#dsb-sms_balance{
+	background-color: #3F51B5;
+}
+#dsb-qmc{
+	background-color: #AFB42B;
+}
+#dsb-pmc{
+	background-color: #8BC34A;
+}
+#dsb-upc_annv{
+	background-color: #039BE5;
+}
+
+#dsb-upc_annv .no-bullet a{
+	color: #000;
+	font-weight: bold;	
+}
+
+#dsb-upc_annv .no-bullet a:hover{
+	color: #808080;
+	font-weight: bold;
+}
+
+#dsb-upc_annv span{
+	font-weight: normal;
 }
