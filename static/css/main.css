@@ -146,3 +146,51 @@ form.qu-re-form input[type="submit"]{
 	box-shadow: 0px 0px 9px 0px rgba(0,0,0,0.2);
 	padding: 1rem;
 }
+
+
+body.dashboard .kitapp-content{
+}
+
+body.dashboard .kitapp-content h3{
+}
+
+.grid{
+}
+
+
+/* fluid 5 columns */
+.grid-sizer,
+.grid-item {
+	width: 25%;
+	float: left;
+	padding: 8px;
+}
+/* 2 columns */
+.grid-item--width2 {
+	width: 40%;
+	float: left;
+}
+
+.grid-item h4{
+	color: #fff;
+}
+
+.grid-item p{
+	color: #dfdfdf;
+}
+
+#dsb-uptime{
+	background-color: #B71C1C;
+}
+
+#dsb-cpu{
+	background-color: #D32F2F;
+}
+
+#dsb-ram{
+	background-color: #F44336;
+}
+
+#dsb-disk_usage{
+	background-color: #FF1744;
+}
