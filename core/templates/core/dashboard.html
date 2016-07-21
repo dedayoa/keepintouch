@@ -42,9 +42,45 @@
 						<h4>Disk<small> (/)</small></h4>
 						<p><span>0</span>%</p>
 					</div>
+					<div class="grid-item" id="dsb-sms_balance">
+						<h4>SMS Balance</h4>
+						<p class="stat text-center"><span>0</span></p>
+					</div>
+					<div class="grid-item align-center" id="dsb-qmc">
+						<h4>Queued</h4>
+						<p class="stat text-center"><span>0</span></p>
+					</div>
+					<div class="grid-item" id="dsb-pmc">
+						<h4>Processed</h4>
+						<p class="stat text-center"><span>0</span></h4></p>
+					</div>
+					<div class="grid-item grid-item--width2" id="dsb-upc_annv">
+						<h4>Upcoming</h4>
+						<div class="column small-6">
+							<ul class="no-bullet">
+							{% for prve in priv_annv %}
+								<li><a href="{{prve.contact.get_absolute_url}}">{{prve.contact.first_name}}</a>, <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover='false' tabindex=1 title="{{prve.date}}">{{prve.title}}</span></li>
+							{% endfor %}
+							</ul>
+						</div>
+						<div class="column small-6">
+							<ul class="no-bullet">
+								{% for pube in publ_annv %}
+									<li><a data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover='false' tabindex=1 title="{{pube.date}}" href="{{pube.get_absolute_url}}">{{pube.title}}</a></li>
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
 				</div>
 			</div>
 		{% endblock %}
+	</div>
+	<div class="reveal" id="server-error-modal" data-reveal>
+		<h3>Server Appears to be Down</h3>
+		<p id="modal-rpt"></p>
+		<button class="close-button" data-close aria-label="Close modal" type="button">
+	    <span aria-hidden="true">&times;</span>
+	  </button>
 	</div>
 
 {% endblock %}
@@ -53,22 +89,59 @@
 	{{ block.super }}
 	<script src="{% static "js/masonry.pkgd.js" %}"></script>
 	<script>
-		function getstat(){
-			ajaxGet('/ping-stat/system/', function(content){
-				console.log(content);
-				if (content.hasOwnProperty("result")){
-					$("#dsb-ram p span").text(content.result.ram);
-					$("#dsb-cpu p span").text(content.result.cpu);
-					$("#dsb-disk_usage p span").text(content.result.disk_usage);
-					$("#dsb-uptime p span").text(content.result.uptime);
-				}
-				
-				setTimeout(getstat, 5000);
-			});
+		
+		/* ******** Runs the most frequently, so checks for server connection  */
+		function sayserverdown(){
+			$('#server-error-modal').foundation('open');
 		}
+		
+		function get_system_stat(){
+			try{
+				ajaxGet('/ping-stat/system/', function(content){
+					console.log(content);
+					
+					//$(document).on('opened.zf.reveal', '[data-reveal]', function () {
+					//$('[data-reveal]').on('opened.zf.reveal', function() {
+					$('#server-error-modal').foundation('close');
+					//});
+					
+					if (content.hasOwnProperty("result")){
+						$("#dsb-ram p span").text(content.result.ram);
+						$("#dsb-cpu p span").text(content.result.cpu);
+						$("#dsb-disk_usage p span").text(content.result.disk_usage);
+						$("#dsb-uptime p span").text(content.result.uptime);
+					}
+				}, {onError: sayserverdown});
+				
+				setTimeout(get_system_stat, 5000);
+			}
+			catch(err){
+				return;
+			}
+		}
+		/******                     ********/
+		
+		function get_qpc_stat(){
+			try
+			{
+				ajaxGet('/ping-stat/qpc/', function(content){
+					if (content.hasOwnProperty("result")){
+						$("#dsb-qmc p span").text(content.result.qmc);
+						$("#dsb-pmc p span").text(content.result.pmc);
+					}
+				}, {onError: sayserverdown});				
+				setTimeout(get_qpc_stat, 60*1000);	
+			}
+			catch(err){
+				return;
+			}
+		}
+			
+			
 		$( document ).ready(function() {
 			console.log('Ready');
-			setTimeout(getstat, 1000);
+			setTimeout(get_system_stat, 1000);
+			setTimeout(get_qpc_stat, 1000);
 		});
 	
 		$('.grid').masonry({
