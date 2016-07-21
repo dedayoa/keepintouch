@@ -58,14 +58,11 @@ class DashboardView(TemplateView):
     
     template_name = 'core/dashboard.html'
     params = {}
-    
-    def get_context_data(self, **kwargs):
-        self.params = super(DashboardView, self).get_context_data(**kwargs)
-        self.params["title"] = "InTouch Dashboard"
-        return self.params
         
     
     def get(self,request):
+        self.params["title"] = "Dashboard"
+        self.params["body_class"] = "dashboard"
         return render(request,self.template_name, self.params)
 
 def contacts(request):
