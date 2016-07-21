@@ -21,6 +21,10 @@ from django.conf import settings
 from timezone_utils.fields import TimeZoneField
 from timezone_utils.choices import PRETTY_ALL_TIMEZONES_CHOICES, PRETTY_COMMON_TIMEZONES_CHOICES
 
+#from messaging.models import ProcessedMessages, QueuedMessages
+
+from django.apps import apps
+
 
 ### Managers
 class ActiveManager(models.Manager):
@@ -136,14 +140,16 @@ class KITUser(models.Model):
             under the groups I admin over
             '''
             
-            return Event.objects.filter(contact__kit_user__parent=self.pk).order_by("date")
+            return Event.objects.filter(contact__kit_user__parent=self.pk)
         else:
-            return Event.objects.filter(contact__kit_user__groups_belongsto__kit_admin=self.parent).order_by("date")
+            #get events of groups I belong to
+            return Event.objects.filter(contact__kit_user__groups_belongsto__kit_admin=self.parent)
         
     def get_public_events(self):
         if self.is_admin:
             return PublicEvent.objects.filter(kit_user__parent=self.pk).order_by("date")
         else:
+            #get events of groups I belong to. May chance this later
             return PublicEvent.objects.filter(kit_user__groups_belongsto__kit_admin=self.parent).order_by("date")
         
     def get_templates(self):
@@ -151,7 +157,20 @@ class KITUser(models.Model):
             return MessageTemplate.objects.filter(kit_admin = self.pk, active=True)
         else:
             return MessageTemplate.objects.filter(cou_group__kit_users = self.pk, active=True)
-
+        
+    def get_processed_messages(self):
+        processedmessages = apps.get_model('messaging', 'ProcessedMessages')
+        if self.is_admin:
+            return processedmessages.objects.filter(created_by__parent = self.pk)
+        else:
+            return processedmessages.objects.filter(created_by = self.pk)
+                
+    def get_queued_messages(self):
+        queuedmessages = apps.get_model('messaging', 'QueuedMessages')
+        if self.is_admin:
+            return queuedmessages.objects.filter(created_by__parent = self.pk)
+        else:
+            return queuedmessages.objects.filter(created_by = self.pk)
         
     #####Admin Things#######
     
@@ -176,6 +195,8 @@ class KITUser(models.Model):
         '''
         if self.is_admin:
             return SMTPSetting.objects.filter(kit_admin=self.pk)
+
+
             
 
 post_save.connect(create_and_set_default_user_group, sender=KITUser)      
