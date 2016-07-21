@@ -9,6 +9,7 @@ from django.conf.urls import url, include
 
 
 from .views import *
+from .ajax import get_system_stats
 
 
 urlpatterns = [
@@ -16,6 +17,9 @@ urlpatterns = [
     url(r'^exit/$', exitdoor , name='backdoor'),
     url(r'^frontdoor/$', entrance, name='frontdoor'),
     url(r'^dashboard/$', DashboardView.as_view(), name='dashboard-view'),
+    url(r'^ping-stat/', include([
+                url(r'^system/$', get_system_stats, name='system-stat'),
+    ])),
     url(r'^settings/', include([
                 url(r'^users/$', kituser_settings, name='kituser-settings-list'),
                 url(r'^user/(?P<pk>\d+)/$', KITUserUpdateView.as_view(), name='kituser-detail'),
