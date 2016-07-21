@@ -1,10 +1,12 @@
 import sys
+import datetime
 
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import View, TemplateView
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.contrib import messages as flash_messages
+from django.utils import timezone
 
 from django_tables2   import RequestConfig
 
@@ -54,15 +56,27 @@ class Index(View):
     def post(self, request):
         return HttpResponse("Hallo World")
 
+
 class DashboardView(TemplateView):
     
     template_name = 'core/dashboard.html'
     params = {}
-        
+    
     
     def get(self,request):
+        
+        now = timezone.now()
+        svn_days_ago = now - datetime.timedelta(days=7)
+        tty_days_ago = now - datetime.timedelta(days=30)
+        
+        private_events = request.user.kituser.get_private_events().filter(date__range = (svn_days_ago, now))[:10]
+        public_events = request.user.kituser.get_public_events().filter(date__range = (tty_days_ago, now))[:10]
+        #
+        #
         self.params["title"] = "Dashboard"
         self.params["body_class"] = "dashboard"
+        self.params["priv_annv"] = private_events
+        self.params["publ_annv"] = public_events
         return render(request,self.template_name, self.params)
 
 def contacts(request):
