@@ -1,15 +1,81 @@
 {% extends "core/base_generic.html" %}
-{% load render_table from django_tables2 %}
+
+{% load staticfiles %}
+
 {% block head_base_links %}
 	{{ block.super }}
 {% endblock %}
 {% block title %}{{title}}{% endblock %}
 
-{% block content %}
-<div class="row">
-	<h3>Dashboard <small>Welcome</small></h3>
-	<div class="table-scroll">
-		{{ block.super }}
+{% block container %}
+	<div class="show-for-large medium-3 column">
+		{% block lsb %}
+			{% include "core/menu.html" %}
+		{% endblock %}
 	</div>
-</div>
+	<div class="small-12 large-9 column kitapp-content">
+		{% block content %}
+			{% if messages %}
+			<div class="alert callout">
+				{% for message in messages %}
+					<p>{{ message }}</p>
+				{% endfor %}
+			</div>
+			{% endif %}
+			<div class="row">
+				<h3>Dashboard <small>Welcome</small></h3>
+				<div class="grid">
+					<div class="grid-sizer"></div>
+					<div class="grid-item" id="dsb-uptime">
+						<h4>Uptime</h4>
+						<p><span>-</span></p>
+					</div>
+					<div class="grid-item" id="dsb-cpu">
+						<h4>CPU</h4>
+						<p><span>0</span>%</p>
+					</div>
+					<div class="grid-item" id="dsb-ram">
+						<h4>Memory</h4>
+						<p><span>0</span></p>
+					</div>
+					<div class="grid-item" id="dsb-disk_usage">
+						<h4>Disk<small> (/)</small></h4>
+						<p><span>0</span>%</p>
+					</div>
+				</div>
+			</div>
+		{% endblock %}
+	</div>
+
+{% endblock %}
+
+{% block foot_base_js %}
+	{{ block.super }}
+	<script src="{% static "js/masonry.pkgd.js" %}"></script>
+	<script>
+		function getstat(){
+			ajaxGet('/ping-stat/system/', function(content){
+				console.log(content);
+				if (content.hasOwnProperty("result")){
+					$("#dsb-ram p span").text(content.result.ram);
+					$("#dsb-cpu p span").text(content.result.cpu);
+					$("#dsb-disk_usage p span").text(content.result.disk_usage);
+					$("#dsb-uptime p span").text(content.result.uptime);
+				}
+				
+				setTimeout(getstat, 5000);
+			});
+		}
+		$( document ).ready(function() {
+			console.log('Ready');
+			setTimeout(getstat, 1000);
+		});
+	
+		$('.grid').masonry({
+		  // options
+		  itemSelector: '.grid-item',
+		  columnWidth: '.grid-sizer',
+		  percentPosition: true,
+		});
+	</script>
 {% endblock %}
