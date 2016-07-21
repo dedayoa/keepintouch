@@ -9,7 +9,7 @@ from django.conf.urls import url, include
 
 
 from .views import *
-from .ajax import get_system_stats
+from .ajax import get_system_stats, get_qpc_stats
 
 
 urlpatterns = [
@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^dashboard/$', DashboardView.as_view(), name='dashboard-view'),
     url(r'^ping-stat/', include([
                 url(r'^system/$', get_system_stats, name='system-stat'),
+                url(r'^qpc/$', get_qpc_stats, name='qpc-stat'),
     ])),
     url(r'^settings/', include([
                 url(r'^users/$', kituser_settings, name='kituser-settings-list'),
