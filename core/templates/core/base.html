@@ -17,7 +17,7 @@
 		<script type="text/javascript" src="{% static 'django_ajax/js/jquery.ajax-plugin.min.js' %}"></script>
 	{% endblock %}
 </head>
-<body>
+<body class="{% block body_css_blk %}{{body_class}}{% endblock %}">
 	{% block body %}
 		{% block header%}{% endblock %}
 		<div class="row">
