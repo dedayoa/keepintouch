@@ -1,0 +1,13 @@
+{% extends "core/base_generic.html" %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+	<div class="row">
+		<h3>Accounts <small></small></h3>
+		<div class="row column">
+			<a class="button" href="{% url 'core:sms-account-mgmt' %}">SMS Transfers & History</a>
+		</div>
+		
+	</div>
+{% endblock %}
