@@ -9,7 +9,7 @@ from django.conf.urls import url, include
 
 
 from .views import *
-from .ajax import get_system_stats, get_qpc_stats
+from .ajax import get_system_stats, get_qpc_stats, sms_credit_transfer, get_user_sms_balance
 
 
 urlpatterns = [
@@ -35,6 +35,12 @@ urlpatterns = [
                 url(r'^smtp/new/$', SMTPCreateView.as_view(), name='smtp-new'),
                 url(r'^smtp/(?P<pk>\d+)/delete/$', SMTPDeleteView.as_view(), name='smtp-delete'),
                 url(r'^smtp/(?P<pk>\d+)/check/$', CheckSMTPServerView.as_view(), name='smtp-check'),
+                
+                #Accounts
+                url(r'^account/$', AccountManagementView.as_view(), name='account-mgmt'),
+                url(r'^account/sms/$', SMSBalanceTransferView.as_view(), name='sms-account-mgmt'),
+                url(r'^account/sms/credit_transfer/$', sms_credit_transfer, name='sms-credit-transfer'),
+                url(r'^account/sms/get_user_balance/$', get_user_sms_balance),
     ])),
 
     #User Groups
