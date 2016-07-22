@@ -402,7 +402,7 @@ class ContactGroupForm(forms.ModelForm):
 
 class SMSTransferForm(forms.Form):
     
-    users = forms.ModelChoiceField(queryset=None, empty_label='-- Select A User --')
+    users = forms.ModelChoiceField(queryset=None, empty_label='-- Select A User --', widget=Select2Widget)
     admin = forms.CharField(widget=None)#(widget=forms.HiddenInput(attrs={'value':'{{adminid}}'}))
     amount = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={'min':settings.MIN_SMS_TRANSFERABLE, 'pattern':"^[0-9]"}))
     
@@ -423,4 +423,4 @@ class SMSTransferForm(forms.Form):
         
         if cleaned_data.get("users") is None:
             raise forms.ValidationError("You must select a user")
-    
+
