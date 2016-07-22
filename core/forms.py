@@ -5,6 +5,7 @@ Created on May 23, 2016
 '''
 
 from django import forms
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.views.generic.edit import ModelFormMixin
 from django.forms.models import formset_factory, inlineformset_factory
@@ -313,7 +314,9 @@ class NewUserForm(forms.ModelForm):
 class KITUserForm(forms.ModelForm):
     
     dob = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS,\
-                           widget=forms.DateInput(attrs={'class':'dob-form-date'}))   
+                           widget=forms.DateInput(attrs={'class':'dob-form-date'}))
+    
+    sms_balance = forms.IntegerField(disabled=True, label="SMS Balance")
     
     def __init__(self, *args, **kwargs):
         super(KITUserForm, self).__init__(*args, **kwargs)
@@ -326,7 +329,7 @@ class KITUserForm(forms.ModelForm):
     
     class Meta:
         model = KITUser
-        fields = ['dob','phone_number','industry','company','address_1',\
+        fields = ['sms_balance', 'dob','phone_number','industry','company','address_1',\
                   'address_2','city_town','state']
         exclude = ['user']
         widgets = {
@@ -392,6 +395,32 @@ class ContactGroupForm(forms.ModelForm):
     class Meta:
         model = ContactGroup
         fields = ['title','description','contacts']
+    
         widgets = {
             'contacts' : Select2MultipleWidget,
                    }
+
+class SMSTransferForm(forms.Form):
+    
+    users = forms.ModelChoiceField(queryset=None, empty_label='-- Select A User --')
+    admin = forms.CharField(widget=None)#(widget=forms.HiddenInput(attrs={'value':'{{adminid}}'}))
+    amount = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={'min':settings.MIN_SMS_TRANSFERABLE, 'pattern':"^[0-9]"}))
+    
+    def __init__(self, *args, **kwargs):
+        self.crequest = kwargs.pop('crequest') or None
+        super(SMSTransferForm, self).__init__(*args, **kwargs)        
+        self.fields['users'].queryset = self.crequest.user.kituser.get_kitusers()
+        self.fields['admin'].widget = forms.HiddenInput(attrs={'value':self.crequest.user.kituser.id})
+        
+        
+    def clean(self):
+        
+        cleaned_data = super(SMSTransferForm, self).clean()
+        
+        
+        if cleaned_data.get("amount",0) < settings.MIN_SMS_TRANSFERABLE:
+            raise forms.ValidationError("Amount needs to be at least {}".format(settings.MIN_SMS_TRANSFERABLE));
+        
+        if cleaned_data.get("users") is None:
+            raise forms.ValidationError("You must select a user")
+    
