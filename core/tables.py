@@ -7,7 +7,7 @@ Created on May 23, 2016
 import django_tables2 as tables
 from django_tables2.utils import A
 from .models import Contact, MessageTemplate, Event, PublicEvent, ContactGroup, \
-                    KITUser, KITAdminAccount, SMTPSetting, CoUserGroup
+                    KITUser, KITAdminAccount, SMTPSetting, CoUserGroup, SMSTransfer
 from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 
@@ -155,4 +155,16 @@ class ContactGroupsSettingsTable(tables.Table):
     class Meta:
         model = ContactGroup
         fields = ('title','description','contacts','last_modified')
+        
+
+class SMSTransferHistoryTable(tables.Table):
+    
+    from_user = tables.Column(verbose_name="From")
+    to_user = tables.Column(verbose_name="To")
+    sms_units = tables.Column(verbose_name="SMS Units")
+    transaction_date = tables.Column(verbose_name="Transaction Time")
+    
+    class Meta:
+        model = SMSTransfer
+        fields = ('from_user','to_user','sms_units','transaction_date')
         
