@@ -14,7 +14,7 @@ from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTe
                     SMTPSetting, ContactGroup
 from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, ExistingUserForm,\
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
-                    UserGroupSettingForm, NewUserForm, ContactGroupForm
+                    UserGroupSettingForm, NewUserForm, ContactGroupForm, SMSTransferForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
@@ -618,3 +618,31 @@ class ContactGroupCreateView(CreateView):
     def form_valid(self, form):
         form.instance.kit_user = self.request.user.kituser
         return super(ContactGroupCreateView, self).form_valid(form)
+    
+    
+class SMSBalanceTransferView(TemplateView):
+    
+    template_name = "core/accounts/sms_transfer_and_log.html"
+    params = {}
+    
+    def get(self, request):
+        self.params['total_balance'] = request.user.kituser.sms_balance
+        self.params['users'] = request.user.kituser.get_kitusers()
+        transfer_form = SMSTransferForm(crequest=request)
+        
+        self.params['transfer_form'] = transfer_form
+        
+        return render(request, self.template_name, self.params)
+    
+    def post(self, request, direction):
+        pass
+    
+    
+class AccountManagementView(TemplateView):
+    
+    template_name = 'core/accounts/accounts_landing.html'
+    params = {}
+    
+    def get(self, request):
+        
+        return render(request, self.template_name, self.params)
