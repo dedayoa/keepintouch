@@ -104,6 +104,7 @@ class KITUser(models.Model):
     city_town = models.CharField(max_length=100, blank=False)
     state = models.CharField(max_length=100, blank=False, choices=STATE, default="LAG")
     is_admin = models.BooleanField(default=False)
+    sms_balance = models.PositiveIntegerField(default=0)
     
     objects = KITUserManager()
     
@@ -460,4 +461,16 @@ class SentMessage(models.Model):
         return self.event
 
 
+
+class SMSTransfer(models.Model):
     
+    from_user = models.ForeignKey(KITUser, models.SET_NULL, null=True, blank=False, related_name='from_user')
+    to_user = models.ForeignKey(KITUser, models.SET_NULL, null=True, blank=False, related_name = 'to_user')
+    sms_units = models.PositiveIntegerField(blank=False)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+    transaction_detail = JSONField(blank=False) #in case the user is deleted
+    
+    created_by = models.ForeignKey(KITUser, models.PROTECT, blank=False, limit_choices_to={'is_admin':True})
+    
+    def __str__(self):
+        return "{} units(s) from {} to {}".format(self.sms_units, self.from_user, self.to_user)
