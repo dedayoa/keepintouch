@@ -1,0 +1,81 @@
+{% extends "core/base_generic.html" %}
+{% load staticfiles %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+	<div class="row">
+		<h3>SMS <small>Transfers & Logs</small></h3>
+		<div class="row column">
+			<form action="" method="post" id="sms-transfer-form">
+				<table>
+					<h4 class="text-right">Total: <span class="stat" id="total-balance">{{total_balance}}</span> units</h4>
+					<tr>
+						<td width="35%">
+							<div>Balance: <span id="user-balance">-</span> units</div>
+							<div>{{transfer_form.users}}</div>
+						</td>
+						<td width="25%">
+							<div>Amount</div>
+							<div>{{transfer_form.amount}}</div>
+						</td>
+						<td>
+							<div><br /></div>
+							<button class="button sms-txn-butn" data-mdir="credit"><i class="fi-plus"></i> Credit</button>
+							<button class="button sms-txn-butn" data-mdir="debit"><i class="fi-minus"></i> Debit</button>
+						</td>						
+					</tr>
+				</table>
+				{{transfer_form.admin}}
+			</form>
+		</div>
+	</div>
+{% endblock %}
+{% block foot_base_js %}
+	<script>
+	$(document).ready(function(){
+		$('.sms-txn-butn').click(function(e){
+   			e.preventDefault();
+  			var payload = $("#sms-transfer-form").serializeArray();
+  			payload.push({name:"mdir",value: $(this).data('mdir')});
+  			console.log(payload);
+   			ajaxPost('/settings/account/sms/credit_transfer/',payload, function(content){   				
+   				
+           		if (content.hasOwnProperty("errors")){
+           			var errors = $.parseJSON(content.errors);	
+           		
+           			$.each(errors, function(index, value){
+           				if (index === '__all__'){
+           					$('div.nonfield-ajax-error').remove();
+           					$("small.error").remove();
+           					$("#sms-transfer-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+           				}else{
+           					$("small.error").remove();
+           					//select field with error and apply text after it
+           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+           				}
+           			});
+           			
+           			return;
+           			
+           		}else{
+           			$('div.nonfield-ajax-error').remove();
+           			$("small.error").remove();
+           			
+           			$("#total-balance").text(content.result.admin_sms_bal)
+           			$("#user-balance").text(content.result.user_sms_bal)
+           			
+           			console.log(content.result)
+   				}
+			});
+   		})
+
+   		$( "#id_users" ).change(function() {
+   			var payload = $("#sms-transfer-form").serialize();
+   	  		ajaxGet('/settings/account/sms/get_user_balance/', payload, function(content){
+   	  			$("#user-balance").text(content.result.user_sms_bal)
+   	  		});
+   		});
+	})	
+   		
+	</script>
+{% endblock %}
