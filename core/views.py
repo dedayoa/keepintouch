@@ -11,12 +11,13 @@ from django.utils import timezone
 from django_tables2   import RequestConfig
 
 from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate,\
-                    SMTPSetting, ContactGroup
+                    SMTPSetting, ContactGroup, SMSTransfer
 from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, ExistingUserForm,\
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
                     UserGroupSettingForm, NewUserForm, ContactGroupForm, SMSTransferForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
-                    KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable
+                    KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable,\
+                    SMSTransferHistoryTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django_select2.views import AutoResponseView
 
@@ -624,13 +625,19 @@ class SMSBalanceTransferView(TemplateView):
     
     template_name = "core/accounts/sms_transfer_and_log.html"
     params = {}
+
     
     def get(self, request):
         self.params['total_balance'] = request.user.kituser.sms_balance
+        
+        smshtable = SMSTransferHistoryTable(SMSTransfer.objects.filter(created_by = request.user.kituser).order_by('-transaction_date'))
+        RequestConfig(request, paginate={'per_page': 50}).configure(smshtable)
+        
         self.params['users'] = request.user.kituser.get_kitusers()
         transfer_form = SMSTransferForm(crequest=request)
         
         self.params['transfer_form'] = transfer_form
+        self.params['table'] = smshtable
         
         return render(request, self.template_name, self.params)
     
