@@ -1,10 +1,22 @@
 {% extends "core/base_generic.html" %}
+{% load render_table from django_tables2 %}
 {% load staticfiles %}
 {% block title %}{{title}}{% endblock %}
-
+{% block head_base_links %}
+	{{ block.super }}
+	{{ transfer_form.media.css }}
+	<style>
+		span.select2-selection{
+		height: 2.4em !important;
+	    padding-top: 0.4em !important;
+	    margin-bottom: 1em !important;
+		}
+	</style>
+{% endblock %}
 {% block content %}
 	<div class="row">
-		<h3>SMS <small>Transfers & Logs</small></h3>
+		{{ block.super }}
+		<h3>SMS <small>Transfer & History</small></h3>
 		<div class="row column">
 			<form action="" method="post" id="sms-transfer-form">
 				<table>
@@ -28,16 +40,21 @@
 				{{transfer_form.admin}}
 			</form>
 		</div>
+		<div class="row column">
+			<h4>Transfer History</h4>
+			{% render_table table %}		
+		</div>
 	</div>
 {% endblock %}
 {% block foot_base_js %}
+	{{ transfer_form.media.js }}
 	<script>
 	$(document).ready(function(){
 		$('.sms-txn-butn').click(function(e){
    			e.preventDefault();
   			var payload = $("#sms-transfer-form").serializeArray();
   			payload.push({name:"mdir",value: $(this).data('mdir')});
-  			console.log(payload);
+
    			ajaxPost('/settings/account/sms/credit_transfer/',payload, function(content){   				
    				
            		if (content.hasOwnProperty("errors")){
@@ -61,10 +78,8 @@
            			$('div.nonfield-ajax-error').remove();
            			$("small.error").remove();
            			
-           			$("#total-balance").text(content.result.admin_sms_bal)
-           			$("#user-balance").text(content.result.user_sms_bal)
-           			
-           			console.log(content.result)
+           			$("#total-balance").text(content.result.admin_sms_bal);
+           			$("#user-balance").text(content.result.user_sms_bal);
    				}
 			});
    		})
@@ -75,7 +90,7 @@
    	  			$("#user-balance").text(content.result.user_sms_bal)
    	  		});
    		});
-	})	
-   		
+	})	   		
 	</script>
+	{{block.super}}
 {% endblock %}
