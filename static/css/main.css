@@ -221,3 +221,7 @@ body.dashboard .kitapp-content h3{
 #dsb-upc_annv span{
 	font-weight: normal;
 }
+
+#sms-transfer-form i{
+	color: #fff;
+}
