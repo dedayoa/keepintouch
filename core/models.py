@@ -1,5 +1,6 @@
 import sys
 import datetime
+import uuid
 
 from django.db import models, transaction
 
@@ -474,3 +475,25 @@ class SMSTransfer(models.Model):
     
     def __str__(self):
         return "{} units(s) from {} to {}".format(self.sms_units, self.from_user, self.to_user)
+
+
+class UploadedContact(models.Model):
+    
+    name = models.CharField(max_length=30)
+    file = models.FileField(upload_to='uploaded_contact_files/%Y/%m/')
+    import_status = JSONField()
+    upload_date = models.DateTimeField(auto_now_add=True)
+    
+    uploaded_by = models.ForeignKey(KITUser, models.CASCADE, blank=False)
+    
+    def __str__(self):
+        return self.name
+    
+    
+class StateMaintainCache(models.Model):
+    #will use redis for this later
+    key = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    obj = models.BinaryField()
+    
+    def __str__(self):
+        return str(self.key)
