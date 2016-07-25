@@ -3,7 +3,8 @@ from django.contrib import admin
 # Register your modelx here.
 
 from .models import Contact, KITUser, Event, PublicEvent, MessageTemplate, \
-                    SentMessage, SMTPSetting, CoUserGroup, ContactGroup, SMSTransfer
+                    SentMessage, SMTPSetting, CoUserGroup, ContactGroup, SMSTransfer,\
+                    StateMaintainCache, UploadedContact
 
 
 class ContactAdmin(admin.ModelAdmin):
@@ -24,7 +25,9 @@ class CoUserGroupAdmin(admin.ModelAdmin):
     
     
 admin.site.register(Event)
+admin.site.register(StateMaintainCache)
 admin.site.register(PublicEvent)
+admin.site.register(UploadedContact)
 admin.site.register(SMSTransfer)
 admin.site.register(Contact, ContactAdmin)
 admin.site.register(ContactGroup)
