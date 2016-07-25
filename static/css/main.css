@@ -52,6 +52,9 @@ table.events-set-list-table select{
 	background-color: rgba(255, 153, 0, 0.47);
 }
 
+.none-display{
+	display: none;
+}
 
 .sms-textarea-status-bar{
     background-color: #ddd;
