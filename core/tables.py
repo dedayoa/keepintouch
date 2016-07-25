@@ -4,10 +4,15 @@ Created on May 23, 2016
 @author: Dayo
 '''
 
+import json
+import ast
+import os
+
 import django_tables2 as tables
 from django_tables2.utils import A
 from .models import Contact, MessageTemplate, Event, PublicEvent, ContactGroup, \
-                    KITUser, KITAdminAccount, SMTPSetting, CoUserGroup, SMSTransfer
+                    KITUser, KITAdminAccount, SMTPSetting, CoUserGroup, SMSTransfer,\
+                    UploadedContact
 from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 
@@ -167,4 +172,24 @@ class SMSTransferHistoryTable(tables.Table):
     class Meta:
         model = SMSTransfer
         fields = ('from_user','to_user','sms_units','transaction_date')
+        
+        
+class UploadedContactFileHistoryTable(tables.Table):
+
+    def render_file(self, record):
+        if record.file:
+            ext = os.path.splitext(record.file.name)[1][1:]
+            if ext == 'csv':
+                return mark_safe('<a href="{}"><i class="fi-page-csv" style="color: #10c710; font-size: 3rem;"></i></a>'.\
+                                 format(record.file.url))
+            elif ext == 'xls':
+                return mark_safe('<a href="{}"><i class="fi-page" style="color: #439243; font-size: 3rem;"></i></a>'.\
+                                 format(record.file.url))
+            else:
+                return mark_safe('<a href="{}"><i class="fi-page-filled" style="color: #ea1313; font-size: 3rem;"></i></a>'.\
+                                 format(record.file.url))
+    
+    class Meta:
+        model = UploadedContact
+        fields = ('name','file','import_status','upload_date')
         
