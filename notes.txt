@@ -1,1 +1,12 @@
 python manage.py loadtestdata core.KITUser:20 core.ContactGroup:10 core.PublicEvents:20 core.Events:30 core.Contact:10 core.CoUserGroup:20 auth.user:30
+
+
+            '''
+            file_n = str(uuid.uuid4())+fext
+            
+            with open(file_n,'wb') as infile:
+                for chunk in upfile.chunks():
+                    infile.write(chunk)
+                    
+            inf = open(file_n,'rb').read()  
+            '''
