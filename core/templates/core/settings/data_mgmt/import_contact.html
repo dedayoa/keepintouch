@@ -1,0 +1,173 @@
+{% extends "core/base_generic.html" %}
+{% load render_table from django_tables2 %}
+{% load crispy_forms_tags %}
+
+{% load staticfiles %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="row">
+	<h3>Import <small>Contacts</small></h3>
+	{{ block.super }}
+	<form action="{% url 'core:contact-upload-action' %}" method="POST" enctype="multipart/form-data" id="contactfile-upload-form">
+		{% csrf_token %}
+		<table>
+			<tr>
+				<td>{{import_form.name|as_crispy_field}}</td>
+				<td width="50%">{{import_form.file|as_crispy_field}}</td>
+				<td width="20%"><input type="submit" value="Upload" class="button" id="contactfile-upload-button" /></td>
+			</tr>
+			<tr>
+				<td colspan=3>
+					<strong>Instruction</strong>
+					<p>Files must be less than <span id="max-file-size">{{file_max_size}}</span>. Only .csv and .xls files are supported</p>			
+					Uploaded File must follow the order below <span style="font-style: italic;">(<strong>Note:</strong>
+					<i>firstname</i> and at least <i>email</i> or <i>phone</i> is compulsory)</span>.
+					<img class="float-center" src="{% static 'images/import-template.png' %}" alt="Sample Upload File Template" />
+					<p>You can download <a href="{% static 'others/contacts-test.xls' %}">this template</a> as a guide</p>				
+				</td>
+			</tr>
+		</table>
+	</form>
+	<h4>Import History</h4>
+	{% render_table table %}
+</div>
+<div class="large reveal" id="table-message-modal" data-reveal>
+	<h4>Detail</h4>
+	<span id="new-entries" class="none-display"><i><span></span></i> new entries will be created, </span>
+	<span id="update-entries" class="none-display"><i><span></span></i> entries will be updated, </span>
+	<span id="delete-entries" class="none-display"><i><span></span></i> entries will be deleted, </span>
+	<span id="skip-entries" class="none-display"><i><span></span></i> entries will be skipped, </span>
+	<span id="error-entries" class="none-display"><i><span></span></i> entries have errors, </span>
+	<p id="total-entries" class="none-display">In total, <strong><span style="font-size: 1.5em"></span> contacts will be processed</strong></p>    
+	<div class="table-scroll" style="width: 100%">
+		<table id="dry-run-import-table">
+			<thead>
+				<th>Salutation</th>
+	   			<th>first_name</th>
+	   			<th>last_name</th>
+	   			<th>Phone</th>
+	   			<th>Email</th>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+	<div>
+		<button class="button success" id="import-contact-button">Import</button>
+	</div>
+	<button class="close-button" data-close aria-label="Close modal" type="button">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+<div class="small reveal" id="import-success-modal" data-reveal>
+	<h3>Done!</h3>
+</div>
+{% endblock %}
+{% block foot_base_js %}
+	<script type="text/javascript" src="{% static "js/humanize.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/jquery.dynatable.js" %}"></script>
+	<script>
+		$(document).ready(function(){
+			
+			$.ajaxSetup({
+				crossDomain : false,
+				processData: false,
+				contentType: false,
+				cache: false
+			});
+			
+			i_disp = function insert_displayc(elem, vtext){
+				$(elem+" span").text(vtext);
+				$(elem).show();
+			};
+			
+			$("span#max-file-size").text(function(){return Humanize.fileSize($(this).text())});
+		});
+		
+
+		(function(){
+			var glcontent;
+			
+			try{
+				$("form").submit(function(e){
+					e.preventDefault();
+					var data = new FormData(this);					
+					url = $(this).attr("action");
+					
+					ajaxPost(url, data, function(content){
+						
+						glcontent = content;
+						
+						if (content.hasOwnProperty("errors")){
+		           			var errors = $.parseJSON(content.errors);	
+		           		
+		           			$.each(errors, function(index, value){
+		           				if (index === '__all__'){
+		           					$('div.nonfield-ajax-error').remove();
+		           					$("small.error").remove();
+		           					$("#sms-transfer-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+		           				}else{
+		           					$("small.error").remove();
+		           					//select field with error and apply text after it
+		           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+		           				}
+		           			});
+		           			
+		           			return;
+		           			
+		           		}else{
+		           			$('div.nonfield-ajax-error').remove();
+		           			$("small.error").remove();
+		           			
+		           		   $('#dry-run-import-table').dynatable({
+								dataset: {
+									records: JSON.parse(content.result.jsont)
+								},
+								features:{
+									paginate: false,
+									search: false,
+									recordCount: false,
+									perPageSelect: false
+		           		   		}
+							});
+		           		   for (status in content.result.opdet){
+		           			content.result.opdet[status] != 0 ? i_disp(("#"+status+"-entries"),content.result.opdet[status]):null
+		           		   }
+		           		   /*
+		           			(content.result.opdet['new'] != 0) ? i_disp("#new-entries", content.result.opdet['new']):null;
+							(content.result.opdet['update'] != 0) ? i_disp("#entries-updated", content.result.opdet['update']):null;
+							(content.result.opdet['delete'] != 0) ? i_disp("#deleted-entries", content.result.opdet['delete']):null;
+							(content.result.opdet['skip'] != 0) ? i_disp("#entries-skipped", content.result.opdet['skip']):null;
+							(content.result.opdet['error'] != 0) ? i_disp("#error-entries", content.result.opdet['error']):null;
+							(content.result.opdet['total'] != 0) ? i_disp("#success-entries", content.result.opdet['total']):null;
+							*/
+		       				$('#table-message-modal').foundation('open');
+		   				} 	
+					});
+				});
+			}catch(err){
+				console.log(err);
+			}
+			
+			$("#import-contact-button").click(function(){
+				
+				var payload = new FormData()
+				payload.append('namega',glcontent.result.namega);
+				payload.append('sook',glcontent.result.sook);
+				
+				
+				
+				ajaxPost('/data-mgmt/import_contact/import/',payload, function(content){
+					$('#import-success-modal').foundation('open');
+					//setTimeout(function(){ alert(content.reply); }, 1000);
+					setTimeout(function(){window.location.replace(window.location);}, 5000);						
+				})
+			})
+		})();
+		
+
+	</script>
+	{{block.super}}
+{% endblock %}
