@@ -9,7 +9,8 @@ from django.conf.urls import url, include
 
 
 from .views import *
-from .ajax import get_system_stats, get_qpc_stats, sms_credit_transfer, get_user_sms_balance
+from .ajax import get_system_stats, get_qpc_stats, sms_credit_transfer, get_user_sms_balance,\
+                    get_contact_file_upload, now_import_contacts
 
 
 urlpatterns = [
@@ -41,6 +42,12 @@ urlpatterns = [
                 url(r'^account/sms/$', SMSBalanceTransferView.as_view(), name='sms-account-mgmt'),
                 url(r'^account/sms/credit_transfer/$', sms_credit_transfer, name='sms-credit-transfer'),
                 url(r'^account/sms/get_user_balance/$', get_user_sms_balance),
+    ])),
+    #Data Management
+    url(r'^data-mgmt/', include([
+                url(r'import_contact/$', ContactImportView.as_view(), name='contact-import'),
+                url(r'import_contact/upload/$', get_contact_file_upload, name='contact-upload-action'),
+                url(r'import_contact/import/$', now_import_contacts, name='contact-import-action'),
     ])),
 
     #User Groups
