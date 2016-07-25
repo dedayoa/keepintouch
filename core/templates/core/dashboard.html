@@ -87,6 +87,7 @@
 
 {% block foot_base_js %}
 	{{ block.super }}
+	<script type="text/javascript" src="{% static "js/humanize.js" %}"></script>
 	<script src="{% static "js/masonry.pkgd.js" %}"></script>
 	<script>
 		
@@ -94,6 +95,10 @@
 		function sayserverdown(){
 			$('#server-error-modal').foundation('open');
 		}
+		$.ajaxSetup({
+			crossDomain : false,
+			async : true,
+		});
 		
 		function get_system_stat(){
 			try{
@@ -128,6 +133,7 @@
 					if (content.hasOwnProperty("result")){
 						$("#dsb-qmc p span").text(content.result.qmc);
 						$("#dsb-pmc p span").text(content.result.pmc);
+						$("#dsb-sms_balance p span").text(Humanize.compactInteger(content.result.total_sms_balance));
 					}
 				}, {onError: sayserverdown});				
 				setTimeout(get_qpc_stat, 60*1000);	
