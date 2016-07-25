@@ -48,8 +48,10 @@
 {% endblock %}
 {% block foot_base_js %}
 	{{ transfer_form.media.js }}
+	<script type="text/javascript" src="{% static "js/humanize.js" %}"></script>
 	<script>
 	$(document).ready(function(){
+		$("#total-balance").text(function(){return Humanize.formatNumber($(this).text())});
 		$('.sms-txn-butn').click(function(e){
    			e.preventDefault();
   			var payload = $("#sms-transfer-form").serializeArray();
@@ -78,7 +80,7 @@
            			$('div.nonfield-ajax-error').remove();
            			$("small.error").remove();
            			
-           			$("#total-balance").text(content.result.admin_sms_bal);
+           			$("#total-balance").text(Humanize.formatNumber(content.result.admin_sms_bal));
            			$("#user-balance").text(content.result.user_sms_bal);
    				}
 			});
