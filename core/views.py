@@ -11,13 +11,14 @@ from django.utils import timezone
 from django_tables2   import RequestConfig
 
 from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate,\
-                    SMTPSetting, ContactGroup, SMSTransfer
+                    SMTPSetting, ContactGroup, SMSTransfer, UploadedContact
 from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, ExistingUserForm,\
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
-                    UserGroupSettingForm, NewUserForm, ContactGroupForm, SMSTransferForm
+                    UserGroupSettingForm, NewUserForm, ContactGroupForm, SMSTransferForm,\
+                    ContactImportForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable,\
-                    SMSTransferHistoryTable
+                    SMSTransferHistoryTable, UploadedContactFileHistoryTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django_select2.views import AutoResponseView
 
@@ -31,6 +32,8 @@ from django.contrib.auth import logout
 from messaging.helper import SMTPHelper
 
 from sitegate.decorators import signin_view, redirect_signedin
+from django.conf import settings
+import mimetypes
 
 # Create your views here.
 
@@ -623,7 +626,7 @@ class ContactGroupCreateView(CreateView):
     
 class SMSBalanceTransferView(TemplateView):
     
-    template_name = "core/accounts/sms_transfer_and_log.html"
+    template_name = "core/settings/accounts/sms_transfer_and_log.html"
     params = {}
 
     
@@ -641,15 +644,33 @@ class SMSBalanceTransferView(TemplateView):
         
         return render(request, self.template_name, self.params)
     
-    def post(self, request, direction):
-        pass
-    
     
 class AccountManagementView(TemplateView):
     
-    template_name = 'core/accounts/accounts_landing.html'
+    template_name = 'core/settings/accounts/accounts_landing.html'
     params = {}
     
     def get(self, request):
         
         return render(request, self.template_name, self.params)
+    
+    
+class ContactImportView(TemplateView):
+    
+    template_name = 'core/settings/data_mgmt/import_contact.html'
+    params = {}
+    
+    def get(self, request):
+        import_form = ContactImportForm()
+        self.params['import_form'] = import_form
+        self.params['file_max_size'] = settings.MAX_UPLOAD_FILE_SIZE
+        self.params['allowed_extensions'] = (mimetypes.guess_extension(alwdt) for alwdt in settings.ALLOWED_CONTENT_TYPES)
+        
+                
+        uphistable = UploadedContactFileHistoryTable(UploadedContact.objects.filter(uploaded_by = request.user.kituser).order_by('-upload_date'))
+        RequestConfig(request, paginate={'per_page': 30}).configure(uphistable)
+        self.params["table"] = uphistable
+        
+        return render(request, self.template_name, self.params)
+
+            
