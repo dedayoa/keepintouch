@@ -29,7 +29,7 @@ from django.contrib.auth.models import User
 
 from django.utils import timezone
 from datetime import datetime
-
+from django.template.defaultfilters import filesizeformat
 
 
 class ContactForm(forms.ModelForm):
@@ -424,3 +424,31 @@ class SMSTransferForm(forms.Form):
         if cleaned_data.get("users") is None:
             raise forms.ValidationError("You must select a user")
 
+
+
+class ContactImportForm(forms.Form):
+    
+    name = forms.CharField(max_length=30)
+    file = forms.FileField()
+    
+    def __init__(self, *args, **kwargs):    
+        super(ContactImportForm, self).__init__(*args, **kwargs)        
+        self.helper = FormHelper()
+        
+        
+    def clean_file(self):
+        content = self.cleaned_data['file']
+        content_type = content.content_type#.split('/')[0]
+        print(content_type)
+        if content_type in settings.ALLOWED_CONTENT_TYPES:
+            if content._size > settings.MAX_UPLOAD_FILE_SIZE:
+                msg = 'Keep your file size under %s. actual size %s'\
+                        % (filesizeformat(settings.MAX_UPLOAD_FILE_SIZE), filesizeformat(content._size))
+                raise forms.ValidationError(msg)
+
+            if not (content.name.endswith('.csv') or content.name.endswith('.xlsx') or content.name.endswith('.xls')) :
+                msg = 'Your file has to be either .csv, .xls or .xlsx'
+                raise forms.ValidationError(msg)
+        else:
+            raise forms.ValidationError('File not supported')
+    
