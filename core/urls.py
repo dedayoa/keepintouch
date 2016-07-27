@@ -43,6 +43,8 @@ urlpatterns = [
                 url(r'^account/sms/credit_transfer/$', sms_credit_transfer, name='sms-credit-transfer'),
                 url(r'^account/sms/get_user_balance/$', get_user_sms_balance),
                 
+                #my profile
+                url(r'^user/me/$', KITUserPersonalProfileView.as_view(), name='kituser-personal-profile'),
     ])),
     #Data Management
     url(r'^data-mgmt/', include([
