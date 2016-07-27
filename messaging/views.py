@@ -57,6 +57,11 @@ class StandardMessageCreateView(CreateView):
     def get_success_url(self):
         return reverse('messaging:standard-message-draft', kwargs={'pk': self.object.pk})
     
+    def get_form_kwargs(self):
+        kwargs = super(StandardMessageCreateView, self).get_form_kwargs()
+        kwargs.update({'kituser': self.request.user.kituser})
+        return kwargs
+    
     
 class StandardMessageUpdateDraftView(UpdateView):
     
@@ -76,7 +81,11 @@ class StandardMessageUpdateDraftView(UpdateView):
     def get_object(self, queryset=None):
         return self.model.objects.get(pk=self.kwargs.get('pk',None),status="draft", created_by=self.request.user.kituser)
 
-    
+
+    def get_form_kwargs(self):
+        kwargs = super(StandardMessageUpdateDraftView, self).get_form_kwargs()
+        kwargs.update({'kituser': self.request.user.kituser})
+        return kwargs
     
 class AdvancedMessageCreateView(CreateView):
     
@@ -94,14 +103,17 @@ class AdvancedMessageCreateView(CreateView):
         self.params["title"] = _("Create Advanced Message")
         return self.params
     
+    ##??  You could set the field here or using get_form_kwargs  as above ??##
     def get_form(self, form_class=form_class):
         form = super(AdvancedMessageCreateView, self).get_form(form_class)
         form.fields["message_template"].queryset = self.request.user.kituser.get_templates()
+        form.fields['contact_group'].queryset = self.request.user.kituser.get_contact_groups()
         
         return form
     
     def get_success_url(self):
         return reverse('messaging:advanced-message-draft', kwargs={'pk': self.object.pk})
+
     
 
 class AdvancedMessageUpdateDraftView(UpdateView):
@@ -112,8 +124,7 @@ class AdvancedMessageUpdateDraftView(UpdateView):
     
     def get_form(self, form_class=form_class):
         form = super(AdvancedMessageUpdateDraftView, self).get_form(form_class)
-        form.fields["message_template"].queryset = self.request.user.kituser.get_templates()
-        
+        form.fields["message_template"].queryset = self.request.user.kituser.get_templates()        
         return form
         
     
