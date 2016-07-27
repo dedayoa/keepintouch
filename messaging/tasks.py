@@ -10,7 +10,7 @@ import django_rq
 from datetime import date
 from django.utils import timezone
 from core.models import MessageTemplate, Event, PublicEvent, Contact, SMTPSetting
-from .helper import SMTPHelper, SMSHelper
+from .helper import SMTPHelper, SMSHelper, ok_to_send
 from dateutil.relativedelta import relativedelta
 
 from .models import AdvancedMessaging, StandardMessaging, QueuedMessages, ProcessedMessages
@@ -56,22 +56,23 @@ def process_private_anniversary():
     # For each due private anniversary, prepare email and sms
     
     for peven in due_private_events:
-        if peven.message.send_email and peven.contact.email and peven.message.email_template:
-            etempl = _compose(peven.message.email_template, peven.contact) #compose title
-            rttempl = _compose(peven.message.title, peven.contact) #compose message
-            e_job = _send_email.delay([rttempl,etempl,peven.contact.email],\
-                                      peven.message.smtp_setting.values(),\
-                                      owner = peven.contact.kit_user
-                                      )
-            
-        if peven.message.send_sms and peven.contact.phone and peven.message.sms_template:
-            sms_msg = _compose(peven.message.sms_template, peven.contact)
-            sender = _compose(peven.message.sms_sender, peven.contact)
-            s_job = _send_sms.delay([sender,sms_msg,peven.contact.phone],\
-                                    owner = peven.contact.kit_user
-                                    )
+        if ok_to_send(peven.contact.kit_user):
+            if peven.message.send_email and peven.contact.email and peven.message.email_template:
+                etempl = _compose(peven.message.email_template, peven.contact) #compose title
+                rttempl = _compose(peven.message.title, peven.contact) #compose message
+                e_job = _send_email.delay([rttempl,etempl,peven.contact.email],\
+                                          peven.message.smtp_setting.values(),\
+                                          owner = peven.contact.kit_user
+                                          )
+                
+            if peven.message.send_sms and peven.contact.phone and peven.message.sms_template:
+                sms_msg = _compose(peven.message.sms_template, peven.contact)
+                sender = _compose(peven.message.sms_sender, peven.contact)
+                s_job = _send_sms.delay([sender,sms_msg,peven.contact.phone],\
+                                        owner = peven.contact.kit_user
+                                        )
 
-        peven.update(last_run=timezone.now().date()) 
+            peven.update(last_run=timezone.now().date()) 
     
     
 def process_public_anniversary():
@@ -80,20 +81,21 @@ def process_public_anniversary():
     # For each due private anniversary,
     for publicevent in due_public_events:
         for recipient_d in publicevent.get_recipients():
-            if publicevent.message.send_email and recipient_d.email and publicevent.message.email_template:
-                e_msg = _compose(publicevent.message.email_template, recipient_d)
-                e_title = _compose(publicevent.message.title, recipient_d)
-                _send_email.delay([e_title,e_msg,recipient_d.email],\
-                                  publicevent.message.smtp_setting.values(),\
-                                  owner = publicevent.kit_user
-                                  )
-                
-            if publicevent.message.send_sms and recipient_d.phone and publicevent.message.sms_template:
-                s_msg = _compose(publicevent.message.sms_template, recipient_d)
-                s_sender = _compose(publicevent.message.sms_sender, recipient_d)
-                _send_sms.delay([s_sender,s_msg,recipient_d.phone],\
-                                owner = publicevent.kit_user
-                                )
+            if ok_to_send(publicevent.kit_user):
+                if publicevent.message.send_email and recipient_d.email and publicevent.message.email_template:
+                    e_msg = _compose(publicevent.message.email_template, recipient_d)
+                    e_title = _compose(publicevent.message.title, recipient_d)
+                    _send_email.delay([e_title,e_msg,recipient_d.email],\
+                                      publicevent.message.smtp_setting.values(),\
+                                      owner = publicevent.kit_user
+                                      )
+                    
+                if publicevent.message.send_sms and recipient_d.phone and publicevent.message.sms_template:
+                    s_msg = _compose(publicevent.message.sms_template, recipient_d)
+                    s_sender = _compose(publicevent.message.sms_sender, recipient_d)
+                    _send_sms.delay([s_sender,s_msg,recipient_d.phone],\
+                                    owner = publicevent.kit_user
+                                    )
             
         publicevent.update(date = timezone.now().date()+relativedelta(years=1))
     
@@ -106,19 +108,20 @@ def process_onetime_event():
         smtp_setting_qsv = SMTPSetting.objects.get(pk = queued_message.message.smtp_setting_id).values()
         
         for recipient_d in recipients_qs:
-            if queued_message.message.send_email and recipient_d.email and queued_message.message.email_template:
-                e_msg = _compose(queued_message.message.email_template, recipient_d)
-                e_title = _compose(queued_message.message.title, recipient_d)
-                _send_email.delay([e_title, e_msg, recipient_d.email],\
-                                  smtp_setting_qsv, owner = queued_message.created_by
-                                  )
-                
-            if queued_message.message.send_sms and recipient_d.phone and queued_message.message.sms_template:
-                s_msg = _compose(queued_message.message.sms_template, recipient_d)
-                s_sender = _compose(queued_message.message.title, recipient_d)
-                _send_email.delay([s_sender, s_msg, recipient_d.phone],\
-                                  owner = queued_message.created_by
-                                  )                
+            if ok_to_send(queued_message.created_by):
+                if queued_message.message.send_email and recipient_d.email and queued_message.message.email_template:
+                    e_msg = _compose(queued_message.message.email_template, recipient_d)
+                    e_title = _compose(queued_message.message.title, recipient_d)
+                    _send_email.delay([e_title, e_msg, recipient_d.email],\
+                                      smtp_setting_qsv, owner = queued_message.created_by
+                                      )
+                    
+                if queued_message.message.send_sms and recipient_d.phone and queued_message.message.sms_template:
+                    s_msg = _compose(queued_message.message.sms_template, recipient_d)
+                    s_sender = _compose(queued_message.message.title, recipient_d)
+                    _send_email.delay([s_sender, s_msg, recipient_d.phone],\
+                                      owner = queued_message.created_by
+                                      )                
         
         # create entry in processed message
         ProcessedMessages.objects.create(
