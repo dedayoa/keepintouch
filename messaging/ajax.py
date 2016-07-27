@@ -49,7 +49,7 @@ def prepare_to_send_message(request):
         #get contacts
 
         if request.POST.get('message_type') == 'STANDARD':
-            myform = StandardMessagingForm(request.POST)  
+            myform = StandardMessagingForm(request.POST, kituser = request.user.kituser)  
             if not myform.is_valid():
                 return {'errors':myform.errors.as_json(escape_html=True)}
             else:
@@ -189,17 +189,21 @@ def send_message(request):
         
         # remove message from draft if it has been drafted
         if request.POST.get("message_type") == 'STANDARD':
-            #delete item from draft
-            if StandardMessaging.objects.filter(pk = request.POST.get('message_id')).exists():
-                created_time = (StandardMessaging.objects.values('created').get(pk = request.POST.get('message_id')))['created']
-                print("exists")
             
+            try:
+                #delete item from draft
+                if StandardMessaging.objects.filter(pk = request.POST.get('message_id')).exists():
+                    created_time = (StandardMessaging.objects.values('created').get(pk = request.POST.get('message_id')))['created']
+                    messageid = request.POST.get('message_id')
+            except ValueError: #messageid is empty
+                created_time = None
+                messageid = 0
             # send message to queue table
             QueuedMessages.objects.create(
                 message_type = request.POST.get("message_type"),
-                message_id = request.POST.get("message_id",0), #-1 means it was never saved to draft
+                message_id = messageid, #-1 means it was never saved to draft
                 message = {
-                    'message_id' : request.POST.get("message_id",0),
+                    'message_id' : messageid,
                     'title':myform.cleaned_data.get('title',''),
                     'email_template':myform.cleaned_data.get('email_message',''),
                     'sms_template':myform.cleaned_data.get('sms_message',''),
@@ -212,27 +216,31 @@ def send_message(request):
                                 'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None                                
                                 }
                            },
-                delivery_time = timezone.make_aware(myform.cleaned_data.get('delivery_time'),timezone.get_current_timezone()),
+                delivery_time = myform.cleaned_data.get('delivery_time'),
                 created_by = request.user.kituser
                 
             )
-            
             return {'result':'Success! Message Queued for Sending'}
             
         elif request.POST.get("message_type") == 'ADVANCED':
-
-            #delete item from draft
-            if AdvancedMessaging.objects.filter(pk = request.POST.get('message_id')).exists():
-                created_time = (AdvancedMessaging.objects.values('created').get(pk = request.POST.get('message_id')))['created']
+            
+            
+            try:
+                #delete item from draft
+                if AdvancedMessaging.objects.filter(pk = request.POST.get('message_id')).exists():
+                    created_time = (AdvancedMessaging.objects.values('created').get(pk = request.POST.get('message_id')))['created']
+                    messageid = request.POST.get('message_id')                    
+            except ValueError:
+                created_time = None
+                messageid = 0
                 
-                print(created_time)
             
             # send message to queue table
             QueuedMessages.objects.create(
                 message_type = request.POST.get("message_type"),
-                message_id = request.POST.get("message_id",0), #-1 means it was never saved to draft
+                message_id = messageid, #0 means it was never saved to draft
                 message = {
-                    'message_id' : request.POST.get("message_id",0),
+                    'message_id' : messageid,
                     'title': my_adv_form[2].title, #myform.cleaned_data.get('title',''),
                     'email_template': my_adv_form[2].email_template,
                     'sms_template': my_adv_form[2].sms_template,
