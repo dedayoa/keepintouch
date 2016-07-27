@@ -11,7 +11,7 @@ import os
 import django_tables2 as tables
 from django_tables2.utils import A
 from .models import Contact, MessageTemplate, Event, PublicEvent, ContactGroup, \
-                    KITUser, KITAdminAccount, SMTPSetting, CoUserGroup, SMSTransfer,\
+                    KITUser, SMTPSetting, CoUserGroup, SMSTransfer,\
                     UploadedContact
 from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
