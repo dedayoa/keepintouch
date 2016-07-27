@@ -34,6 +34,7 @@ from messaging.helper import SMTPHelper
 from sitegate.decorators import signin_view, redirect_signedin
 from django.conf import settings
 import mimetypes
+from gomez.models import KITBilling
 
 # Create your views here.
 
@@ -652,6 +653,9 @@ class AccountManagementView(TemplateView):
     
     def get(self, request):
         
+        self.params["sms_balance"] = request.user.kituser.sms_balance
+        self.params["billing_info"] = request.user.kituser.kitbilling
+        self.params["syssetid"] = request.user.kituser.kitsystem.id
         return render(request, self.template_name, self.params)
     
     
