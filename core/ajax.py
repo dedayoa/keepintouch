@@ -67,7 +67,6 @@ def sms_credit_transfer(request):
     
     
     if request.method == "POST":
-        print("Hello")
         result_dict = {}
         myform = SMSTransferForm(request.POST, crequest=request)
         if not myform.is_valid():
