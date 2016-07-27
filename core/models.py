@@ -130,7 +130,12 @@ class KITUser(models.Model):
             users_who_are_in_groups_i_belong_to = KITUser.objects.filter(groups_belongto__in=my_groups)
             contacts1 = Contact.objects.filter(kit_user__in=users_who_are_in_groups_i_belong_to)
             #Contact.objects.filter(kit_user__cousergroup)
-            contacts2 = Contact.objects.filter(kit_user__groups_belongto__kit_admin=self.parent).distinct()
+            
+            if self.parent.kitsystem.company_wide_contacts == True:
+            
+                contacts2 = Contact.objects.filter(kit_user__parent=self.parent).distinct()
+            else:
+                contacts2 = Contact.objects.filter(kit_user__groups_belongto__kit_admin=self.parent).distinct()
             #return {'contact1': contacts1, 'contact2':contacts2} #self.contact_set.all(cousergroup__kit_user=self.pk)
             return contacts2
             
@@ -145,14 +150,14 @@ class KITUser(models.Model):
             return Event.objects.filter(contact__kit_user__parent=self.pk)
         else:
             #get events of groups I belong to
-            return Event.objects.filter(contact__kit_user__groups_belongsto__kit_admin=self.parent)
+            return Event.objects.filter(contact__kit_user__groups_belongto__kit_admin=self.parent)
         
     def get_public_events(self):
         if self.is_admin:
             return PublicEvent.objects.filter(kit_user__parent=self.pk).order_by("date")
         else:
             #get events of groups I belong to. May chance this later
-            return PublicEvent.objects.filter(kit_user__groups_belongsto__kit_admin=self.parent).order_by("date")
+            return PublicEvent.objects.filter(kit_user__groups_belongto__kit_admin=self.parent).order_by("date")
         
     def get_templates(self):
         if self.is_admin:
@@ -238,16 +243,7 @@ class CoUserGroup(models.Model):
     '''    
     class Meta:
         verbose_name = 'User Group'
-        
 
-        
-
-class KITAdminAccount(models.Model):
-    kit_admin = models.OneToOneField(KITUser)
-    sms_balance = models.DecimalField(max_digits=12, decimal_places=4)
-    last_subscribed = models.DateTimeField()
-    is_multicompany = models.BooleanField()
-    subscription_expires = models.DateField()
     
 
 class SMTPSetting(models.Model):
