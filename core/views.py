@@ -583,9 +583,8 @@ class UserGroupUpdateView(UpdateView):
 def contactgroups(request):
     
     if request.method == "GET":
-        q_user = KITUser.objects.get(user=request.user)
     
-        congrpstable = ContactGroupsSettingsTable(q_user.contactgroup_set.all())
+        congrpstable = ContactGroupsSettingsTable(request.user.kituser.contactgroup_set.all())
         RequestConfig(request, paginate={'per_page': 25}).configure(congrpstable)
         params = {}
         params["title"] = "Contact Groups"
@@ -595,13 +594,19 @@ def contactgroups(request):
 class ContactGroupUpdateView(UpdateView):
     
     model = ContactGroup
-    form_class = ContactGroupForm
     template_name = 'core/contacts/groups/contactgroup_detail.html'
+    form_class = ContactGroupForm
     
     def get_context_data(self, **kwargs):
         params = super(ContactGroupUpdateView, self).get_context_data(**kwargs)
         params["contactgroupid"] = self.object.pk
         return params
+    
+    
+    def get_form_kwargs(self):
+        kwargs = super(ContactGroupUpdateView, self).get_form_kwargs()
+        kwargs.update({'kituser': self.request.user.kituser})
+        return kwargs
 
 
 class ContactGroupDeleteView(DeleteView):
@@ -620,9 +625,15 @@ class ContactGroupCreateView(CreateView):
     form_class = ContactGroupForm
     template_name = 'core/contacts/groups/new_contactgroup.html'
     
+    
     def form_valid(self, form):
         form.instance.kit_user = self.request.user.kituser
         return super(ContactGroupCreateView, self).form_valid(form)
+    
+    def get_form_kwargs(self):
+        kwargs = super(ContactGroupCreateView, self).get_form_kwargs()
+        kwargs.update({'kituser': self.request.user.kituser})
+        return kwargs
     
     
 class SMSBalanceTransferView(TemplateView):
