@@ -27,8 +27,12 @@ from datetime import datetime
 class StandardMessagingForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
+        
+        self.kuser = kwargs.pop('kituser') or None
+        
         super(StandardMessagingForm, self).__init__(*args, **kwargs)
         
+        self.fields['recipients'].queryset = self.kuser.get_contacts()
         #self.fields['cou_group'].label = "Group Availability"
         
         self.helper = FormHelper()
@@ -101,6 +105,9 @@ class StandardMessagingForm(forms.ModelForm):
         
         if send_email and not bool(cleaned_data.get('email_message')):
             raise forms.ValidationError("Send Email checked, you must create an Email template")
+
+        if send_email and not cleaned_data.get('smtp_setting', False):
+            raise forms.ValidationError("Send Email checked, you must select an SMTP server")
         
         if send_email and not bool(cleaned_data.get('title')):
             raise forms.ValidationError("Send Email checked, email should have a Title/Subject")
