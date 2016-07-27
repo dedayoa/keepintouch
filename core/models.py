@@ -138,6 +138,12 @@ class KITUser(models.Model):
                 contacts2 = Contact.objects.filter(kit_user__groups_belongto__kit_admin=self.parent).distinct()
             #return {'contact1': contacts1, 'contact2':contacts2} #self.contact_set.all(cousergroup__kit_user=self.pk)
             return contacts2
+        
+    def get_contact_groups(self):
+        if self.is_admin:
+            return ContactGroup.objects.filter(kit_user___parent=self.pk)
+        else:
+            return ContactGroup.objects.filter(kit_user=self.pk)
             
             
     def get_private_events(self):
