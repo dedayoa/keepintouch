@@ -7,6 +7,7 @@ import sys
 import requests
 
 from django.utils.http import urlencode
+from django.utils import timezone
 
 from django.core import mail
 from django.core.mail import send_mail, EmailMessage
@@ -14,6 +15,7 @@ from django.core.mail.backends.smtp import EmailBackend
 
 from django.core.validators import validate_email
 from .models import SMSReport, EmailReport
+from core.models import KITUser
 
 
 
@@ -220,4 +222,44 @@ class SMSLive247Helper():
             return r
         except:
             pass
+    
+
+
+def ok_to_send(owner):
+    #check user is active
+    #check parent subscription not expired
+    #check parent is active
+    #check i have enough credit balance
+    ## if company_wide_contacts, use admin balance for private and public
+    ## for one-shot always use users balance
+    cw = owner.parent.kitsystem.company_wide_contacts
+    if cw is True: #company wide contacts set
+        if owner.parent.user.is_active:
+            if owner.parent.kitbilling.next_due_date >= timezone.now().date():
+                if owner.parent.sms_balance >= 1: #parent has at least 1unit
+                    return True
+                else:
+                    print("Not Enough Balance")
+                    return False
+            else:
+                print("Parent Account Expired")
+                return False
+        else:
+            print("Parent Account inactive")
+            return False
+                
+    else:
+        if owner.user.is_active:
+            if owner.parent.kitbilling.next_due_date >= timezone.now().date():
+                if owner.sms_balance >= 1:
+                    return True
+                else:
+                    print("Not Enough Balance")
+                    return False
+            else:
+                print("Parent Account Expired")
+                return False
+        else:
+            print("User Account Inactive")
+            return False
     
