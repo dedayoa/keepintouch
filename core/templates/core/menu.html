@@ -50,7 +50,7 @@
 			<li><a href="{% url 'core:account-mgmt' %}"><i class="fi-shopping-cart"></i> Account</a></li>
 			<li><a href="{% url 'core:smtp-settings-list' %}"><i class="fi-mail"></i> SMTP</a></li>
 		{% endif %}
-			<li><a href="#"><i class="fi-sheriff-badge"></i>My Profile</a></li>
+			<li><a href="{% url 'core:kituser-personal-profile' %}"><i class="fi-sheriff-badge"></i>My Profile</a></li>
 			<li><a href="#"><i class="fi-guide-dog"></i>Support</a></li>
 		</ul>
 	</li>
