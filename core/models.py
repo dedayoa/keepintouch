@@ -141,7 +141,7 @@ class KITUser(models.Model):
         
     def get_contact_groups(self):
         if self.is_admin:
-            return ContactGroup.objects.filter(kit_user___parent=self.pk)
+            return ContactGroup.objects.filter(kit_user=self.pk)
         else:
             return ContactGroup.objects.filter(kit_user=self.pk)
             
@@ -156,14 +156,22 @@ class KITUser(models.Model):
             return Event.objects.filter(contact__kit_user__parent=self.pk)
         else:
             #get events of groups I belong to
-            return Event.objects.filter(contact__kit_user__groups_belongto__kit_admin=self.parent)
+            #if you are allowed to see all contacts in the organisation,
+            #then you can view the anniversaries of all of them
+            if self.parent.kitsystem.company_wide_contacts == True:
+                return Event.objects.filter(contact__kit_user__parent=self.parent).distinct()
+            else:
+                return Event.objects.filter(contact__kit_user__groups_belongto__kit_admin=self.parent).distinct()
         
     def get_public_events(self):
         if self.is_admin:
             return PublicEvent.objects.filter(kit_user__parent=self.pk).order_by("date")
         else:
             #get events of groups I belong to. May chance this later
-            return PublicEvent.objects.filter(kit_user__groups_belongto__kit_admin=self.parent).order_by("date")
+            if self.parent.kitsystem.company_wide_contacts == True:
+                return PublicEvent.objects.filter(kit_user__parent=self.parent).order_by("date")
+            else:
+                return PublicEvent.objects.filter(kit_user__groups_belongto__kit_admin=self.parent).order_by("date").distinct()
         
     def get_templates(self):
         if self.is_admin:
