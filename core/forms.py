@@ -384,8 +384,11 @@ class ContactGroupForm(forms.ModelForm):
     title = forms.CharField(label=_('Title'), widget=forms.TextInput(attrs={'required':''}), required=True)
 
     def __init__(self, *args, **kwargs):
+        self.kuser = kwargs.pop('kituser') or None
         
         super(ContactGroupForm, self).__init__(*args, **kwargs)
+        
+        self.fields['contacts'].queryset = self.kuser.get_contacts()
         
         self.helper = FormHelper()
         self.helper.form_action = '.'
