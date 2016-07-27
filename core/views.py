@@ -1,6 +1,8 @@
 import sys
 import datetime
 
+
+from django import forms
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import View, TemplateView
 from django.http.response import HttpResponse, HttpResponseRedirect
@@ -15,11 +17,12 @@ from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTe
 from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, ExistingUserForm,\
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
                     UserGroupSettingForm, NewUserForm, ContactGroupForm, SMSTransferForm,\
-                    ContactImportForm
+                    ContactImportForm, PersonalProfileForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable,\
                     SMSTransferHistoryTable, UploadedContactFileHistoryTable
-from django.views.generic.edit import UpdateView, DeleteView, CreateView
+from django.views.generic.edit import UpdateView, DeleteView, CreateView,\
+    FormMixin
 from django_select2.views import AutoResponseView
 
 from django.core import mail
@@ -299,6 +302,11 @@ class PublicEventCreateView(CreateView):
         form.instance.kit_user = self.request.user.kituser
 
         return super(PublicEventCreateView, self).form_valid(form)
+    
+    def get_form(self, form_class=form_class):
+        form = super(PublicEventCreateView, self).get_form(form_class)
+        form.fields["recipients"].queryset = self.request.user.kituser.get_contacts()       
+        return form
 
    
 class PublicEventUpdateView(UpdateView):
@@ -318,6 +326,14 @@ class PublicEventUpdateView(UpdateView):
         params = super(PublicEventUpdateView, self).get_context_data(**kwargs)
         params["publiceventid"] = self.object.pk
         return params
+    
+    
+    def get_form(self, form_class=form_class):
+        form = super(PublicEventUpdateView, self).get_form(form_class)
+        form.fields["recipients"].queryset = self.request.user.kituser.get_contacts()       
+        return form
+    
+    
     
 class PublicEventDeleteView(DeleteView):
     
@@ -484,7 +500,50 @@ class KITUserUpdateView(View):
             
         return HttpResponseRedirect(reverse('core:kituser-detail', args=[pk]))   
 
+class KITUserPersonalProfileView(View):
     
+    model_1 = User
+    model_2 = KITUser
+    template_name = 'core/settings/users/kituser_detail.html'
+    params = {}
+    
+    form_1 = PersonalProfileForm
+    form_2 = KITUserForm
+
+    
+    def get(self, request):
+        
+        
+        k_user = request.user.kituser
+        uzr = request.user
+        
+        self.params["title"] = "Edit User"
+        self.params["uzrname"] = uzr.username
+        self.params["last_login"] = uzr.last_login
+        self.params["date_joined"] = uzr.date_joined
+        self.params["form_1"] = self.form_1(instance=uzr, prefix="userform")
+        self.params["form_2"] = self.form_2(instance=k_user, prefix="kituform")
+        
+        return render(request, self.template_name, self.params)
+    
+    
+    def post(self, request):
+
+        k_user = request.user.kituser
+        uzr = k_user.user
+        
+        userform = self.form_1(request.POST, prefix="userform", instance=uzr)
+        kituform = self.form_2(request.POST, prefix="kituform", instance=k_user)
+        
+        if userform.is_valid() and kituform.is_valid():
+            
+            f1 = userform.save()
+            f2 = kituform.save(commit=False)
+            f2.user = f1
+            f2.save()
+                
+            
+        return HttpResponseRedirect(reverse('core:kituser-personal-profile'))    
     
 def smtp_settings(request):
     
@@ -584,7 +643,7 @@ def contactgroups(request):
     
     if request.method == "GET":
     
-        congrpstable = ContactGroupsSettingsTable(request.user.kituser.contactgroup_set.all())
+        congrpstable = ContactGroupsSettingsTable(request.user.kituser.get_contact_groups())
         RequestConfig(request, paginate={'per_page': 25}).configure(congrpstable)
         params = {}
         params["title"] = "Contact Groups"
