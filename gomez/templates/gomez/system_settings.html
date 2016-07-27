@@ -1,0 +1,17 @@
+{% extends "core/base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+
+{% block title %}{{title}}{% endblock %}
+{% block head_base_links %}
+	<link href="{% static "css/foundation-datepicker.css" %}" rel="stylesheet">
+	{{ form.media.css }}
+	{{ block.super }}
+{% endblock %}
+{% block content %}
+	<div class="row">
+	<h3>System <small>Settings</small></h3>		
+		{{ block.super }}
+		{% crispy form %}
+	</div>
+{% endblock %}
