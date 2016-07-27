@@ -28,7 +28,7 @@ from core.models import CoUserGroup
 from django.contrib.auth.models import User
 
 from django.utils import timezone
-from datetime import datetime
+import datetime
 from django.template.defaultfilters import filesizeformat
 
 
@@ -256,7 +256,7 @@ class MessageTemplateForm(forms.ModelForm):
         
         if send_at == None or send_at < timezone.now():
             #raise forms.ValidationError('Your Delivery Date Cannot be in the past')
-            cleaned_data["delivery_time"] = datetime.now()
+            cleaned_data["delivery_time"] = datetime.datetime.now()
 
         
         return cleaned_data  
@@ -292,7 +292,27 @@ class ExistingUserForm(forms.ModelForm):
         fields = ['username','email','first_name','last_name',\
                   'is_active'
                   ]  
+
+
+
+class PersonalProfileForm(forms.ModelForm):
+    
+    username = forms.CharField(disabled=True)
+    
+    def __init__(self, *args, **kwargs):
+        super(PersonalProfileForm, self).__init__(*args, **kwargs)
         
+        self.helper = FormHelper()
+        self.helper.form_action = '.'
+        self.helper.form_tag = False
+        #self.helper.add_input(Submit('submit', _('Save'), css_class="success float-right"))
+        #self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+    
+    class Meta:
+        model = User
+        fields = ['username','email','first_name','last_name',]
+
+
 class NewUserForm(forms.ModelForm):
     
     email = forms.EmailField(required=True)
