@@ -169,7 +169,6 @@ def dry_run_file(file, fext, kuserid):
             dataset = tablib.Dataset().load(open(file,'r').read())
         else:
             dataset = tablib.Dataset().load(open(file,'rb').read())
-        print(dataset.json)
         #check that headers 
         fhdr = ['salutation','first_name','last_name','phone','email']
         if dataset.headers is None:
@@ -179,7 +178,7 @@ def dry_run_file(file, fext, kuserid):
         else:
             clean_ds = _salutation_to_lower_case(dataset)
             
-            #clean_ds.append_col(lambda row: kuserid,'kit_user')
+            clean_ds.append_col(lambda row: kuserid,'kit_user')
             
             res_cr_dr = cr.import_data(clean_ds, dry_run=True)
             
@@ -187,7 +186,7 @@ def dry_run_file(file, fext, kuserid):
                 return 'err21' #error occured during dry run
             else:
                 #StateMaintainCache.objects.create(obj=read_file)
-                #del clean_ds['kit_user']
+                del clean_ds['kit_user']
                 return [clean_ds.json, res_cr_dr.totals]
             
     except:

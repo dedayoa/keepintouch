@@ -23,5 +23,5 @@ class ContactResource(resources.ModelResource):
         model = Contact
         skip_unchanged = True
         report_skipped = False
-        import_id_fields = ('email','phone')
+        import_id_fields = ('email','phone','kit_user')
         exclude = ('slug','last_modified', 'created','active')
