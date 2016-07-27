@@ -1,13 +1,34 @@
 {% extends "core/base_generic.html" %}
 
+{% load staticfiles %}
 {% block title %}{{title}}{% endblock %}
 
 {% block content %}
 	<div class="row">
 		<h3>Accounts <small></small></h3>
-		<div class="row column">
-			<a class="button" href="{% url 'core:sms-account-mgmt' %}">SMS Transfers & History</a>
+		<div class="row column">			
+			<a class="button" href="{% url 'gomez:system-settings' syssetid %}"><i class="fi-layout"></i> System</a>
 		</div>
-		
+		<fieldset>
+		<p><strong>SMS Balance:</strong> <span id="sms-balance">{{sms_balance}}</span> units</p>
+		<p><strong>Registered on:</strong> <span>{{billing_info.registered_on}}</span></p>
+		<p><strong>Next Due Date:</strong> <span>{{billing_info.next_due_date}}</span></p>
+		<p><strong>Plan:</strong> <span>{{billing_info.service_plan}}</span></p>
+		<p><strong>Billing Cycle:</strong> <span>{{billing_info.get_billing_cycle_display}}</span></p>
+		</fieldset>
+		<hr />
+		<h3>Billing <small></small></h3>
+		<div>
+			<a class="button" href="#">Invoice</a>		
+		</div>
 	</div>
+{% endblock %}
+{% block foot_base_js %}
+	<script type="text/javascript" src="{% static "js/humanize.js" %}"></script>
+	<script>
+	$(document).ready(function(){
+		$("#sms-balance").text(function(){return Humanize.formatNumber($(this).text())});
+	})
+	</script>
+	{{block.super}}
 {% endblock %}
