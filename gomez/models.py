@@ -72,7 +72,7 @@ class IssueFeedback(models.Model):
     detail = models.TextField(blank=False)
     screenshot = models.ImageField(upload_to="issue_feedback/", blank=True)
     
-    resolution_flag = models.BooleanField()
+    resolution_flag = models.BooleanField(default=False)
     
     submitter = models.ForeignKey(KITUser, on_delete=models.SET_NULL, null=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -95,7 +95,7 @@ def send_email_to_sender_and_dev_channel(sender, instance, **kwargs):
                     submitter_email = instance.submitter.user.email,
                     title = instance.title,
                     detail = instance.detail,
-                    attachment = getattr(instance,'screenshot.url',''),
+                    attachment = instance.screenshot.url if instance.screenshot.url else None,
                     submitter_kusr = instance.submitter
                                         )
             print(fullname)
