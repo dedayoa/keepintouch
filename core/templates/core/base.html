@@ -35,5 +35,28 @@
 		<script type="text/javascript" src="{% static "js/vendor/foundation.js" %}"></script>
 		<script type="text/javascript" src="{% static "js/main.js" %}"></script>
 	{% endblock %}
+	<div id="bug-report">
+		<div class="row column show-for-medium">
+			This Service is still in <a href="https://en.wikipedia.org/wiki/Software_release_life_cycle#BETA">Beta</a>.
+			Help make it better by reporting issues or improvements.
+			<a href="#" class="button success isfb-link" style="margin-top: 5px; margin-left: 1rem;">Report</a>		
+		</div>
+		<div class="show-for-small">
+			<a href="#" class="button success isfb-link" style="margin-top: 5px; margin-left: 2rem;">Report Issue/Feedback</a>
+		</div>
+	</div>
+	<div class="reveal" id="bug-report-modal" data-reveal>
+	  <h3>Issue/Feedback</h3>
+	  
+	  <button class="close-button" data-close aria-label="Close modal" type="button">
+	    <span aria-hidden="true">&times;</span>
+	  </button>
+	</div>
+	<script>
+		$("a.isfb-link").click(function(e){
+			var brm = new Foundation.Reveal($("#bug-report-modal"));
+			brm.open();
+		})		
+	</script>
 </body>
 </html>
