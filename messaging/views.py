@@ -187,7 +187,7 @@ def message_processed_status_view(request):
     
     if request.method == "GET":
         
-        queryset = ProcessedMessages.objects.filter(created_by=request.user.kituser)
+        queryset = request.user.kituser.get_processed_messages()#ProcessedMessages.objects.filter(created_by=request.user.kituser)
         f = ProcessedMessagesFilter(request.GET, \
                                     queryset=queryset)
         p_msgs_table = ProcessedMessagesTable(f.qs)
@@ -203,7 +203,7 @@ def message_queued_status_view(request):
     
     if request.method == "GET":
         
-        queryset = QueuedMessages.objects.filter(created_by=request.user.kituser)
+        queryset = request.user.kituser.get_queued_messages()#QueuedMessages.objects.filter(created_by=request.user.kituser)
         q_msgs_table = QueuedMessagesTable(queryset, order_by="delivery_time")
         RequestConfig(request, paginate={'per_page': 50}).configure(q_msgs_table)
         params = {}
