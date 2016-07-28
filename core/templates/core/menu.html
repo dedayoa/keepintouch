@@ -1,5 +1,7 @@
 <ul class="vertical menu kitapp-lsm" data-accordion-menu>
-	<li><a href="{% url 'core:dashboard-view' %}"><i class="fi-home"></i> Dashboard</a></li>
+	{% if request.user.kituser.is_admin %}
+		<li><a href="{% url 'core:dashboard-view' %}"><i class="fi-home"></i> Dashboard</a></li>
+	{% endif %}
 	<li>
 		<a href="#"><i class="fi-address-book"></i> Contact</a>
 		<ul class="menu vertical nested is-active">
