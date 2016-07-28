@@ -118,7 +118,7 @@
 					}
 				}, {onError: sayserverdown});
 				
-				setTimeout(get_system_stat, 5000);
+				setTimeout(get_system_stat, 60*1000);
 			}
 			catch(err){
 				return;
@@ -136,7 +136,7 @@
 						$("#dsb-sms_balance p span").text(Humanize.compactInteger(content.result.total_sms_balance));
 					}
 				}, {onError: sayserverdown});				
-				setTimeout(get_qpc_stat, 60*1000);	
+				setTimeout(get_qpc_stat, 240*1000);	
 			}
 			catch(err){
 				return;
