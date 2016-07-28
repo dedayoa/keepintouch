@@ -161,8 +161,8 @@ def process_system_notification(**kwargs):
     <strong>Detail</strong>:
     <p>{{detail}}</p>
     
-    Screenshot can be found here {{screenshot_link}}
-    Over & Out...
+    Attachment can be found here <a href="{{screenshot_link}}">{{screenshot_link}}</a>
+    <p>Over & Out...</p>
     '''
     
     t = Template(template_to_user)
@@ -179,7 +179,7 @@ def process_system_notification(**kwargs):
                             'email': kwargs.get('submitter_email',''),
                             'title': kwargs.get('title',''),
                             'detail': kwargs.get('detail',''),
-                            'screenshot_link': kwargs.get('screenshot_link',''),
+                            'screenshot_link': kwargs.get('attachment',''),
                                  }    
                                         )
                                 )
