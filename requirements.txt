@@ -35,6 +35,7 @@ Django-Select2==5.8.5
 django-sitegate==0.10.3
 django-smsish==1.3.2
 django-smtp-ssl==1.0
+django-stronghold==0.2.8
 django-tables2==1.2.1
 django-timezone-utils==0.10
 django-tinymce==2.3.0
