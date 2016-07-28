@@ -9,11 +9,6 @@ if ($('#id_all_contacts').prop('checked')){
 	$('#div_id_recipients').show()
 }
 
-
-
-
-
-
 	
 /*
  * 
