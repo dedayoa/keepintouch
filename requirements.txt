@@ -44,6 +44,7 @@ djangorestframework==3.3.3
 et-xmlfile==1.0.1
 factory-boy==2.7.0
 fake-factory==0.5.9
+gunicorn==19.6.0
 html2text==2016.5.29
 humanize==0.5.1
 idna==2.1
