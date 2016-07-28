@@ -1,4 +1,19 @@
 
+div#bug-report{
+	height: 50px; 
+    position: fixed; 
+    bottom:0%;
+    width:100%; 
+    background-color: #ff5700;
+    color: #fff; 
+    opacity: 1;
+}
+
+div.off-canvas-content{
+	margin-bottom: 50px;
+}
+
+
 i{
 	color: orangered;
 }
