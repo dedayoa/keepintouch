@@ -35,10 +35,10 @@ class IssueFeedback(forms.ModelForm):
         super(IssueFeedback, self).__init__(*args, **kwargs)
         
         self.helper = FormHelper()
-        self.helper.form_action = '.'
         self.helper.form_tag = True
-        self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
-        self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+        self.helper.form_id = 'issue-submit-form'
+        self.helper.add_input(Submit('submit', _('Submit'), css_id="issue-submit-button", css_class="success float-right"))
+        self.helper.add_input(Reset('form_reset', _('Reset'), css_class="float-right"))
     
     class Meta:
         model = IssueFeedback
