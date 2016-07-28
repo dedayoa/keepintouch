@@ -3,7 +3,4 @@
 help/*
 /media/
 /staticfiles/*
-gomez/migrations/*
-core/migrations/*
-messaging/migrations/*
 .env
