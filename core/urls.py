@@ -14,9 +14,9 @@ from .ajax import get_system_stats, get_qpc_stats, sms_credit_transfer, get_user
 
 
 urlpatterns = [
-    url(r'^$', Index.as_view(), name='index'),
+    #url(r'^$', Index.as_view(), name='index'),
     url(r'^exit/$', exitdoor , name='backdoor'),
-    url(r'^frontdoor/$', entrance, name='frontdoor'),
+    url(r'^$', entrance, name='frontdoor'),
     url(r'^dashboard/$', DashboardView.as_view(), name='dashboard-view'),
     url(r'^ping-stat/', include([
                 url(r'^system/$', get_system_stats, name='system-stat'),
