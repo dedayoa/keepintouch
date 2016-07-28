@@ -1,11 +1,14 @@
-from django.db import models
+from django.db import models, transaction
 
 # Create your models here.
 
 from core.models import KITUser
 from django.core.urlresolvers import reverse
-        
 
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+        
+from messaging.tasks import process_system_notification
 
     
     
@@ -62,3 +65,38 @@ class KITSystem(models.Model):
     
     def get_absolute_url(self):
         return reverse('gomez:system-settings',args=[self.pk])
+
+
+class IssueFeedback(models.Model):
+    title = models.CharField(max_length=150, blank=False)
+    detail = models.TextField(blank=False)
+    screenshot = models.ImageField(upload_to="issue_feedback/", blank=True)
+    
+    resolution_flag = models.BooleanField()
+    
+    submitter = models.ForeignKey(KITUser, on_delete=models.SET_NULL, null=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title
+    
+    
+    
+@receiver(post_save, sender=IssueFeedback)
+def send_email_to_sender_and_dev_channel(sender, instance, **kwargs):
+    if kwargs.get('created', False):
+        #send thankyou email to submitter
+        #send notification to dev channel
+        def on_commit():
+            fullname = "{} {}".format(instance.submitter.user.first_name,instance.submitter.user.last_name)
+            process_system_notification(
+                    fullname = fullname,
+                    submitter_email = instance.submitter.user.email,
+                    title = instance.title,
+                    detail = instance.detail,
+                    attachment = getattr(instance,'screenshot.url',''),
+                    submitter_kusr = instance.submitter
+                                        )
+            print(fullname)
+        transaction.on_commit(on_commit)    
