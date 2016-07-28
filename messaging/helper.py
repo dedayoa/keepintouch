@@ -25,8 +25,8 @@ def temp_log_to_db(m_type, **kwargs):
     
     if m_type == 'email':
         EmailReport.objects.create(
-            to_email = kwargs['email_msg'][3],
-            from_email = kwargs['email_msg'][2],
+            to_email = kwargs['email_msg'][2],
+            from_email = kwargs['sender_mail'],
             status = 0,
             owner = kwargs['owner'],
             email_message = {
@@ -119,7 +119,7 @@ class SMTPHelper():
                     'Test Email from IntouchNG',
                     'This is a test email to check your SMTP setup',
                     self.smtp_user,
-                    ['dayo@windom.biz','server-test@intouch.com.ng'],
+                    ['system-notification@intouchng.com'],
                     connection=smtp_connection,
                 ).send()
                                 
@@ -137,8 +137,8 @@ class SMTPHelper():
                 msg = EmailMessage(
                     subject = email_message[0], #title
                     body = email_message[1], #body
-                    from_email = self.from_sender,
-                    to = email_message[2], #recipient
+                    from_email = "{} <{}>".format(self.from_sender, self.smtp_user),
+                    to = [email_message[2]], #recipient
                     connection=smtp_connection,
                     #headers={'Message-ID': 'foo'},
                 )
@@ -147,14 +147,16 @@ class SMTPHelper():
                 
                 temp_log_to_db(
                     'email',
-                    [email_message[0],email_message[1],email_message[2], email_message[3]],
+                    email_msg = email_message,
+                    sender_mail = "{} <{}>".format(self.from_sender, self.smtp_user),
                     owner = kwargs['owner']
                 )
         except Exception:
             temp_log_to_db(
                 'email',
-                [email_message[0],email_message[1],email_message[2], email_message[3]],
+                email_msg = email_message,
                 gw_err_preamble = str(sys.exc_info()),
+                sender_mail = "{} <{}>".format(self.from_sender, self.smtp_user),
                 owner = kwargs['owner']
             )
             return(sys.exc_info())
