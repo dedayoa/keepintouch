@@ -8,8 +8,11 @@ from django.template import Context, Template
 import logging
 import django_rq
 from datetime import date
+
 from django.utils import timezone
-from core.models import MessageTemplate, Event, PublicEvent, Contact, SMTPSetting
+from django.conf import settings
+from core.models import MessageTemplate, Event, PublicEvent, Contact, SMTPSetting,\
+    KITUser
 from .helper import SMTPHelper, SMSHelper, ok_to_send
 from dateutil.relativedelta import relativedelta
 
@@ -30,6 +33,7 @@ def _compose(template, convars):
 @django_rq.job('email')
 def _send_email(email_message, smtp_profile, **kwargs):
     es = SMTPHelper(smtp_profile)
+    print(es)
     es.send_email(email_message, **kwargs)
 
 @django_rq.job('email')
@@ -131,3 +135,64 @@ def process_onetime_event():
         )
         # delete queued message from queuedmessage table
         queued_message.delete()
+        
+        
+def process_system_notification(**kwargs):
+    
+    template_to_user = '''
+    Dear {{fullname}},
+    <p>Thank you for the feedback. <strong>We really appreciate it</strong>.</p>
+    <p>This is to acknowledge receipt of your message.</p>
+    <p>We will look into the issue immediately and revert</p>
+    
+    <p>Need Immediate Support, contact us via<br />
+    Phone: +2348028443225<br />
+    Email: support@intouchng.com<br /></p>
+    
+    Regards<br />
+    In.Touch Support<br />
+    
+    '''
+    template_to_dev_chan = '''
+    Dear Support
+    <p>You have received a new submission from {{fullname}}<{{email}}>.</p>
+    See Detail Below:
+    <p><strong>Title</strong>: {{title}}</p>
+    <strong>Detail</strong>:
+    <p>{{detail}}</p>
+    
+    Screenshot can be found here {{screenshot_link}}
+    Over & Out...
+    '''
+    
+    t = Template(template_to_user)
+    email_to_user = t.render(Context(
+                                {
+                            'fullname':kwargs.get('fullname',''),
+                                 }
+                                     )
+                             )
+    u = Template(template_to_dev_chan)
+    email_to_support = u.render(Context(
+                                {
+                            'fullname': kwargs.get('fullname',''),
+                            'email': kwargs.get('submitter_email',''),
+                            'title': kwargs.get('title',''),
+                            'detail': kwargs.get('detail',''),
+                            'screenshot_link': kwargs.get('screenshot_link',''),
+                                 }    
+                                        )
+                                )
+    
+    smtp_settings = SMTPSetting(**settings.SUPPORT_EMAIL)
+    
+    _send_email.delay(['Feedback Received!', email_to_user, kwargs.get('submitter_email','')],
+                      smtp_settings,
+                       owner = kwargs.get('submitter_kusr',''), #current admin
+                      )
+    
+    _send_email.delay(['Bug Feedback from website!', email_to_support, 'bugs@intouchng.com'],
+                      smtp_settings,
+                      owner = KITUser.objects.get(pk=33) #current admin
+                      )
+    
