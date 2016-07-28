@@ -39,17 +39,18 @@ from django.conf import settings
 import mimetypes
 from gomez.models import KITBilling
 
-# Create your views here.
+from stronghold.decorators import public
 
+# Create your views here.
 @signin_view(template='core/sitegate-myfoundation.html', redirect_to='core:dashboard-view')
 @redirect_signedin('core:dashboard-view')
 def entrance(request):
-    return render(request, 'core/access.html', {'title': 'Sign in & Sign up'})
+    return render(request, 'core/access.html', {'title': 'Welcome'})
 
 
 def exitdoor(request):
     logout(request)
-    return HttpResponseRedirect('/frontdoor/')
+    return HttpResponseRedirect('/')
 
 
 class Index(View):
@@ -73,19 +74,24 @@ class DashboardView(TemplateView):
     
     def get(self,request):
         
-        now = timezone.now()
-        svn_days_ago = now - datetime.timedelta(days=7)
-        tty_days_ago = now - datetime.timedelta(days=30)
+        if request.user.kituser.is_admin:
         
-        private_events = request.user.kituser.get_private_events().filter(date__range = (svn_days_ago, now))[:10]
-        public_events = request.user.kituser.get_public_events().filter(date__range = (tty_days_ago, now))[:10]
-        #
-        #
-        self.params["title"] = "Dashboard"
-        self.params["body_class"] = "dashboard"
-        self.params["priv_annv"] = private_events
-        self.params["publ_annv"] = public_events
-        return render(request,self.template_name, self.params)
+            now = timezone.now()
+            svn_days_ago = now - datetime.timedelta(days=7)
+            tty_days_ago = now - datetime.timedelta(days=30)
+            
+            private_events = request.user.kituser.get_private_events().filter(date__range = (svn_days_ago, now))[:10]
+            public_events = request.user.kituser.get_public_events().filter(date__range = (tty_days_ago, now))[:10]
+            #
+            #
+            self.params["title"] = "Dashboard"
+            self.params["body_class"] = "dashboard"
+            self.params["priv_annv"] = private_events
+            self.params["publ_annv"] = public_events
+            return render(request,self.template_name, self.params)
+        
+        else:
+            return HttpResponseRedirect(reverse('messaging:new-standard-message'))
 
 def contacts(request):
     
