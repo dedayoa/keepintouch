@@ -131,7 +131,7 @@ class ProcessedMessages(models.Model):
     processed_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return "{} Message {}".format(self.message_type,self.message_id)
+        return "{} by {}".format(self.message_type, self.created_by)
     
     def get_absolute_url(self):
         return None
