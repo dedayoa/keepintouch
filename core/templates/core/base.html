@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load crispy_forms_tags %}
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 <head>
@@ -45,18 +46,78 @@
 			<a href="#" class="button success isfb-link" style="margin-top: 5px; margin-left: 2rem;">Report Issue/Feedback</a>
 		</div>
 	</div>
-	<div class="reveal" id="bug-report-modal" data-reveal>
+	<div class="reveal tiny" id="bug-report-modal" data-reveal>
 	  <h3>Issue/Feedback</h3>
-	  
+	  {% crispy issueform %}
 	  <button class="close-button" data-close aria-label="Close modal" type="button">
 	    <span aria-hidden="true">&times;</span>
 	  </button>
 	</div>
+	<div class="reveal tiny" id="bug-report-thankyou" data-reveal>
+	  <h2 class="text-center">Thank You!</h2>
+	  <h3 class="text-center"><small>Feedback Received</small></h3>
+	  <button class="close-button" data-close aria-label="Close modal" type="button">
+	    <span aria-hidden="true">&times;</span>
+	  </button>
+	</div>
+	
 	<script>
-		$("a.isfb-link").click(function(e){
-			var brm = new Foundation.Reveal($("#bug-report-modal"));
-			brm.open();
-		})		
+		$(document).ready(function(){
+			$("a.isfb-link").click(function(e){
+				var brm = new Foundation.Reveal($("#bug-report-modal"));
+				brm.open();
+			})
+			
+			$.ajaxSetup({
+				crossDomain : false,
+				processData: false,
+				contentType: false,
+				cache: false
+			});
+			
+			$("#issue-submit-form").submit(function(e){
+				
+				
+				e.preventDefault();
+				
+				var payload = new FormData(this);	
+				ajaxPost('/settings/system/feedback/', payload, function(content){
+					
+					if (content.hasOwnProperty("errors")){
+	           			var errors = $.parseJSON(content.errors);	
+	           		
+	           			$.each(errors, function(index, value){
+	           				if (index === '__all__'){
+	           					$('div.nonfield-ajax-error').remove();
+	           					$("small.error").remove();
+	           					$("#sms-transfer-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+	           				}else{
+	           					$("small.error").remove();
+	           					//select field with error and apply text after it
+	           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+	           				}
+	           			});
+	           			
+	           		}else{
+	           			$('div.nonfield-ajax-error').remove();
+	           			$("small.error").remove();
+	           			
+	           			console.log(content.result);
+	           			
+	           			//document.getElementById("issue-submit-form").reset();
+	           			$("#issue-submit-form")[0].reset();
+	           			var brtu = new Foundation.Reveal($("#bug-report-thankyou"));
+	           			$("#bug-report-modal").foundation('close');
+	    				setTimeout(brtu.open(),1000);
+	    				
+	           		}
+				})
+				
+			})
+		});
+		
+		
+		
 	</script>
 </body>
 </html>
