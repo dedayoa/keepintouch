@@ -6,3 +6,4 @@ help/*
 gomez/migrations/*
 core/migrations/*
 messaging/migrations/*
+.env
