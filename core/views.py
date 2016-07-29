@@ -3,6 +3,7 @@ import datetime
 
 
 from django import forms
+from django.db import transaction
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import View, TemplateView
 from django.http.response import HttpResponse, HttpResponseRedirect
@@ -441,19 +442,24 @@ class UserCreateView(View):
         #k_user = get_object_or_404(KITUser, pk=pk,parent=request.user.kituser)
         #uzr = k_user.user
         
-        userform = self.form_1(request.POST or None, prefix="userform", instance=None)
-        kituform = self.form_2(request.POST or None, prefix="kituform", instance=None)
+        self.params["form_1"] = userform = self.form_1(request.POST or None, prefix="userform", instance=None)
+        self.params["form_2"] = kituform = self.form_2(request.POST or None, prefix="kituform", instance=None)
         
         if userform.is_valid() and kituform.is_valid():
             
-            f1 = userform.save()
-            f2 = kituform.save(commit=False)
-            f2.user = f1
-            f2.parent= request.user.kituser
-            f2.save()
+            with transaction.atomic():
+                f1 = userform.save()
+                f2 = kituform.save(commit=False)
+                f2.user = f1
+                f2.parent= request.user.kituser
+                f2.save()
                 
-            
-        return HttpResponseRedirect(reverse('core:kituser-detail', args=[f2.pk]))      
+            return HttpResponseRedirect(reverse('core:kituser-detail', args=[f2.pk]))
+        
+        return render(request, self.template_name, self.params)       
+        #transaction.on_commit(
+        #    lambda :HttpResponseRedirect(reverse('core:kituser-detail', args=[f2.pk]))
+        #)      
 
     
     def get_success_url(self):
