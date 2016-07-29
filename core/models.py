@@ -228,6 +228,23 @@ def prevent_save_of_group_titled_default(sender, instance, *args, **kwargs):
     if (instance.title).lower() == 'default' :
         pass
 
+
+@receiver(post_save, sender=KITUser)
+def create_kituser_assoc_tables(sender, instance, **kwargs):
+    if kwargs.get('created', False):
+        def on_commit():
+            kitbilling = apps.get_model('gomez', 'KITBilling')
+            kitsystem = apps.get_model('gomez', 'KITSystem')
+            
+            kitbilling.objects.create(
+                    kit_admin=instance,
+                    next_due_date = timezone.now().date(),
+                    registered_on = timezone.now().date()
+                    )
+            kitsystem.objects.create(kit_admin=instance)
+            
+        transaction.on_commit(on_commit) 
+
           
 class CoUserGroup(models.Model):
     title = models.CharField(max_length=100, blank=False)
