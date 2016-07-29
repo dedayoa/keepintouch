@@ -39,7 +39,7 @@ class KITBilling(models.Model):
     kit_admin = models.OneToOneField(KITUser, limit_choices_to={'is_admin':True})
     next_due_date = models.DateField()
     registered_on = models.DateField()
-    service_plan = models.ForeignKey(KITServicePlan)
+    service_plan = models.ForeignKey(KITServicePlan, blank=True, null=True)
     billing_cycle = models.CharField(max_length=2, choices=BILL_CY, default='AN')
     account_status = models.CharField(max_length=2, choices=ACCT_STATUS, default='PE')
     
@@ -58,9 +58,13 @@ class KITSystem(models.Model):
     
     kit_admin = models.OneToOneField(KITUser, limit_choices_to={'is_admin':True}, null=True)
     company_wide_contacts = models.BooleanField(verbose_name="Organisation-wide Contacts",\
-                                                help_text="Check if you want all users to see contacts from all groups")
+                                                help_text="Check if you want all users to see contacts from all groups",\
+                                                default=True)
     
     last_modified = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return "{} {}".format(self.kit_admin.user.first_name,self.kit_admin.user.last_name)
     
     
     def get_absolute_url(self):
