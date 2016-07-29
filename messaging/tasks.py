@@ -193,6 +193,6 @@ def process_system_notification(**kwargs):
     
     _send_email.delay(['Bug Feedback from website!', email_to_support, 'bugs@intouchng.com'],
                       smtp_settings,
-                      owner = KITUser.objects.get(pk=33) #current admin
+                      owner = KITUser.objects.get(pk=settings.DEVS_KITUSER_ID) #current admin
                       )
     
