@@ -336,7 +336,7 @@ class KITUserForm(forms.ModelForm):
     dob = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS,\
                            widget=forms.DateInput(attrs={'class':'dob-form-date'}))
     
-    sms_balance = forms.IntegerField(disabled=True, label="SMS Balance")
+    sms_balance = forms.IntegerField(disabled=True, required=False, label="SMS Balance")
     
     def __init__(self, *args, **kwargs):
         super(KITUserForm, self).__init__(*args, **kwargs)
