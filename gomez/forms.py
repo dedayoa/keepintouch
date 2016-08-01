@@ -29,10 +29,10 @@ class SystemSettingsForm(forms.ModelForm):
         fields = ['company_wide_contacts']  
         
         
-class IssueFeedback(forms.ModelForm):
+class IssueFeedbackForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
-        super(IssueFeedback, self).__init__(*args, **kwargs)
+        super(IssueFeedbackForm, self).__init__(*args, **kwargs)
         
         self.helper = FormHelper()
         self.helper.form_tag = True
