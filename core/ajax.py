@@ -131,7 +131,7 @@ def sms_credit_transfer(request):
                         )
                     
                 result_dict['user_sms_bal'] = user.sms_balance
-                result_dict ['admin_sms_bal'] = admin.sms_balance
+                result_dict['admin_sms_bal'] = admin.sms_balance
                 
             except IntegrityError:
                 print("Integrity Error Occured")

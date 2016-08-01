@@ -71,13 +71,6 @@
 	<script>
 		$(document).ready(function(){
 			
-			$.ajaxSetup({
-				crossDomain : false,
-				processData: false,
-				contentType: false,
-				cache: false
-			});
-			
 			i_disp = function insert_displayc(elem, vtext){
 				$(elem+" span").text(vtext);
 				$(elem).show();
@@ -145,7 +138,7 @@
 							*/
 		       				$('#table-message-modal').foundation('open');
 		   				} 	
-					});
+					},{"processData":false,"contentType":false,"cache":false});
 				});
 			}catch(err){
 				console.log(err);

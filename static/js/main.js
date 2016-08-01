@@ -9,200 +9,51 @@ if ($('#id_all_contacts').prop('checked')){
 	$('#div_id_recipients').show()
 }
 
+$(document).ready(function(){
+	$("a.isfb-link").click(function(e){
+		var brm = new Foundation.Reveal($("#bug-report-modal"));
+		brm.open();
+	})
 	
-/*
- * 
- $("#id_all_contacts").change( function(){
-	  if ($('#div_id_recipients').is(':visible'))
-	  {
-		  $('#div_id_recipients').hide()
-	  }else{
-		  $('#div_id_recipients').show()
-	  }
-	  
-	});
-
-$('input.test-smtp-button').on('click', function(event){
-		event.preventDefault();
-		console.log("Clicked")
+	$("form#issue-submit-form").submit(function(e){
+		
+		
+		e.preventDefault();
+		
+		var payload = new FormData(this);	
+		ajaxPost('/settings/system/feedback/', payload, function(content){
+			
+			if (content.hasOwnProperty("errors")){
+       			var errors = $.parseJSON(content.errors);	
+       		
+       			$.each(errors, function(index, value){
+       				if (index === '__all__'){
+       					$('div.nonfield-ajax-error').remove();
+       					$("small.error").remove();
+       					$("#sms-transfer-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+       				}else{
+       					$("small.error").remove();
+       					//select field with error and apply text after it
+       					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+       				}
+       			});
+       			
+       			return;
+       			
+       		}else{
+       			$('div.nonfield-ajax-error').remove();
+       			$("small.error").remove();
+       			
+       			console.log(content.result);
+       			
+       			//document.getElementById("issue-submit-form").reset();
+       			$("#issue-submit-form")[0].reset();
+       			var brtu = new Foundation.Reveal($("#bug-report-thankyou"));
+       			$("#bug-report-modal").foundation('close');
+				setTimeout(brtu.open(),1000);
+				
+       		}
+		}, {"processData":false,"contentType":false,"cache":false});
+		
+	})
 });
-
-
-//$('.django-select2').djangoSelect2();
-
-
-
-function DjangoFilebrowser(field_name, url, type, win) {
-
-	  var editor = win.tinyMCE.activeEditor,
-	      cmsURL = '/admin/filebrowser/browse/?pop=2';
-
-	  cmsURL += '&type=' + type;
-
-	  editor.windowManager.open({
-	    'title': 'Django FileBrowser',
-	    'url': cmsURL,
-	    'width': 900,
-	    'height': 450
-	  }, {
-	    'window': win,
-	    'input': field_name,
-	    'editor_id': editor.editorId
-	  });
-
-	  return false;
-	}
-
-/*
-'use strict';
-
-if ($ === undefined) $ = django.jQuery;
-
-function change_image_alignment(node, styles) {
-  if (node.nodeName === 'IMG') {
-    $(node).removeAttr('style');
-    if (styles) {
-      $(node).css('margin', '5px');
-      $(node).css(styles);
-    }
-  }
-}
-
-tinymce.init({
-  height: '350px',
-  selector: 'textarea.tinymce',
-  // language_url : '/static/tinymce_4/langs/ru.js',
-  theme: 'modern',
-  relative_urls: false,
-  convert_urls: false,
-  valid_elements: '*[*]',
-  content_css: [
-    '/static/tinymce_4/css/__tinymce_4.css?' + new Date().getTime()
-  ],
-
-  plugins: [
-    'advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker',
-    'searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking',
-    'save table contextmenu directionality emoticons template paste textcolor'
-  ],
-
-  plugin_preview_width : '730',
-  plugin_preview_height : '550',
-
-  menu : {
-    edit: {
-      title : 'Edit',
-      items : 'undo redo | cut copy paste pastetext | selectall'
-    },
-    insert : {
-      title : 'Insert',
-      items : 'link image media | template'
-    },
-    view: {
-      title : 'View'  ,
-      items : 'visualaid, visualblocks'
-    },
-    format: {
-      title : 'Format',
-      items : 'bold italic underline strikethrough superscript subscript | formats | removeformat'
-    },
-    table: {
-      title : 'Table' ,
-      items : 'inserttable tableprops deletetable | cell row column'
-    }
-  },
-
-  toolbar1: 'insertfile undo redo | styleselect removeformat | link image media template | code | preview | image_alignment',
-  toolbar2: 'fontsizeselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | forecolor backcolor',
-
-  setup: function(editor) {
-    editor.addButton('image_alignment', {
-      type: 'menubutton',
-      text: 'Image alignment',
-      icon: false,
-      menu: [
-        {
-          text: 'Not set', onclick: function() {
-            change_image_alignment(editor.selection.getNode(), false);
-          }
-        }, {
-          text: 'Left', onclick: function() {
-            change_image_alignment(editor.selection.getNode(),
-              {'float': 'left'});
-          }
-        }, {
-          text: 'Right', onclick: function() {
-            change_image_alignment(editor.selection.getNode(),
-              {'float': 'right'});
-          }
-        }, {
-          text: 'Baseline', onclick: function() {
-            change_image_alignment(editor.selection.getNode(),
-              {'vertical-align': 'baseline'});
-          }
-        }, {
-          text: 'Top', onclick: function() {
-            change_image_alignment(editor.selection.getNode(),
-              {'vertical-align': 'top'});
-          }
-        }, {
-          text: 'Middle', onclick: function() {
-            change_image_alignment(editor.selection.getNode(),
-              {'vertical-align': 'middle'});
-          }
-        }, {
-          text: 'Bottom', onclick: function() {
-            change_image_alignment(editor.selection.getNode(),
-              {'vertical-align': 'bottom'});
-          }
-        }, {
-          text: 'Text Top', onclick: function() {
-            change_image_alignment(editor.selection.getNode(),
-              {'vertical-align': 'text-top'});
-          }
-        }, {
-          text: 'Text Bottom', onclick: function() {
-            change_image_alignment(editor.selection.getNode(),
-              {'vertical-align': 'text-bottom'});
-          }
-        }
-      ]
-    });
-  },
-
-  style_formats: [
-    { title: 'Headers', items: [
-      { title: 'Header 1', format: 'h1' },
-      { title: 'Header 2', format: 'h2' },
-      { title: 'Header 3', format: 'h3' },
-      { title: 'Header 4', format: 'h4' },
-      { title: 'Header 5', format: 'h5' },
-      { title: 'Header 6', format: 'h6' }
-    ]},
-    { title: 'Inline', items: [
-      { title: 'Bold', icon: 'bold', format: 'bold' },
-      { title: 'Italic', icon: 'italic', format: 'italic' },
-      { title: 'Underline', icon: 'underline', format: 'underline' },
-      { title: 'Strikethrough', icon: 'strikethrough', format: 'strikethrough' },
-      { title: 'Superscript', icon: 'superscript', format: 'superscript' },
-      { title: 'Subscript', icon: 'subscript', format: 'subscript' },
-      { title: 'Code', icon: 'code', format: 'code' }
-    ]},
-    { title: 'Blocks', items: [
-      { title: 'Paragraph', format: 'p' },
-      { title: 'Blockquote', format: 'blockquote' },
-      { title: 'Div', format: 'div' },
-      { title: 'Pre', format: 'pre' }
-    ]},
-    { title: 'Alignment', items: [
-      { title: 'Left', icon: 'alignleft', format: 'alignleft' },
-      { title: 'Center', icon: 'aligncenter', format: 'aligncenter' },
-      { title: 'Right', icon: 'alignright', format: 'alignright' },
-      { title: 'Justify', icon: 'alignjustify', format: 'alignjustify' }
-    ]}
-  ],
-  fontsize_formats: '8px 10px 12px 14px 16px 18px 20px 22px 24px 26px 28px 36px 48px 72px',
-
-  // Callbacks
-  file_browser_callback: DjangoFilebrowser
-}); */
