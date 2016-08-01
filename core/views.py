@@ -453,6 +453,9 @@ class UserCreateView(View):
                 f2.user = f1
                 f2.parent= request.user.kituser
                 f2.save()
+        
+        
+            
                 
             return HttpResponseRedirect(reverse('core:kituser-detail', args=[f2.pk]))
         
