@@ -78,11 +78,11 @@ class DashboardView(TemplateView):
         if request.user.kituser.is_admin:
         
             now = timezone.now()
-            svn_days_ago = now - datetime.timedelta(days=7)
-            tty_days_ago = now - datetime.timedelta(days=30)
+            svn_days_to_come = now + datetime.timedelta(days=7)
+            tty_days_to_come = now + datetime.timedelta(days=30)
             
-            private_events = request.user.kituser.get_private_events().filter(date__range = (svn_days_ago, now))[:10]
-            public_events = request.user.kituser.get_public_events().filter(date__range = (tty_days_ago, now))[:10]
+            private_events = request.user.kituser.get_private_events().filter(date__range = (now, svn_days_to_come))[:10]
+            public_events = request.user.kituser.get_public_events().filter(date__range = (now, tty_days_to_come))[:10]
             #
             #
             self.params["title"] = "Dashboard"
