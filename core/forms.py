@@ -42,7 +42,8 @@ class ContactForm(forms.ModelForm):
         super(ContactForm, self).__init__(*args, **kwargs)
         #had to move the above here from below and also pass self to formhelper to get the layout.append
         #to work
-        self.helper = FormHelper(self)        
+        self.fields['domain_id'].label = _("Domain ID")
+        self.helper = FormHelper(self)
         self.helper.attrs = {'data_abide': ''}
         #self.helper.form_method = 'post'
         self.helper.form_tag = False
@@ -84,7 +85,7 @@ class ContactForm(forms.ModelForm):
     
     class Meta:
         model = Contact
-        fields = ['salutation','first_name','last_name','email','phone','active']
+        fields = ['salutation','first_name','last_name','email','phone','domain_id','active']
         labels = {
             #'user_group': _('User Group'),
         }
@@ -125,6 +126,7 @@ class NewContactForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
         self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
         super(NewContactForm, self).__init__(*args, **kwargs)
+        self.fields['domain_id'].label = _("Domain ID")
     
     def clean(self):
         """
@@ -144,7 +146,7 @@ class NewContactForm(forms.ModelForm):
     
     class Meta:
         model = Contact
-        fields = ['salutation','first_name','last_name','email','phone','active']
+        fields = ['salutation','first_name','last_name','email','phone','domain_id','active']
         labels = {
             #'user_group': _('Group'),
         }
