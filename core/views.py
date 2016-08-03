@@ -746,7 +746,7 @@ class AccountManagementView(TemplateView):
     
 class ContactImportView(TemplateView):
     
-    template_name = 'core/settings/data_mgmt/import_contact.html'
+    template_name = 'gomez/data_mgmt/import_contact.html'
     params = {}
     
     def get(self, request):
