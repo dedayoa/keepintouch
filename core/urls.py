@@ -11,6 +11,7 @@ from django.conf.urls import url, include
 from .views import *
 from .ajax import get_system_stats, get_qpc_stats, sms_credit_transfer, get_user_sms_balance,\
                     get_contact_file_upload, now_import_contacts
+from gomez.views import CustomDataView
 
 
 urlpatterns = [
@@ -51,7 +52,7 @@ urlpatterns = [
                 url(r'import_contact/$', ContactImportView.as_view(), name='contact-import'),
                 url(r'import_contact/upload/$', get_contact_file_upload, name='contact-upload-action'),
                 url(r'import_contact/import/$', now_import_contacts, name='contact-import-action'),
-                url(r'custom-data/$', now_import_contacts, name='custom-data'),
+                url(r'custom_data/$', CustomDataView.as_view(), name='custom-data'),
                 url(r'export/$', now_import_contacts, name='export-data'),
     ])),
 
