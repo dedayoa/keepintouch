@@ -68,10 +68,23 @@ class AdvancedMessaging(models.Model):
     
     STATUS = Choices('draft', 'waiting', 'processed')
     
+        
+    REPEAT = (
+        ("norepeat","No Repeat"),
+        ("hourly","Hourly"),
+        ("daily","Daily"),
+        ("weekly","Weekly"),
+        ("monthly","Monthly"),
+        ("quarterly","Quarterly"),
+        ("annually","Annually"),
+              )
+    
     title = models.CharField(max_length=100, blank=False)
     message_template = models.ForeignKey(MessageTemplate, blank=False)
     contact_group = models.ManyToManyField(ContactGroup)
     delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
+    repeat_frequency = models.CharField(max_length=20, choices=REPEAT, default="norepeat")
+    next_event = models.DateTimeField()
        
     created_by = models.ForeignKey(KITUser, models.PROTECT)
     
