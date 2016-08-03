@@ -2,13 +2,15 @@ from django.db import models, transaction
 
 # Create your models here.
 
-from core.models import KITUser
+from core.models import KITUser, MessageTemplate, Contact
 from django.core.urlresolvers import reverse
 
 from django.dispatch import receiver
 from django.db.models.signals import post_save
         
 from messaging.tasks import process_system_notification
+from randomslugfield.fields import RandomSlugField
+from django.contrib.postgres.fields.jsonb import JSONField
 
     
     
@@ -103,4 +105,34 @@ def send_email_to_sender_and_dev_channel(sender, instance, **kwargs):
                     submitter_kusr = instance.submitter
                                         )
             print(fullname)
-        transaction.on_commit(on_commit)    
+        transaction.on_commit(on_commit)
+        
+        
+        
+class InCal(models.Model):
+    
+    OPTIONS = (
+        ('onetime','One Time'),
+        ('recurring','Recurring'),
+               )
+
+    
+    title = models.CharField(max_length=100)
+    message_template = models.ForeignKey(MessageTemplate)
+    start_date = models.DateTimeField()
+    next_date = models.DateTimeField(blank=True)
+    end_date = models.DateTimeField(blank=True)
+    
+    
+class CustomData(models.Model):
+    
+    namespace = RandomSlugField(length=5, exclude_upper=True, exclude_vowels=True, primary_key=True)
+    contact_id = models.ForeignKey(Contact, on_delete=models.CASCADE)
+    data = JSONField()
+    
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "{}, {}".format(self.namespace,self.contact_id)
+    
