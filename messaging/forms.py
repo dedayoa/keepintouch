@@ -159,7 +159,7 @@ class AdvancedMessagingForm(forms.ModelForm):
     
     class Meta:
         model = AdvancedMessaging
-        fields = ['title','message_template', 'contact_group', 'delivery_time']
+        fields = ['title','message_template', 'contact_group', 'delivery_time','repeat_frequency']
         widgets = {
             'contact_group': Select2MultipleWidget,
             'message_template' : Select2Widget
