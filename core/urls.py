@@ -51,6 +51,8 @@ urlpatterns = [
                 url(r'import_contact/$', ContactImportView.as_view(), name='contact-import'),
                 url(r'import_contact/upload/$', get_contact_file_upload, name='contact-upload-action'),
                 url(r'import_contact/import/$', now_import_contacts, name='contact-import-action'),
+                url(r'custom-data/$', now_import_contacts, name='custom-data'),
+                url(r'export/$', now_import_contacts, name='export-data'),
     ])),
 
 
