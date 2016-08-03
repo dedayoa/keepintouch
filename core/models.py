@@ -329,7 +329,7 @@ class Contact(models.Model):
     last_name = models.CharField(max_length=100, blank=True)
     email = models.EmailField(blank=True)
     phone = PhoneNumberField(blank=True)
-    domain_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
+    domain_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
     #uprofile = JSONField() 
     #slug = modelx.SlugField(max_length=100)
     active = models.BooleanField(default=True)
