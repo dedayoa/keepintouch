@@ -9,6 +9,23 @@ if ($('#id_all_contacts').prop('checked')){
 	$('#div_id_recipients').show()
 }
 
+jQuery.fn.highlight = function () {
+    $(this).each(function () {
+        var el = $(this);
+        $("<div/>")
+        .width(el.outerWidth())
+        .height(el.outerHeight())
+        .css({
+            "position": "absolute",
+            "left": el.offset().left,
+            "top": el.offset().top,
+            "background-color": "#ffff99",
+            "opacity": ".7",
+            "z-index": "9999999"
+        }).appendTo('body').fadeOut(2000).queue(function () { $(this).remove(); });
+    });
+}
+
 $(document).ready(function(){
 	$("a.isfb-link").click(function(e){
 		var brm = new Foundation.Reveal($("#bug-report-modal"));
@@ -53,7 +70,7 @@ $(document).ready(function(){
 				setTimeout(brtu.open(),1000);
 				
        		}
-		}, {"processData":false,"contentType":false,"cache":false});
+		}, {contentType:false,processData:false,cache:false});
 		
-	})
+	});
 });
