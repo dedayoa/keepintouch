@@ -1,0 +1,204 @@
+{% extends "core/base_generic.html" %}
+{% load render_table from django_tables2 %}
+{% load crispy_forms_tags %}
+
+{% load staticfiles %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="row">
+	<h3>Custom <small>Data</small></h3>
+	{{ block.super }}
+	<form action="{% url 'gomez:upload-custom-data' %}" method="POST" enctype="multipart/form-data" id="customdata-upload-form">
+		{% csrf_token %}
+		<div class="row columns">
+			<div class="column small-12 medium-3" id="unique-field-col-div">
+				{{ingest_form.unique_field|as_crispy_field}}
+			</div>
+			<div class="column small-8 medium-6">
+				{{ingest_form.file|as_crispy_field}}
+			</div>
+			<div class="column small-4 medium-3">
+				<div><input type="submit" value="Upload" class="button" id="customdata-upload-button" /></div>
+			</div>
+		</div>
+		<div style="background-color: #ebebeb; padding: 0.5em; margin: 1rem 0;">
+			<strong>Instruction</strong>
+			<p>File must be less than <span id="max-file-size">{{file_max_size}}</span>. Only .csv and .xls files are supported</p>
+		</div>
+	</form>
+	<hr />
+	<h4>Custom Data Store</h4>
+	{% render_table table %}
+</div>
+<div class="large reveal" id="custom-data-p-modal" data-reveal>
+	<h4 class="title"></h4>
+	<div id="cdpm-content"></div>
+	<button class="close-button" data-close aria-label="Close modal" type="button">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+<div class="small reveal" id="close-message-modal" data-reveal>
+	<h3></h3>
+	<button class="close-button" data-close aria-label="Close modal" type="button">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
+{% endblock %}
+{% block foot_base_js %}
+	<script type="text/javascript" src="{% static "js/humanize.js" %}"></script>
+	<script type="text/javascript" src="{% static "js/jquery.dynatable.js" %}"></script>
+	<script>
+	$(document).ready(function(){
+		$("span#max-file-size").text(function(){return Humanize.fileSize($(this).text())});
+		
+		$("form#customdata-upload-form").submit(function(e){
+			e.preventDefault();
+			
+			var data = new FormData(this);	
+			url = $(this).attr("action");
+			
+			ajaxPost(url, data, function(content){	
+				
+				if (content.hasOwnProperty("errors")){
+           			var errors = $.parseJSON(content.errors);	
+           		
+           			$.each(errors, function(index, value){
+           				if (index === '__all__'){
+           					$('div.nonfield-ajax-error').remove();
+           					$("small.error").remove();
+           					$("#sms-transfer-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+           				}else{
+           					$("small.error").remove();
+           					//select field with error and apply text after it
+           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+           				}
+           			});
+           			
+           			return;
+           			
+           		}else{
+           			$('div.nonfield-ajax-error').remove();
+           			$("small.error").remove();
+           			
+           			console.log(content.result);
+           			var table = '<form method="POST" id="header-sel-form"><input name="token" type="hidden" value="'+content.result.token+'" />';
+           			table += '<input name="unqf_idfr" type="hidden" value="'+content.result.unqf_idfr+'" /><div class="table-scroll" style="margin-bottom:1em;"><table id="cd-hdr-q-table"><thead><tr>';
+           			table += '<th style="color: #fff; background-color: #000; width:50px;"><span style="font-weight: normal;">Headers </span> <i class="fi-arrow-right"></i></th>'
+           			
+           			for (item in content.result.idata_headers){
+           				table+='<th>'+content.result.idata_headers[item]+
+           				'<div class="cd-hdr-ptr-div"><hr /><input class="radioselect float-center" id="id_identity_fld_'+item+'" name="identity_fld_ptr" type="radio" value="'+item+'"></div></th>';
+           			}
+           			
+           			table+='</tr></thead></table></div></form>';
+           			
+           			console.log(table)
+           			
+           			var text = '<p style="padding:1em;">Do the headers below represent the header of your table?</p>'+table;
+           			text+='<div id="cd-fq-butns"><button class="button" id="cd-hdr-q-yes">Yes</button><button class="button alert" id="cd-hdr-q-no">No</button></div>';
+           			
+           			
+           			$("div#custom-data-p-modal div#cdpm-content").html(text);
+           			
+           			$(".cd-hdr-ptr-div").hide();
+           			
+           			$('#custom-data-p-modal').foundation('open');
+           			
+	           		//action on click of no
+           			$("#cd-hdr-q-no").on('click', function(){
+           				$('#close-message-modal h3').html('<i class="fi-alert" style="color: red;"></i> Edit the file and add the Proper Headers');
+           				$('#close-message-modal').foundation('open');
+           			});
+           			
+           			//action on click of yes
+           			$("#cd-hdr-q-yes").on('click', function(){
+           				$("div#custom-data-p-modal div p").html('Check the column that contains the <strong>"identity"</strong> field').highlight();
+           				$(".cd-hdr-ptr-div").show(1000);
+           				$("#cd-hdr-q-no").remove();
+           				$(this).hide();
+           				$("#cd-fq-butns").append('<button class="button success" id="cd-hdr-q-proceed">Proceed</button>');
+           				
+           			});
+           			
+           			$(document).on('click', "#cd-hdr-q-proceed", function(e){
+						if($('input[name="identity_fld_ptr"]:checked').length > 0){
+							//send filename
+							//send selection
+							var sel_form = $("#header-sel-form").serialize();
+							console.log(sel_form);
+							ajaxPost('/data-mgmt/custom-data/process-a/',sel_form, function(content){
+								console.log(content.result);
+								$('#close-message-modal h3').html('<i class="fi-alert" style="color: green;"></i> Custom Data Imported with namespace, <code>'+content.result)+'</code>';
+		           				$('#close-message-modal').foundation('open');
+		           				setTimeout(function(){window.location.replace(window.location);}, 3000);
+							});
+							
+							e.stopImmediatePropagation();
+							//return false;
+							
+						}else{
+							alert('You must select the identity field');
+						}
+           			});
+           			
+           		}
+				
+			}, {"processData":false,"contentType":false,"cache":false});
+			
+		});
+		
+		$(".namespace_link").click(function(e){
+			e.preventDefault();
+			
+			var lhref = $(this).attr("href")
+			
+			ajaxGet(lhref, function(content){
+
+				var cdptable = '<div class="table-scroll"><table id="custom-data-preview"><thead>';
+				for (th in content.result.headers){
+					cdptable+='<th>'+content.result.headers[th]+'</th>';
+				}
+				cdptable += '</thead></table></div>';
+				cdptable += '<a href="'+lhref+'delete/" class="float-right button alert" id="cdata-delete">Delete</a>';
+				$("div#custom-data-p-modal div#cdpm-content").html(cdptable);
+
+				$('#custom-data-preview').dynatable({
+					table: {
+						defaultColumnIdStyle: 'underscore'
+					},
+					dataset: {
+						records: content.result.data_table
+					},
+					features:{
+						paginate: false,
+						search: true,
+						recordCount: true,
+						perPageSelect: false
+       		   		}
+				});
+				$('#custom-data-p-modal').foundation('open');
+				
+
+				$("#cdata-delete").click(function(e){
+					e.preventDefault();
+					alert("Are you sure you want to delete this custom data sheet?");
+					ajaxPost($(this).attr("href"),function(content){
+						console.log(content.result);
+						$('#close-message-modal h3').html('<i class="fi-alert" style="color: red;"></i> Deleted!');
+           				$('#close-message-modal').foundation('open');
+						setTimeout(function(){window.location.replace(window.location);}, 3000);
+					})
+				})
+			});
+		});
+		
+		
+		
+	});
+		
+
+	</script>
+	{{block.super}}
+{% endblock %}
