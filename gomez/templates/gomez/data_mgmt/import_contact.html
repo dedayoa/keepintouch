@@ -84,7 +84,7 @@
 			var glcontent;
 			
 			try{
-				$("form").submit(function(e){
+				$("form#contactfile-upload-form").submit(function(e){
 					e.preventDefault();
 					var data = new FormData(this);					
 					url = $(this).attr("action");
@@ -156,7 +156,7 @@
 					$('#import-success-modal').foundation('open');
 					//setTimeout(function(){ alert(content.reply); }, 1000);
 					setTimeout(function(){window.location.replace(window.location);}, 5000);						
-				})
+				},{"processData":false,"contentType":false,"cache":false});
 			})
 		})();
 		
