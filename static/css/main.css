@@ -243,3 +243,34 @@ body.dashboard .kitapp-content h3{
 #sms-transfer-form i{
 	color: #fff;
 }
+
+ul#id_unique_field{
+	margin:0;
+	list-style: none; 
+}
+
+ul#id_unique_field input{
+	margin: 0;
+}
+
+ul#id_unique_field input{
+	margin: 0;
+}
+
+@media screen and (max-width: 39.9375em) {
+	ul#id_unique_field li{
+		float: left;
+	}
+	ul#id_unique_field li:nth-child(2){
+		margin-left: 2em;
+	}
+}
+
+#unique-field-col-div{
+	padding: 1em;
+	background-color: bisque;
+}
+
+#customdata-upload-form div.column:nth-child(3) div{
+	margin-top: 1em;
+}
