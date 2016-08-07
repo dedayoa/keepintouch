@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse_lazy, reverse
 from django.contrib import messages as flash_messages
 from django.utils import timezone
 
-from django_tables2   import RequestConfig
+from django_tables2 import RequestConfig
 
 from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate,\
                     SMTPSetting, ContactGroup, SMSTransfer, UploadedContact
@@ -652,7 +652,16 @@ class UserGroupUpdateView(UpdateView):
         params["gptitle"] = self.object.title
         return params
     
+class UserGroupCreateView(CreateView):
     
+    model = CoUserGroup
+    form_class = UserGroupSettingForm
+    template_name = 'core/settings/user_groups/new_user_group.html'
+    
+    def form_valid(self, form):
+        form.instance.kit_admin = self.request.user.kituser
+
+        return super(UserGroupCreateView, self).form_valid(form)    
     
 def contactgroups(request):
     
