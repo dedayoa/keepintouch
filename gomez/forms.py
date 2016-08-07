@@ -43,3 +43,20 @@ class IssueFeedbackForm(forms.ModelForm):
     class Meta:
         model = IssueFeedback
         fields = ['title','detail','screenshot']
+        
+
+class CustomDataIngestForm(forms.Form):
+    
+    UFDS = (
+        ('coid',_("Contact ID")),
+        ('doid',_("Domain ID"))
+            )
+    
+    file = forms.FileField()
+    unique_field = forms.ChoiceField(choices=UFDS, initial="coid", widget=forms.RadioSelect, label=_("Identity Field"))
+    
+    def __init__(self, *args, **kwargs):
+        super(CustomDataIngestForm, self).__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+    
