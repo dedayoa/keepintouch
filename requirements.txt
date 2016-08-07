@@ -39,7 +39,7 @@ django-stronghold==0.2.8
 django-tables2==1.2.1
 django-timezone-utils==0.10
 django-tinymce==2.3.0
-djangoajax==2.3.6
+-e git://github.com/dedayoa/django-ajax#egg=djangoajax
 djangorestframework==3.3.3
 et-xmlfile==1.0.1
 factory-boy==2.7.0
