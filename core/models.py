@@ -329,7 +329,7 @@ class Contact(models.Model):
     last_name = models.CharField(max_length=100, blank=True)
     email = models.EmailField(blank=True)
     phone = PhoneNumberField(blank=True)
-    domain_id = models.CharField(max_length=255, null=True, blank=True, unique=True)
+    domain_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
     #uprofile = JSONField() 
     #slug = modelx.SlugField(max_length=100)
     active = models.BooleanField(default=True)
@@ -353,7 +353,27 @@ class Contact(models.Model):
         
     def all_cou_group(self):
         return ', '.join([x.title for x in self.cou_group.all()])
-
+    
+    def cdata(self, cud):
+        # con.cdata("dkkwb:our_food")
+        customdata = apps.get_model('gomez', 'CustomData')
+        g = cud.split(":")
+        try:
+            h = customdata.objects.get(pk=g[0])#self.customdata_set.get(pk = g[0])
+            if h.system_id_field == "coid":
+                result = h.data[self.pk][g[1]]
+            elif h.system_id_field == "doid":
+                result = h.data[self.domain_id][g[1]]
+            return result
+        except KeyError:
+            #log error
+            print("Seems you are using the wrong system Identity Field or it simply does not exist")
+    
+    #{% cdata 'x9v7a:account_id' %}
+    #{{ cdata:x9v7a.account_id }}
+    #{{ x9v7a:account_id }}
+    #{{x9v7a|cdata:account_id}}
+    # {{cdata("x9v7a:account_id")}}
 #post_save.connect(set_m2m_contact_usergroup, sender=Contact) 
 
     
