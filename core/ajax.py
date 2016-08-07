@@ -240,11 +240,12 @@ def wet_run_file(file, fext, kuserid):
         cr = ContactResource()
         #read_file = file.read()
         #read_dec_file = read_file.decode()
-        print(file)
         if (fext[1:]).lower() == 'csv':
-            dataset = tablib.Dataset().load(open(file,'r').read(), format="csv")
+            with open(file, 'r') as f:                
+                dataset = tablib.Dataset().load(f.read(), format="csv")
         else:
-            dataset = tablib.Dataset().load(open(file,'rb').read(), format="xls")
+            with open(file,'rb') as f:
+                dataset = tablib.Dataset().load(f.read(), format="xls")
         
         dataset.append_col(lambda row: kuserid,'kit_user')
         
