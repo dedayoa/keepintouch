@@ -126,13 +126,25 @@ class InCal(models.Model):
     
 class CustomData(models.Model):
     
+    IDFLD_TYPE = (
+        ('coid','Contact ID'),
+        ('doid','Domain ID')
+                  )
+    
     namespace = RandomSlugField(length=5, exclude_upper=True, exclude_vowels=True, primary_key=True)
-    contact_id = models.ForeignKey(Contact, on_delete=models.CASCADE)
+    system_id_field = models.CharField(max_length=4, choices=IDFLD_TYPE)
+    identity_column_name = models.CharField(max_length=255)
+    headers = JSONField()
     data = JSONField()
+    data_table = JSONField()
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(KITUser, on_delete=models.PROTECT)
     
     def __str__(self):
-        return "{}, {}".format(self.namespace,self.contact_id)
+        return "{}".format(self.namespace)
+
+    def get_absolute_url(self):
+        return reverse('gomez:custom-data-ajax',args=[self.pk])
     
