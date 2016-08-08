@@ -1,2 +1,2 @@
 web: gunicorn keepintouch.wsgi --log-file -
-worker: python manage.py rqworker sms email
+worker: python manage.py rqworker default sms email
