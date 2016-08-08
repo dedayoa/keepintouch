@@ -94,6 +94,11 @@ def send_email_to_sender_and_dev_channel(sender, instance, **kwargs):
     if kwargs.get('created', False):
         #send thankyou email to submitter
         #send notification to dev channel
+        try:
+            isu = instance.screenshot.url
+        except ValueError:
+            isu = None
+        
         def on_commit():
             fullname = "{} {}".format(instance.submitter.user.first_name,instance.submitter.user.last_name)
             process_system_notification(
@@ -101,10 +106,9 @@ def send_email_to_sender_and_dev_channel(sender, instance, **kwargs):
                     submitter_email = instance.submitter.user.email,
                     title = instance.title,
                     detail = instance.detail,
-                    attachment = instance.screenshot.url if instance.screenshot.url else None,
+                    attachment = isu,
                     submitter_kusr = instance.submitter
                                         )
-            print(fullname)
         transaction.on_commit(on_commit)
         
         
