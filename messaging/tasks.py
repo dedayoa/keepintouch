@@ -142,7 +142,6 @@ def process_system_notification(**kwargs):
     template_to_user = '''
     Dear {{fullname}},
     <p>Thank you for the feedback. <strong>We really appreciate it</strong>.</p>
-    <p>This is to acknowledge receipt of your message.</p>
     <p>We will look into the issue immediately and revert</p>
     
     <p>Need Immediate Support, contact us via<br />
