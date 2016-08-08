@@ -207,11 +207,11 @@ def send_message(request):
                     'title':myform.cleaned_data.get('title',''),
                     'email_template':myform.cleaned_data.get('email_message',''),
                     'sms_template':myform.cleaned_data.get('sms_message',''),
-                    'send_email' : myform.cleaned_data.get('send_email', True),
-                    'send_sms' : myform.cleaned_data.get('send_sms', True),
+                    'send_email' : myform.cleaned_data.get('send_email', False),
+                    'send_sms' : myform.cleaned_data.get('send_sms', False),
                     'sms_sender_id' : myform.cleaned_data.get('sms_sender',''),
                     'recipients' : request.POST.getlist('recipients',[]),
-                    'smtp_setting_id': myform.cleaned_data.get('smtp_setting').id,
+                    'smtp_setting_id': request.POST.get('smtp_setting',''),
                     'others' : {
                                 'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None                                
                                 }
