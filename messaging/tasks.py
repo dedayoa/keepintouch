@@ -72,7 +72,7 @@ def process_private_anniversary():
             if peven.message.send_sms and peven.contact.phone and peven.message.sms_template:
                 sms_msg = _compose(peven.message.sms_template, peven.contact)
                 sender = _compose(peven.message.sms_sender, peven.contact)
-                s_job = _send_sms.delay([sender,sms_msg,peven.contact.phone],\
+                s_job = _send_sms.delay([sender,sms_msg,peven.contact.phone.as_e164],\
                                         owner = peven.contact.kit_user
                                         )
 
@@ -97,7 +97,7 @@ def process_public_anniversary():
                 if publicevent.message.send_sms and recipient_d.phone and publicevent.message.sms_template:
                     s_msg = _compose(publicevent.message.sms_template, recipient_d)
                     s_sender = _compose(publicevent.message.sms_sender, recipient_d)
-                    _send_sms.delay([s_sender,s_msg,recipient_d.phone],\
+                    _send_sms.delay([s_sender,s_msg,recipient_d.phone.as_e164],\
                                     owner = publicevent.kit_user
                                     )
             
@@ -123,7 +123,7 @@ def process_onetime_event():
                 if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
                     s_msg = _compose(queued_message.message["sms_template"], recipient_d)
                     s_sender = _compose(queued_message.message["title"], recipient_d)
-                    _send_sms.delay([s_sender, s_msg, recipient_d.phone],\
+                    _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
                                       owner = queued_message.created_by
                                       )                
         
