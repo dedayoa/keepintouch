@@ -6,7 +6,6 @@ Created on Jul 9, 2016
 import sys
 import requests
 
-from django.utils.http import urlencode
 from django.utils import timezone
 
 from django.core import mail
@@ -184,11 +183,11 @@ class SMSLive247Helper():
     def send_sms(self, message_payload, **kwargs):
         try:
             payload = {'cmd': 'sendmsg',
-                       'sessionid': urlencode(self.sessid),
-                       'message' : urlencode(message_payload[1]),
-                       'sender' : urlencode(message_payload[0]),
-                       'sendto' : urlencode((message_payload[2])[1:]), #remove leading +
-                       'msgtype' : 0                   
+                       'sessionid': self.sessid,
+                       'message' : message_payload[1],
+                       'sender' : message_payload[0],
+                       'sendto' : message_payload[2][1:], #remove leading +
+                       'msgtype' : 0             
                        }
             r = requests.post("http://www.smslive247.com/http/index.aspx", data=payload)
             if r.split(':')[0] is not 'OK':
@@ -217,8 +216,8 @@ class SMSLive247Helper():
         
         try:
             payload = {'cmd': 'querymsgstatus',
-                       'sessionid': urlencode(self.sessid),
-                       'messageid' : urlencode(messageid)    
+                       'sessionid': self.sessid,
+                       'messageid' : messageid  
                        }
             r = requests.get("http://www.smslive247.com/http/index.aspx", data=payload)
             return r
