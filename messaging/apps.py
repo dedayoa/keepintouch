@@ -14,6 +14,11 @@ class MessagingConfig(AppConfig):
     def ready(self):
         default_scheduler = django_rq.get_scheduler('default')
         
+        # Delete any existing jobs in the scheduler when the app starts up
+        for job in default_scheduler.get_jobs():
+            job.delete()
+        
+        
         # Private Event Scheduler
         # Run every 1 hour
         default_scheduler.schedule(
