@@ -211,7 +211,7 @@ class SMSLive247Helper():
             
                 return(messageid)
         except Exception:
-            print('Exception')
+            return(sys.exc_info())
     
     def get_sms_msg_status(self, messageid):
         
