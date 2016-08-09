@@ -108,21 +108,21 @@ def process_onetime_event():
     due_queued_messages = QueuedMessages.objects.filter(delivery_time__lte = timezone.now())
     
     for queued_message in due_queued_messages:
-        recipients_qs = Contact.objects.filter(pk__in = queued_message.message.recipients)
-        smtp_setting_qsv = SMTPSetting.objects.get(pk = queued_message.message.smtp_setting_id).values()
+        recipients_qs = Contact.objects.filter(pk__in = queued_message.message["recipients"])
         
         for recipient_d in recipients_qs:
             if ok_to_send(queued_message.created_by):
-                if queued_message.message.send_email and recipient_d.email and queued_message.message.email_template:
-                    e_msg = _compose(queued_message.message.email_template, recipient_d)
-                    e_title = _compose(queued_message.message.title, recipient_d)
+                if queued_message.message["send_email"] and recipient_d.email and queued_message.message["email_template"]:
+                    smtp_setting_qsv = SMTPSetting.objects.get(pk = queued_message.message["smtp_setting_id"]).values()
+                    e_msg = _compose(queued_message.message["email_template"], recipient_d)
+                    e_title = _compose(queued_message.message["title"], recipient_d)
                     _send_email.delay([e_title, e_msg, recipient_d.email],\
                                       smtp_setting_qsv, owner = queued_message.created_by
                                       )
                     
-                if queued_message.message.send_sms and recipient_d.phone and queued_message.message.sms_template:
-                    s_msg = _compose(queued_message.message.sms_template, recipient_d)
-                    s_sender = _compose(queued_message.message.title, recipient_d)
+                if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
+                    s_msg = _compose(queued_message.message["sms_template"], recipient_d)
+                    s_sender = _compose(queued_message.message["title"], recipient_d)
                     _send_email.delay([s_sender, s_msg, recipient_d.phone],\
                                       owner = queued_message.created_by
                                       )                
