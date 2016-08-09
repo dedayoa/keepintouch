@@ -21,7 +21,7 @@ class MessagingConfig(AppConfig):
         
         # Private Event Scheduler
         # Run every 1 hour
-        default_scheduler.schedule(
+        job_36k = default_scheduler.schedule(
             scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
             func='messaging.tasks.process_private_anniversary',                     # Function to be queued
             #args=[arg1, arg2],             # Arguments passed into function when executed
@@ -33,7 +33,7 @@ class MessagingConfig(AppConfig):
         
         # Public Event Scheduler
         # Run every 4 hour
-        default_scheduler.schedule(
+        job_436k = default_scheduler.schedule(
             scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
             func='messaging.tasks.process_public_anniversary',                     # Function to be queued
             #args=[arg1, arg2],             # Arguments passed into function when executed
@@ -44,7 +44,7 @@ class MessagingConfig(AppConfig):
         
         # Public Event Scheduler
         # Run every 5 minutes
-        default_scheduler.schedule(
+        job_60 = default_scheduler.schedule(
             scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
             func='messaging.tasks.process_onetime_event',                     # Function to be queued
             #args=[arg1, arg2],             # Arguments passed into function when executed
@@ -52,3 +52,5 @@ class MessagingConfig(AppConfig):
             interval=60,                  # Call every 3 minutes
             repeat=None                      # Repeat forever
         )
+        
+        print(job_36k, job_436k, job_60)
