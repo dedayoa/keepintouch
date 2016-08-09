@@ -13,7 +13,7 @@ from django.utils import timezone
 from django.conf import settings
 from core.models import MessageTemplate, Event, PublicEvent, Contact, SMTPSetting,\
     KITUser
-from .helper import SMTPHelper, SMSHelper, ok_to_send
+from .helper import SMTPHelper, SMSHelper, ok_to_send, SMSLive247Helper
 from dateutil.relativedelta import relativedelta
 
 from .models import AdvancedMessaging, StandardMessaging, QueuedMessages, ProcessedMessages
@@ -43,7 +43,7 @@ def _send_mass_email(email_message, smtp_profile):
 
 @django_rq.job('sms')
 def _send_sms(sms_message, **kwargs):
-    es = SMSHelper()
+    es = SMSLive247Helper()
     es.send_sms(sms_message, **kwargs)
 
 @django_rq.job('sms')   
