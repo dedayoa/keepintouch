@@ -190,7 +190,7 @@ class SMSLive247Helper():
                        'msgtype' : 0             
                        }
             r = requests.post("http://www.smslive247.com/http/index.aspx", data=payload)
-            '''if r.split(':')[0] is not 'OK':
+            if r.split(':')[0] is not 'OK':
                 temp_log_to_db(
                     'sms',
                     [message_payload[0],message_payload[1],message_payload[2]],
@@ -208,7 +208,7 @@ class SMSLive247Helper():
                     owner = kwargs['owner']
                 )
             
-                return(messageid)'''
+                return(messageid)
             return r
         except:
             return(sys.exc_info())
