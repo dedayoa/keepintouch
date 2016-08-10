@@ -189,9 +189,9 @@ class KITUser(models.Model):
     def get_queued_messages(self):
         queuedmessages = apps.get_model('messaging', 'QueuedMessages')
         if self.is_admin:
-            return queuedmessages.objects.filter(created_by__parent = self.pk).order_by('-processed_at')
+            return queuedmessages.objects.filter(created_by__parent = self.pk).order_by('-queued_at')
         else:
-            return queuedmessages.objects.filter(created_by = self.pk).order_by('-processed_at')
+            return queuedmessages.objects.filter(created_by = self.pk).order_by('-queued_at')
         
     #####Admin Things#######
     
