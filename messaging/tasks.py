@@ -17,6 +17,7 @@ from .helper import SMTPHelper, SMSHelper, ok_to_send, SMSLive247Helper
 from dateutil.relativedelta import relativedelta
 
 from .models import AdvancedMessaging, StandardMessaging, QueuedMessages, ProcessedMessages
+from .helper import get_next_delivery_time
 
 def _compose(template, convars):
     
@@ -112,6 +113,7 @@ def process_onetime_event():
         
         for recipient_d in recipients_qs:
             if ok_to_send(queued_message.created_by):
+                #email
                 if queued_message.message["send_email"] and recipient_d.email and queued_message.message["email_template"]:
                     smtp_setting_qsv = SMTPSetting.objects.get(pk = queued_message.message["smtp_setting_id"]).values()
                     e_msg = _compose(queued_message.message["email_template"], recipient_d)
@@ -119,7 +121,7 @@ def process_onetime_event():
                     _send_email.delay([e_title, e_msg, recipient_d.email],\
                                       smtp_setting_qsv, owner = queued_message.created_by
                                       )
-                    
+                #sms   
                 if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
                     s_msg = _compose(queued_message.message["sms_template"], recipient_d)
                     s_sender = _compose(queued_message.message["title"], recipient_d)
@@ -131,10 +133,15 @@ def process_onetime_event():
         ProcessedMessages.objects.create(
             message_type = queued_message.message_type,
             message = queued_message.message,
-            created_by = queued_message.created_by            
+            created_by = queued_message.created_by  
         )
-        # delete queued message from queuedmessage table
-        queued_message.delete()
+        
+        # delete queued message from queuedmessage table if it does not reccur
+        if queued_message.recurring == False:
+            queued_message.delete()
+        else:
+            queued_message.update(delivery_time=get_next_delivery_time(queued_message.message["others"]["recurring"],\
+                                                                       queued_message.delivery_time))
         
         
 def process_system_notification(**kwargs):
