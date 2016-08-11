@@ -14,6 +14,7 @@
 		{{ block.super }}
 		<form action="." method="post" id="advanced-message-form">
 			{% crispy form %}
+			<input type="hidden" name="msgtoken" value="" />
 			<input type="reset" name="reset" value="Reset" class="reset button secondary float-left" id="reset-id-reset">
 			<input type="submit" name="submit" value="Save Draft" class="submit button float-left" id="submit-id-submit">
 			<input type="button" id="prepare-send-message" value="Prepare" class="button warning float-right">
@@ -84,6 +85,7 @@
 		   				if (content.result.nocwe == 0 && content.result.total_sms_count == 0){
 		   					return;
 		   				}else{
+		   					$('input[name="msgtoken"]').val(content.result.msgtoken);
 			    			$('#message-modal p#modal-rpt').html(""+
 			    					(content.result.nocwe != 0 ? "Email will be sent to "+content.result.nocwe+" recipient"+(content.result.nocwe > 1 ?"s":"")+" via "+content.result.mail_server+"<p />":"")+
 			    					(content.result.total_sms_count != 0 ? "Total of "+content.result.total_sms_count+" SMS"+(content.result.total_sms_count > 1 ?"s":"")+" to be sent<p />":"")+

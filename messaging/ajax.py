@@ -3,8 +3,9 @@ Created on Jul 13, 2016
 
 @author: Dayo
 '''
-
+import os, pickle
 import json
+import uuid
 import datetime, pytz
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -12,6 +13,7 @@ from django_ajax.decorators import ajax
 from django.template import Context, Template
 #from django.utils.crypto import get_random_string
 from django.db import transaction
+from django.conf import settings
 
 from .models import Contact, SMTPSetting, StandardMessaging, QueuedMessages, AdvancedMessaging,\
                     ContactGroup, MessageTemplate
@@ -19,6 +21,8 @@ from messaging.sms_counter import SMSCounter
 
 from .forms import StandardMessagingForm
 from messaging.forms import AdvancedMessagingForm
+import base64
+from cryptography.fernet import Fernet
 
 def _compose(template, convars):
     
@@ -33,16 +37,27 @@ def _compose(template, convars):
                     )
 
 
-myform = None
-my_adv_form = None
+def _tokenize(file_path):
+    
+    aix = bytes(settings.SECRET_KEY[:32],'utf-8')
+    f = Fernet(base64.urlsafe_b64encode(aix))
+    token = f.encrypt(bytes(file_path,'utf-8'))
+    
+    return token
+
+def _untokenize(enc_file_loc):
+    
+    aix = bytes(settings.SECRET_KEY[:32],'utf-8')
+    f = Fernet(base64.urlsafe_b64encode(aix))
+    file_loc = (f.decrypt(bytes(enc_file_loc,'utf-8'))).decode('utf-8')
+    
+    return file_loc
 
 @ajax
 @login_required
 def prepare_to_send_message(request):
     #c = "foo " + request.POST['recipients']
     #return {'result': c}
-    global myform
-    global my_adv_form
     
     if request.method == 'POST':
         #return {'result':request.POST.getlist('recipients',[])}
@@ -93,7 +108,16 @@ def prepare_to_send_message(request):
                 else:
                     result_dict['total_sms_count'] = 0
                 
-                #result_dict['idtdt'] = idondit = "{}{}".format(code_seg_1, code_seg_2)       
+                #result_dict['idtdt'] = idondit = "{}{}".format(code_seg_1, code_seg_2)
+                
+                # the global is failing, switching to pickle + uuid
+                file_path = os.path.join(settings.MEDIA_ROOT, 'tmp/'+str(uuid.uuid4()))
+                
+                with open(file_path, 'wb') as f:
+                    pickle.dump(myform, f, pickle.HIGHEST_PROTOCOL)
+                
+                result_dict['msgtoken'] = _tokenize(file_path)
+                     
                 return {'result':result_dict}
             
         elif request.POST.get("message_type") == 'ADVANCED':
@@ -171,6 +195,13 @@ def prepare_to_send_message(request):
                     recipient.append(r.pk)
                     
                 my_adv_form = [adv_msg_form, recipient, msg_t]
+                
+                file_path = os.path.join(settings.MEDIA_ROOT, 'tmp/'+str(uuid.uuid4()))
+                
+                with open(file_path, 'wb') as f:
+                    pickle.dump(my_adv_form, f, pickle.HIGHEST_PROTOCOL)
+                
+                result_dict['msgtoken'] = _tokenize(file_path)
                 #result_dict['idtdt'] = idondit = "{}{}".format(code_seg_1, code_seg_2)       
                 return {'result':result_dict} 
             
@@ -181,9 +212,6 @@ def prepare_to_send_message(request):
 @login_required
 @transaction.atomic
 def send_message(request):
-    
-    global myform
-    global my_adv_form
     
     if request.method == 'POST':
         
@@ -199,6 +227,12 @@ def send_message(request):
                 created_time = None
                 messageid = 0
             # send message to queue table
+            token = request.POST.get("msgtoken")
+            pkl_loc = _untokenize(token)
+            with open(pkl_loc, 'rb') as f:
+                myform = pickle.load(f)
+
+            
             QueuedMessages.objects.create(
                 message_type = request.POST.get("message_type"),
                 message_id = messageid, #-1 means it was never saved to draft
@@ -234,8 +268,13 @@ def send_message(request):
                 created_time = None
                 messageid = 0
                 
-            
+            token = request.POST.get("msgtoken")
+            pkl_loc = _untokenize(token)
+            with open(pkl_loc, 'rb') as f:
+                my_adv_form = pickle.load(f)
             # send message to queue table
+            print(my_adv_form)
+            
             QueuedMessages.objects.create(
                 message_type = request.POST.get("message_type"),
                 message_id = messageid, #0 means it was never saved to draft
@@ -248,7 +287,7 @@ def send_message(request):
                     'send_sms' : my_adv_form[2].send_sms,
                     'sms_sender_id' : my_adv_form[2].sms_sender,
                     'recipients' : my_adv_form[1], #request.POST.getlist('recipients',[]),
-                    'smtp_setting_id': my_adv_form[2].smtp_setting.id, #request.POST.get('smtp_setting','')
+                    'smtp_setting_id': getattr(my_adv_form[2], 'smtp_setting.id',''), #request.POST.get('smtp_setting','')
                     'others' : {
                                 'draft_title' : my_adv_form[0].cleaned_data.get('title'),
                                 'template_id' : my_adv_form[0].cleaned_data.get('message_template').id,

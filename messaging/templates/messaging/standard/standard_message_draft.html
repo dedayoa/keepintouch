@@ -20,6 +20,7 @@
 			{% if draft_time %}
 		   		<span class="float-left hide-for-small-only" style="font-size: 0.7rem; margin: 1em 0 0 1em; line-height: 1rem;">Draft Saved: {{draft_time}}</span>
 		   	{% endif %}
+		   	<input type="hidden" name="msgtoken" value="" />
 		   	<input type="button" id="prepare-send-message" value="Prepare" class="button warning float-right">
 		</form>
 		<form method="POST" action="{% url 'messaging:standard-message-delete' messageid %}">
@@ -100,6 +101,7 @@
 		   				if (content.result.nocwe == 0 && content.result.total_sms_count == 0){
 		   					return;
 		   				}else{
+		   					$('input[name="msgtoken"]').val(content.result.msgtoken);
 			    			$('#message-modal p#modal-rpt').html(""+
 			    					(content.result.nocwe != 0 ? "Email will be sent to "+content.result.nocwe+" recipient"+(content.result.nocwe > 1 ?"s":"")+" via "+content.result.mail_server+"<p />":"")+
 			    					(content.result.total_sms_count != 0 ? "Total of "+content.result.total_sms_count+" SMS"+(content.result.total_sms_count > 1 ?"s":"")+" to be sent<p />":"")+
