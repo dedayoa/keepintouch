@@ -106,7 +106,7 @@ class AdvancedMessageCreateView(CreateView):
     ##??  You could set the field here or using get_form_kwargs  as above ??##
     def get_form(self, form_class=form_class):
         form = super(AdvancedMessageCreateView, self).get_form(form_class)
-        form.fields["message_template"].queryset = self.request.user.kituser.get_templates()
+        form.fields["message_template"].queryset = self.request.user.kituser.get_templates().filter(active=True)
         form.fields['contact_group'].queryset = self.request.user.kituser.get_contact_groups()
         
         return form
@@ -124,7 +124,7 @@ class AdvancedMessageUpdateDraftView(UpdateView):
     
     def get_form(self, form_class=form_class):
         form = super(AdvancedMessageUpdateDraftView, self).get_form(form_class)
-        form.fields["message_template"].queryset = self.request.user.kituser.get_templates()        
+        form.fields["message_template"].queryset = self.request.user.kituser.get_templates().filter(active=True)      
         return form
         
     
