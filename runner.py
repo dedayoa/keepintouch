@@ -18,8 +18,8 @@ def kill(proc_pid):
 
 if __name__ == "__main__":
         
-    proc1 = subprocess.run('python manage.py rqworker default sms email')
-    proc2 = subprocess.run('python manage.py rqscheduler')
+    proc1 = subprocess.run('python manage.py rqworker default sms email', shell=True, stdout=subprocess.STDOUT)
+    proc2 = subprocess.run('python manage.py rqscheduler', shell=True, stdout=subprocess.STDOUT)
     
     proc_list = [proc1, proc2]
     
