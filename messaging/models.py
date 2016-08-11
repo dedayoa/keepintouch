@@ -139,6 +139,7 @@ class QueuedMessages(models.Model):
     message_id = models.PositiveIntegerField()   
     message = JSONField() #message, recipients
     delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
+    recurring = models.BooleanField(default=False)
     
     created_by = models.ForeignKey(KITUser, models.PROTECT)
     queued_at = models.DateTimeField(auto_now_add=True)
