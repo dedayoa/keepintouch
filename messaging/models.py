@@ -1,5 +1,6 @@
 import datetime
 import html2text
+from dateutil.relativedelta import relativedelta
 
 from django.db import models
 from django.conf import settings
@@ -101,8 +102,30 @@ class AdvancedMessaging(models.Model):
     def get_absolute_url(self):
         return reverse('messaging:advanced-message-draft',args=[self.pk])
     
+    def _next_event_time(self):
+        if self.repeat_frequency == "norepeat":
+            return self.delivery_time
+        elif self.repeat_frequency == "hourly":
+            return self.delivery_time+relativedelta(hours=1)
+        elif self.repeat_frequency == "daily":
+            return self.delivery_time+relativedelta(days=1)
+        elif self.repeat_frequency == "weekly":
+            return self.delivery_time+relativedelta(weeks=1)
+        elif self.repeat_frequency == "monthly":
+            return self.delivery_time+relativedelta(months=1)
+        elif self.repeat_frequency == "quarterly":
+            return self.delivery_time+relativedelta(months=3)
+        elif self.repeat_frequency == "annually":
+            return self.delivery_time+relativedelta(years=1)   
+        
+    
+    def save(self, *args, **kwargs):
+        self.next_event = self._next_event_time()
+        super(AdvancedMessaging, self).save(*args, **kwargs)
+    
     class Meta:
         verbose_name_plural = "Advanced Messaging"
+        
     
 
 class QueuedMessages(models.Model):
