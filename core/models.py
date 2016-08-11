@@ -175,9 +175,9 @@ class KITUser(models.Model):
         
     def get_templates(self):
         if self.is_admin:
-            return MessageTemplate.objects.filter(kit_admin = self.pk, active=True)
+            return MessageTemplate.objects.filter(kit_admin = self.pk)
         else:
-            return MessageTemplate.objects.filter(cou_group__kit_users = self.pk, active=True)
+            return MessageTemplate.objects.filter(cou_group__kit_users = self.pk)
         
     def get_processed_messages(self):
         processedmessages = apps.get_model('messaging', 'ProcessedMessages')
@@ -399,15 +399,15 @@ class MessageTemplate(models.Model):
     sms_template = models.TextField(blank=True)
     
     sms_sender = models.CharField(max_length=11, blank=True)
-    smtp_setting = models.ForeignKey(SMTPSetting)
+    smtp_setting = models.ForeignKey(SMTPSetting, models.SET_NULL, null=True, blank=True)
     
     send_sms = models.BooleanField(verbose_name="Send SMS")
     send_email = models.BooleanField(verbose_name="Send Email")
     
-    cou_group = models.ForeignKey(CoUserGroup,models.SET_NULL, null=True, verbose_name="Group Availability")
+    cou_group = models.ForeignKey(CoUserGroup, models.SET_NULL, null=True, verbose_name="Group Availability")
     kit_admin = models.ForeignKey(KITUser, models.PROTECT, blank=True, limit_choices_to={'is_admin':True})
     
-    active = models.BooleanField()
+    active = models.BooleanField(default=True)
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
