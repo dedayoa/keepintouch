@@ -19,8 +19,8 @@ from .models import Contact, SMTPSetting, StandardMessaging, QueuedMessages, Adv
                     ContactGroup, MessageTemplate
 from messaging.sms_counter import SMSCounter
 
-from .forms import StandardMessagingForm
-from messaging.forms import AdvancedMessagingForm
+from .forms import StandardMessagingForm, AdvancedMessagingForm
+from .helper import get_next_delivery_time 
 import base64
 from cryptography.fernet import Fernet
 
@@ -231,7 +231,6 @@ def send_message(request):
             pkl_loc = _untokenize(token)
             with open(pkl_loc, 'rb') as f:
                 myform = pickle.load(f)
-
             
             QueuedMessages.objects.create(
                 message_type = request.POST.get("message_type"),
@@ -273,7 +272,13 @@ def send_message(request):
             with open(pkl_loc, 'rb') as f:
                 my_adv_form = pickle.load(f)
             # send message to queue table
-            print(my_adv_form)
+            
+            if my_adv_form[0].cleaned_data.get('repeat_frequency') != "norepeat":
+                message_reoccurs = True
+                next_delivery_time = get_next_delivery_time(my_adv_form[0].cleaned_data.get('repeat_frequency'),\
+                                                            my_adv_form[0].cleaned_data.get('delivery_time'))
+            
+            fdt = (my_adv_form[0].cleaned_data.get('delivery_time')).strftime('%d-%m-%Y %H:%M')
             
             QueuedMessages.objects.create(
                 message_type = request.POST.get("message_type"),
@@ -291,11 +296,14 @@ def send_message(request):
                     'others' : {
                                 'draft_title' : my_adv_form[0].cleaned_data.get('title'),
                                 'template_id' : my_adv_form[0].cleaned_data.get('message_template').id,
-                                'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None 
+                                'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None,
+                                'recurring' : my_adv_form[0].cleaned_data.get('repeat_frequency'),
+                                'first_delivery_time' : fdt
                                 }
                            },
-                delivery_time = my_adv_form[0].cleaned_data.get('delivery_time'),
-                created_by = request.user.kituser                
+                recurring = message_reoccurs,
+                delivery_time = next_delivery_time,
+                created_by = request.user.kituser           
             )
             
             return {'result':'Success! Message Queued for Sending'}
