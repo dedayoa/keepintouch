@@ -24,7 +24,7 @@ if __name__ == "__main__":
                ]
     for command in commands:
         print("$ "+command)
-        proc = subprocess.run(command)
+        proc = subprocess.run(command, shell=True)
         proc_list.append(proc)
     
     try:
