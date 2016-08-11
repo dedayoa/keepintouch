@@ -5,6 +5,7 @@ Created on Jul 9, 2016
 '''
 import sys
 import requests
+from dateutil.relativedelta import relativedelta
 
 from django.utils import timezone
 
@@ -265,3 +266,19 @@ def ok_to_send(owner):
             print("User Account Inactive")
             return False
     
+    
+def get_next_delivery_time(repeat_frequency, delivery_time):
+    if repeat_frequency == "norepeat":
+        return delivery_time
+    elif repeat_frequency == "hourly":
+        return delivery_time+relativedelta(hours=1)
+    elif repeat_frequency == "daily":
+        return delivery_time+relativedelta(days=1)
+    elif repeat_frequency == "weekly":
+        return delivery_time+relativedelta(weeks=1)
+    elif repeat_frequency == "monthly":
+        return delivery_time+relativedelta(months=1)
+    elif repeat_frequency == "quarterly":
+        return delivery_time+relativedelta(months=3)
+    elif repeat_frequency == "annually":
+        return delivery_time+relativedelta(years=1) 
