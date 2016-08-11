@@ -17,15 +17,11 @@ def kill(proc_pid):
 
 
 if __name__ == "__main__":
-    proc_list = []
+        
+    proc1 = subprocess.run('python manage.py rqworker default sms email')
+    proc2 = subprocess.run('python manage.py rqscheduler')
     
-    commands = ["python manage.py rqworker default sms email",
-               "python manage.py rqscheduler"
-               ]
-    for command in commands:
-        print("$ "+command)
-        proc = subprocess.run(command, shell=True)
-        proc_list.append(proc)
+    proc_list = [proc1, proc2]
     
     try:
         while True:
