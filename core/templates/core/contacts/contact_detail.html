@@ -14,7 +14,7 @@
 		<form action="." method="post">
 			{% crispy form %} {# I have set helper not to generate the form tag #}
 			<fieldset class="fieldset">
-				<legend>Events</legend>
+				<legend>Anniversaries</legend>
 					{{ event_formset.management_form|crispy}}
 					{{ event_formset.non_form_errors }}
 					{# crispy event_form #}

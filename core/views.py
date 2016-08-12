@@ -14,14 +14,14 @@ from django.utils import timezone
 from django_tables2 import RequestConfig
 
 from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate,\
-                    SMTPSetting, ContactGroup, SMSTransfer, UploadedContact
+                    SMTPSetting, ContactGroup, SMSTransfer, UploadedContact, CustomData
 from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, ExistingUserForm,\
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
                     UserGroupSettingForm, NewUserForm, ContactGroupForm, SMSTransferForm,\
-                    ContactImportForm, PersonalProfileForm
+                    ContactImportForm, PersonalProfileForm, CustomDataIngestForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable,\
-                    SMSTransferHistoryTable, UploadedContactFileHistoryTable
+                    SMSTransferHistoryTable, UploadedContactFileHistoryTable, CustomDataStoreTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView,\
     FormMixin
 from django_select2.views import AutoResponseView
@@ -755,7 +755,7 @@ class AccountManagementView(TemplateView):
     
 class ContactImportView(TemplateView):
     
-    template_name = 'gomez/data_mgmt/import_contact.html'
+    template_name = 'core/data_mgmt/import_contact.html'
     params = {}
     
     def get(self, request):
@@ -771,4 +771,23 @@ class ContactImportView(TemplateView):
         
         return render(request, self.template_name, self.params)
 
-            
+
+
+
+class CustomDataView(TemplateView):
+    
+    template_name = 'core/data_mgmt/custom_data.html'
+    params = {}
+    ingest_form = CustomDataIngestForm()
+    
+    def get(self, request):
+        self.params["ingest_form"] = self.ingest_form
+        self.params['file_max_size'] = settings.MAX_UPLOAD_FILE_SIZE
+        self.params["title"] = "Custom Data Management"
+                
+        custdatable = CustomDataStoreTable(CustomData.objects.filter(created_by = request.user.kituser).order_by('-created'))
+        RequestConfig(request, paginate={'per_page': 30}).configure(custdatable)
+        self.params["table"] = custdatable
+        
+        
+        return render(request, self.template_name, self.params)

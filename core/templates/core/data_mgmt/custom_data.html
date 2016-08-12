@@ -10,7 +10,7 @@
 <div class="row">
 	<h3>Custom <small>Data</small></h3>
 	{{ block.super }}
-	<form action="{% url 'gomez:upload-custom-data' %}" method="POST" enctype="multipart/form-data" id="customdata-upload-form">
+	<form action="{% url 'core:upload-custom-data' %}" method="POST" enctype="multipart/form-data" id="customdata-upload-form">
 		{% csrf_token %}
 		<div class="row columns">
 			<div class="column small-12 medium-3" id="unique-field-col-div">

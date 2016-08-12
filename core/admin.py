@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from .models import Contact, KITUser, Event, PublicEvent, MessageTemplate, \
                     SentMessage, SMTPSetting, CoUserGroup, ContactGroup, SMSTransfer,\
-                    StateMaintainCache, UploadedContact
+                    UploadedContact, CustomData
 
 
 class ContactAdmin(admin.ModelAdmin):
@@ -25,13 +25,13 @@ class CoUserGroupAdmin(admin.ModelAdmin):
     
     
 admin.site.register(Event)
-admin.site.register(StateMaintainCache)
 admin.site.register(PublicEvent)
 admin.site.register(UploadedContact)
 admin.site.register(SMSTransfer)
 admin.site.register(Contact, ContactAdmin)
 admin.site.register(ContactGroup)
 admin.site.register(SentMessage)
+admin.site.register(CustomData)
 admin.site.register(MessageTemplate)
 admin.site.register(SMTPSetting)
 admin.site.register(KITUser, KITUserAdmin)

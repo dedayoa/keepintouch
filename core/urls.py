@@ -9,9 +9,7 @@ from django.conf.urls import url, include
 
 
 from .views import *
-from .ajax import get_system_stats, get_qpc_stats, sms_credit_transfer, get_user_sms_balance,\
-                    get_contact_file_upload, now_import_contacts
-from gomez.views import CustomDataView
+from .ajax import *
 
 
 urlpatterns = [
@@ -55,6 +53,14 @@ urlpatterns = [
                 url(r'import_contact/import/$', now_import_contacts, name='contact-import-action'),
                 url(r'custom_data/$', CustomDataView.as_view(), name='custom-data'),
                 url(r'export/$', now_import_contacts, name='export-data'),
+    ])),
+    #custom Data
+    url(r'^data-mgmt/', include([
+                url(r'^custom-data/upload/$', upload_custom_data, name='upload-custom-data'),
+                url(r'^custom-data/process-a/$', process_1_custom_data),
+                url(r'^custom-data/(?P<pk>\w{5})/$', get_custom_data_ajax, name='custom-data-ajax'),
+                url(r'^custom-data/(?P<pk>\w{5})/delete/$', delete_custom_data_ajax, name='delete-custom-data-ajax'),
+                
     ])),
 
 

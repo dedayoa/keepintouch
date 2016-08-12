@@ -12,7 +12,7 @@ import django_tables2 as tables
 from django_tables2.utils import A
 from .models import Contact, MessageTemplate, Event, PublicEvent, ContactGroup, \
                     KITUser, SMTPSetting, CoUserGroup, SMSTransfer,\
-                    UploadedContact
+                    UploadedContact, CustomData
 from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
 
@@ -192,4 +192,20 @@ class UploadedContactFileHistoryTable(tables.Table):
     class Meta:
         model = UploadedContact
         fields = ('name','file','import_status','upload_date')
+        
+
+
+class CustomDataStoreTable(tables.Table):
+    
+    namespace = tables.LinkColumn(verbose_name="Namespace")
+    system_id_field = tables.Column(verbose_name="Identity Field")
+    identity_column_name = tables.Column(verbose_name="ID Key")
+    created = tables.Column(verbose_name="Created")
+        
+    def render_namespace(self, record):        
+        return format_html('<code><a href="{}" class="namespace_link">{}</a></code>',record.get_absolute_url(), record.namespace)
+    
+    class Meta:
+        model = CustomData
+        fields = ('namespace','system_id_field','identity_column_name','created')
         
