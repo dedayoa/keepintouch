@@ -1,0 +1,107 @@
+{% extends "core/base_generic.html" %}
+{% load crispy_forms_tags %}
+{% load staticfiles %}
+
+{% block title %}{{title}}{% endblock %}
+{% block head_base_links %}
+	{{ form.media.css }}
+	{{ block.super }}
+{% endblock %}
+{% block content %}
+	<div class="row">
+		<h3>Reminder <small>{{title}}</small></h3>
+		{{ block.super }}
+		<form action="." method="post" id="reminder-message-form">
+			{% crispy form %}
+			<fieldset class="fieldset">
+				<legend>Reminders</legend>
+					{{ reminder_formset.management_form|crispy}}
+					{{ reminder_formset.non_form_errors }}
+					<table class="reminder-set-list-table">
+						<thead>
+							<th>Value</th>
+							<th>Period</th>
+							<th>Delta</th>
+							<th>?</th>
+						</thead>
+						<tbody>		
+						{% for reminder_item in reminder_formset %}
+							<tr>
+								{{ reminder_item.id}} 
+								<td style="width:30%">{{ reminder_item.delta_value}}</td>
+								<td style="width:35%">{{reminder_item.delta_type}}</td>
+								<td style="width:30%">{{reminder_item.delta_direction}}</td>
+								<td style="width:5%">{{ reminder_item.DELETE }}</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+			</fieldset>
+			<input type="submit" name="submit" value="Save Draft" class="submit button float-left" id="submit-id-submit">
+			{% if draft_time %}
+		   		<span class="float-left hide-for-small-only" style="font-size: 0.7rem; margin: 1em 0 0 1em; line-height: 1rem;">Draft Saved: {{draft_time}}</span>
+		   	{% endif %}
+			<input type="hidden" name="msgtoken" value="" />
+			<input type="button" id="run-reminder" value="Run" class="button warning float-right">
+		</form>		
+		<form method="POST" action="{% url 'messaging:reminder-message-delete' rmsgid %}">
+		   {% csrf_token %}
+		   <input type="submit" value="Delete" class="button alert float-right" style="margin-right: 0.5rem;"
+		   onclick="return confirm('Are you sure you want to delete this Message?');">
+		</form>
+	</div>
+	<div class="reveal" id="message-modal" data-reveal>
+		<h3>Sending...</h3>
+		<p id="modal-rpt"></p>
+		<button class="close-button" data-close aria-label="Close modal" type="button">
+	    <span aria-hidden="true">&times;</span>
+	  </button>
+	</div>
+	<div class="reveal" id="message-sent-modal" data-reveal>
+  		<h4></h4>
+  		<button class="close-button" data-close aria-label="Close reveal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
+	</div>
+{% endblock %}
+{% block foot_base_js %}
+	{{ form.media.js }}
+		<script>
+		
+		$(document).ready(function(){
+			
+			/*get the column headers
+			var url = '/data-mgmt/custom-data/headers/'+$("#id_custom_data_namespace").val();
+   			ajaxGet(url, function(content){
+				$.each(content.result.headers, function(i, val){
+					$("#id_date_column").append($('<option />', { value: val, text: val }));
+				});
+   	  		});*/
+   			
+   			//set the selected to what's saved in the DB
+   			
+			
+	   		$( "#id_custom_data_namespace" ).change(function(e){
+	   			var url = '/data-mgmt/custom-data/headers/'+$("#id_custom_data_namespace").val();
+	   			ajaxGet(url, function(content){
+	   				
+	   				console.log(content.result)
+	   				
+	   				if (content.result == "nil"){
+						$("#id_date_column").empty();
+					}
+	   				else{
+	   					$("#id_date_column").empty();
+						$.each(content.result.headers, function(i, val){
+								$("#id_date_column").append($('<option />', { value: val, text: val }));
+						});
+	   				}
+	   	  		});
+	   			
+	   			
+	   		});
+		});
+		
+	</script>
+	{{block.super}}
+{% endblock %}
