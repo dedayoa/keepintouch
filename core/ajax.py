@@ -445,3 +445,17 @@ def delete_custom_data_ajax(request, pk):
     if request.method == "POST":
         result = CustomData.objects.get(pk=pk, created_by=request.user.kituser).delete()
         return {"result":result}
+    
+    
+
+@ajax
+@login_required
+def get_custom_data_columns(request, pk=None):
+    
+    if request.method == "GET":
+        # watch out, you may need to do (, created_by=request.user.kituser)
+        if pk is None:
+            return {'result':"nil"}
+        headers = CustomData.objects.values("headers").get(pk=pk)
+        print(headers)
+        return {'result':headers}
