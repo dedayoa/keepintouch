@@ -31,5 +31,11 @@ urlpatterns = [
                 url(r'^message/(?P<pk>\d+)/delete/$', AdvancedMessageDeleteView.as_view(), name='advanced-message-delete'),
                 
                 ])),
+    url(r'^reminder/', include([
+            url(r'^new/$', ReminderCreateView.as_view(), name='new-reminder-message'),
+            url(r'^draft/(?P<pk>\d+)/$', ReminderUpdateDraftView.as_view(), name='reminder-message-draft'),
+            url(r'^draft/messages/$', reminder_draft_view, name='reminder-draft-messages'),
+            url(r'^message/(?P<pk>\d+)/delete/$', ReminderDeleteView.as_view(), name='reminder-message-delete'),
+            ])),
     
 ]
