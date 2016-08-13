@@ -3,11 +3,13 @@ import html2text
 from dateutil.relativedelta import relativedelta
 
 from django.db import models
+from django.apps import apps
 from django.conf import settings
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import JSONField
 
-from core.models import KITUser, Contact, SMTPSetting, ContactGroup, MessageTemplate
+from core.models import KITUser, Contact, SMTPSetting, ContactGroup, MessageTemplate, CustomData
 
 from model_utils.fields import StatusField, MonitorField
 from model_utils import Choices
@@ -15,6 +17,7 @@ from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
 from phonenumber_field.modelfields import PhoneNumberField
+
 
 
 def get_default_time():
@@ -71,13 +74,13 @@ class AdvancedMessaging(models.Model):
     
         
     REPEAT = (
-        ("norepeat","No Repeat"),
-        ("hourly","Hourly"),
-        ("daily","Daily"),
-        ("weekly","Weekly"),
-        ("monthly","Monthly"),
-        ("quarterly","Quarterly"),
-        ("annually","Annually"),
+        ("norepeat",_("No Repeat")),
+        ("hourly",_("Hourly")),
+        ("daily",_("Daily")),
+        ("weekly",_("Weekly")),
+        ("monthly",_("Monthly")),
+        ("quarterly",_("Quarterly")),
+        ("annually",_("Annually")),
               )
     
     title = models.CharField(max_length=100, blank=False)
@@ -227,3 +230,77 @@ class EmailReport(models.Model):
     
     def __str__(self):
         return "Email from {} to {}".format(self.from_email,self.to_email)
+    
+    
+class ReminderMessaging(models.Model):
+    
+    
+    STATUS = Choices('draft', 'running', 'completed')
+    
+    title = models.CharField(max_length=100, blank=False)
+    message_template = models.ForeignKey(MessageTemplate, blank=False)
+    contact_group = models.ManyToManyField(ContactGroup)    
+    
+    custom_data_namespace = models.ForeignKey(CustomData, on_delete=models.PROTECT)
+    date_column = models.CharField(max_length=500)
+       
+    created_by = models.ForeignKey(KITUser, models.PROTECT)
+    
+    is_active = models.BooleanField(default=True)
+    status = StatusField()
+    
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title
+    
+    def get_custom_data_header_selected_choices(self):
+        if self.custom_data_namespace:
+            
+            chs = []
+            headers = self.custom_data_namespace.headers            
+            for header_item in headers:
+                chs.append((header_item, header_item))
+            
+            headers = tuple(chs)
+            return [headers,self.date_column]
+        else:
+            return []
+            
+    def get_absolute_url(self):
+        return reverse('messaging:new-reminder-message',args=[self.pk])  
+        
+    
+    def save(self, *args, **kwargs):
+        super(ReminderMessaging, self).save(*args, **kwargs)
+    
+    class Meta:
+        verbose_name_plural = "Reminder Messaging"
+
+
+class Reminder(models.Model):
+    
+    DELTA = (
+        ("hour",_("Hours")),
+        ("day",_("Days")),
+        ("week",_("Weeks")),
+        ("month",_("Months")),
+        ("year",_("Years")),
+              )
+    DELTADIR = (
+        ('before', _("Before")),
+        ('after', _("After"))
+                )
+    
+    message = models.ForeignKey(ReminderMessaging, on_delete=models.CASCADE)
+    delta_value = models.PositiveSmallIntegerField(blank=False)
+    delta_type = models.CharField(max_length=20, choices=DELTA, default="day", blank=False)
+    delta_direction = models.CharField(max_length=10, choices=DELTADIR, default="before", blank=False)
+    
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "{}, {} {} {}".format(self.message, self.delta_value, self.delta_type, self.delta_direction)
+    
