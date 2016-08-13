@@ -14,6 +14,7 @@
 		<ul class="menu vertical nested is-active">
 			<li><a href="{% url 'messaging:new-standard-message' %}">Standard</a></li>
 			<li><a href="{% url 'messaging:new-advanced-message' %}">Advanced</a></li>
+			<li><a href="{% url 'messaging:new-reminder-message' %}">Reminder</a></li>
 			<hr style="padding: 0 1rem">
 			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:standard-draft-messages' %}"><i class="fi-folder"></i> Drafts</a></li>
 			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:messages-queued-status' %}"><i class="fi-database"></i> Queued</a></li>
@@ -22,7 +23,7 @@
 	</li>
 	<li><a href="{% url 'core:templates-list' %}"><i class="fi-page-multiple"></i> Templates</a></li>
 	<li>
-		<a href="#"><i class="fi-clock"></i> Anniversaries</a>
+		<a href="#"><i class="fi-calendar"></i> Anniversaries</a>
 		<ul class="menu vertical nested">
 			<li><a href="{% url 'core:events-list' %}">Private</a></li>
 			<li><a href="{% url 'core:public-events-list' %}">Public</a></li>
