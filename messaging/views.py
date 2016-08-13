@@ -1,18 +1,20 @@
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _, ugettext
+from django.contrib import messages as flash_messages
 
 from django_tables2   import RequestConfig
 
 from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages,\
-                    QueuedMessages
+                    QueuedMessages, ReminderMessaging, Reminder
 from core.models import KITUser
  
-from .forms import StandardMessagingForm, AdvancedMessagingForm
+from .forms import StandardMessagingForm, AdvancedMessagingForm, ReminderMessagingForm,\
+                    ReminderFormSet
 from .tables import DraftStandardMessagesTable, DraftAdvancedMessagesTable, ProcessedMessagesTable,\
                     QueuedMessagesTable
 from .filters import ProcessedMessagesFilter
 
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
 
@@ -221,3 +223,134 @@ def queued_message_dequeue_view(request, mtype, pk):
         elif mtype == "STANDARD":
             return HttpResponse("Standard")
     
+    
+    
+class ReminderCreateView(CreateView):
+    
+    model = ReminderMessaging
+    form_class = ReminderMessagingForm
+    reminders_formset = ReminderFormSet
+    template_name = 'messaging/reminder/new_reminder_message.html'
+    
+    params = {}
+    
+    def post(self, request, *args, **kwargs):
+        
+        form = self.form_class(request.POST)
+        reminder_formset = ReminderFormSet(request.POST)
+        
+        
+        if form.is_valid() and reminder_formset.is_valid():
+            return self.form_valid(form, reminder_formset)
+        return self.form_invalid()
+    
+    
+    def form_valid(self, form, formset):
+        
+        form.instance.created_by = self.request.user.kituser
+        
+        self.object = form.save()
+        formset.instance = self.object
+        formset.save()
+        
+        return HttpResponseRedirect(reverse('messaging:reminder-message-draft', args=[self.object.pk]))
+    
+    
+    def form_invalid(self, form, formset):
+        
+        return render(self.request, self.template_name, self.get_context_data())
+    
+    
+    def get_context_data(self, **kwargs):
+        #self.params = super(ReminderCreateView, self).get_context_data(**kwargs)
+        self.params["title"] = _("Create A Reminder Message")
+        
+        if self.request.POST:
+            self.params["form"] = self.form_class(self.request.POST)
+            self.params["reminder_formset"] = self.reminders_formset(self.request.POST)
+        else:
+            self.params["form"] = self.form_class()
+            self.params["reminder_formset"] = self.reminders_formset()
+    
+        return self.params
+    
+    
+    ##??  You could set the field here or using get_form_kwargs  as above ??##
+    def get_form(self, form_class=form_class):
+        form = super(ReminderCreateView, self).get_form(form_class)
+        form.fields["message_template"].queryset = self.request.user.kituser.get_templates().filter(active=True)
+        form.fields['contact_group'].queryset = self.request.user.kituser.get_contact_groups()
+        
+        return form
+    
+    
+
+class ReminderUpdateDraftView(UpdateView):
+    
+    model = ReminderMessaging
+    form_class = ReminderMessagingForm
+    template_name = 'messaging/reminder/reminder_message_draft.html'
+    #reminder_formset = ReminderFormSet()
+    
+    params = {}
+    
+    def get(self, request, *args, **kwargs):
+        super(ReminderUpdateDraftView, self).get(request, *args, **kwargs)
+        
+        choices_arr = self.object.get_custom_data_header_selected_choices()
+        
+        self.params["form"] = self.form_class(instance=self.object, date_column_ish=choices_arr)
+        self.params["reminder_formset"] = ReminderFormSet(instance=self.object)
+        
+        return render(request,self.template_name, self.params)
+       
+    def post(self, request, *args, **kwargs):
+        
+        self.object = self.get_object()
+        
+        form = self.get_form(self.form_class)
+        reminder_formset = ReminderFormSet(request.POST, instance=self.object)
+        
+        
+        if form.is_valid() and reminder_formset.is_valid():
+            return self.form_valid(form, reminder_formset)
+        return self.form_invalid()
+    
+    
+    def form_valid(self, form, formset):
+        
+        self.object = form.save()
+        formset.save()
+        
+        return HttpResponseRedirect(reverse('messaging:reminder-message-draft', args=[self.object.pk]))
+    
+    
+    def form_invalid(self):
+        
+        return HttpResponseRedirect(reverse('messaging:reminder-message-draft', args=[self.object.pk]))
+    
+    
+    def get_context_data(self, **kwargs):
+        self.params = super(ReminderUpdateDraftView, self).get_context_data(**kwargs)
+        self.params["title"] = self.object.title
+        self.params["rmsgid"] = self.object.pk
+        self.params["draft_time"] = self.object.last_modified
+        return self.params
+    
+    def get_form(self, form_class=form_class):
+        form = super(ReminderUpdateDraftView, self).get_form(form_class)
+        form.fields["message_template"].queryset = self.request.user.kituser.get_templates().filter(active=True)
+        form.fields['contact_group'].queryset = self.request.user.kituser.get_contact_groups()        
+        return form
+    
+    def get_form_kwargs(self):        
+        choices_arr = self.object.get_custom_data_header_selected_choices()
+        kwargs = super(ReminderUpdateDraftView, self).get_form_kwargs()
+        kwargs.update({'date_column_ish':choices_arr})
+        return kwargs
+
+def reminder_draft_view(request):
+    pass
+
+class ReminderDeleteView(DeleteView):
+    pass
