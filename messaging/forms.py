@@ -8,7 +8,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.conf import settings
 
-from .models import StandardMessaging, AdvancedMessaging
+from .models import StandardMessaging, AdvancedMessaging, ReminderMessaging, Reminder
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
@@ -20,6 +20,7 @@ from django_select2.forms import Select2Widget, Select2MultipleWidget,\
     ModelSelect2MultipleWidget
 from django.utils import timezone
 from datetime import datetime
+from django.forms.models import inlineformset_factory
 
 
 
@@ -174,3 +175,60 @@ class AdvancedMessagingForm(forms.ModelForm):
             #raise forms.ValidationError('Your Delivery Date Cannot be in the past')
             cleaned_data["delivery_time"] = datetime.now()
         
+        
+class ReminderMessagingForm(forms.ModelForm):
+    
+    date_column = forms.CharField(required=True)
+    
+    def __init__(self, *args, **kwargs):
+    
+        self.dcolish = kwargs.pop('date_column_ish') or None
+        
+        super(ReminderMessagingForm, self).__init__(*args, **kwargs)
+        
+        self.fields["date_column"].widget = forms.Select(choices=self.dcolish[0])
+        self.fields["date_column"].initial = self.dcolish[1]
+        
+        self.helper = FormHelper()
+        self.helper.form_action = '.'
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            Row(Column('title'), css_class = "reminder-title"),
+            Row(Column('message_template'), css_class = "message-template"),
+            Row(Column('contact_group'), css_class = "contact-group"),            
+            Row(
+                Column('custom_data_namespace', css_class = "float-left small-6"),
+                Column('date_column', css_class = "float-left small-6")
+            ),
+            Hidden('message_type', 'REMINDER'),
+            Hidden('message_id', '{{messageid}}')
+        )
+    
+    class Meta:
+        model = ReminderMessaging
+        fields = ['title','message_template', 'contact_group', 'is_active', 'custom_data_namespace','date_column']
+        widgets = {
+            'contact_group': Select2MultipleWidget,
+            'message_template' : Select2Widget
+        }
+        
+        
+    def clean(self, *args, **kwargs):
+        super(ReminderMessagingForm, self).clean(*args, **kwargs)
+        
+        
+class ReminderForm(forms.ModelForm):
+    
+    def __init__(self, *args, **kwargs):
+        
+        super(ReminderForm, self).__init__(*args, **kwargs)        
+        self.helper = FormHelper(self)        
+        self.helper.attrs = {'data_abide': ''}
+        
+    
+    class Meta:
+        model = Reminder
+        fields = ['message','delta_value','delta_type','delta_direction']
+        
+ReminderFormSet = inlineformset_factory(ReminderMessaging, Reminder, \
+                        fields=('delta_value','delta_type','delta_direction'), form = ReminderForm, extra=3, max_num=10)   
