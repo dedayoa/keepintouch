@@ -11,12 +11,13 @@ from core.models import KITUser
 from .forms import StandardMessagingForm, AdvancedMessagingForm, ReminderMessagingForm,\
                     ReminderFormSet
 from .tables import DraftStandardMessagesTable, DraftAdvancedMessagesTable, ProcessedMessagesTable,\
-                    QueuedMessagesTable
+                    QueuedMessagesTable, DraftReminderMessagesTable, RunningMessagesTable
 from .filters import ProcessedMessagesFilter
 
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
+from core.tables import ContactTable
 
 # Create your views here.
 
@@ -171,6 +172,7 @@ def standard_message_draft_view(request):
         params = {}
         params["title"] = "Draft Messages"
         params["table"] = draft_msgs_table
+        params["herpath"] = (request.path.split('/'))[2]
         return render(request, 'messaging/standard/draft_standard_messages_list.html', params)
         
         
@@ -183,6 +185,7 @@ def advanced_message_draft_view(request):
         params = {}
         params["title"] = "Draft Messages"
         params["table"] = draft_msgs_table
+        params["herpath"] = (request.path.split('/'))[2]
         return render(request, 'messaging/advanced/draft_advanced_messages_list.html', params)
         
 def message_processed_status_view(request):
@@ -351,7 +354,41 @@ class ReminderUpdateDraftView(UpdateView):
         return kwargs'''
 
 def reminder_draft_view(request):
-    pass
+    
+    if request.method == "GET":
+        
+        query = ReminderMessaging.objects.filter(status="draft", created_by=request.user.kituser).order_by('-last_modified')
+        
+        contactstable = DraftReminderMessagesTable(query)
+        RequestConfig(request, paginate={'per_page': 25}).configure(contactstable)
+        params = {}
+        params["title"] = "Reminders"
+        params["table"] = contactstable
+        params["herpath"] = (request.path.split('/'))[2]
+        return render(request, 'messaging/reminder/draft_reminder_messages_list.html', params)
 
 class ReminderDeleteView(DeleteView):
-    pass
+    
+    model = ReminderMessaging
+    #template_name = 'core/contacts/contact_confirm_delete.html' #POSTing so no need for template
+    success_url = reverse_lazy('messaging:reminder-draft-messages')
+    params = {}
+    
+    def get_context_data(self, **kwargs):
+        params = super(ReminderUpdateDraftView, self).get_context_data(**kwargs)
+        params["title"] = "Deleting Reminder ".format(self.object.pk)
+        params["rmsgid"] = self.object.pk
+        return params
+    
+    
+def message_running_status_view(request):
+    
+    if request.method == "GET":        
+        queryset = request.user.kituser.get_running_messages()
+        r_msgs_table = RunningMessagesTable(queryset)
+        RequestConfig(request, paginate={'per_page': 25}).configure(r_msgs_table)
+        params = {}
+        
+        params["title"] = "Running Messages"
+        params["table"] = r_msgs_table
+        return render(request, 'messaging/running_messages.html', params)
