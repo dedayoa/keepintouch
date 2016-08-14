@@ -7,7 +7,8 @@ Created on Jun 10, 2016
 import django_tables2 as tables
 from django_tables2.utils import A
 
-from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages, QueuedMessages
+from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages, QueuedMessages,\
+                    ReminderMessaging
 from django.utils.html import format_html_join, format_html
 from django.utils.safestring import mark_safe
 
@@ -107,3 +108,41 @@ class QueuedMessagesTable(tables.Table):
         model = QueuedMessages
         fields = ['message','message_type','delivery_time','message_id']
     
+    
+class DraftReminderMessagesTable(tables.Table):
+    
+    table_model_action = tables.LinkColumn(verbose_name="", \
+                                       text=mark_safe('<span class="button small warning">Edit</span>'), \
+                                       args=[A('pk')])
+    title = tables.Column(verbose_name="Title")
+    custom_data_namespace = tables.Column(verbose_name="Namespace")
+    last_modified = tables.DateTimeColumn(verbose_name="Last Edited")
+    contact_group = tables.Column(verbose_name="Contact Group")
+    
+    def render_title(self, record):
+        if record.title:
+            text_2_wordlist = re.sub("[^\w]", " ",  record.title).split()
+            return format_html('<span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex=1 title="{}">{}</span>',\
+                               record.__str__(),
+                               (" ".join(text_2_wordlist[0:3])+"...") if len(text_2_wordlist) > 3 else record.title 
+                               )
+    
+    def render_contact_group(self, record):
+        if record.contact_group:
+            if record.contact_group.count() > 2:
+
+                return mark_safe(", ".join(t.title for t in record.contact_group.all()[0:2])+\
+                                 '<span class="and-more"> and more</span>')
+            
+            return ", ".join(t.title for t in record.contact_group.all())
+    
+    class Meta:
+        model = ReminderMessaging
+        fields = ['title','custom_data_namespace','contact_group','last_modified','table_model_action']
+        
+        
+class RunningMessagesTable(tables.Table):
+    
+    class Meta:
+        model = QueuedMessages
+        fields = ['message','contact_dsoi','reminders','started_at']
