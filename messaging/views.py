@@ -343,11 +343,12 @@ class ReminderUpdateDraftView(UpdateView):
         form.fields['contact_group'].queryset = self.request.user.kituser.get_contact_groups()        
         return form
     
+    '''
     def get_form_kwargs(self):        
         choices_arr = self.object.get_custom_data_header_selected_choices()
         kwargs = super(ReminderUpdateDraftView, self).get_form_kwargs()
         kwargs.update({'date_column_ish':choices_arr})
-        return kwargs
+        return kwargs'''
 
 def reminder_draft_view(request):
     pass
