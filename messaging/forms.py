@@ -20,7 +20,7 @@ from django_select2.forms import Select2Widget, Select2MultipleWidget,\
     ModelSelect2MultipleWidget
 from django.utils import timezone
 from datetime import datetime
-from django.forms.models import inlineformset_factory
+from django.forms.models import inlineformset_factory, BaseInlineFormSet
 
 
 
@@ -234,7 +234,25 @@ class ReminderForm(forms.ModelForm):
     class Meta:
         model = Reminder
         fields = ['message','delta_value','delta_type','delta_direction']
+
+class BaseReminderFormSet(BaseInlineFormSet):
+    def clean(self):
+        """Checks that no two reminders have the same values."""
+        if any(self.errors):
+            # Don't bother validating the formset unless each form is valid on its own
+            return
+        entries = set()
+        for form in self.forms:
+            value = form.cleaned_data['delta_value']
+            d_type = form.cleaned_data['delta_type']
+            d_dir = form.cleaned_data['delta_direction']
+            
+            fs_item = (value, d_type, d_dir)
+            
+            if fs_item in entries:
+                raise forms.ValidationError("Reminders in a set must have distinct entries.")
+            entries.add(fs_item)
         
 ReminderFormSet = inlineformset_factory(ReminderMessaging, Reminder, \
                         fields=('delta_value','delta_type','delta_direction'), form = ReminderForm,\
-                        extra=3, max_num=10, validate_max=True)   
+                        formset=BaseReminderFormSet, extra=3, max_num=3, validate_max=True)   
