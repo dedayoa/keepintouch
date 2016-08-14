@@ -17,6 +17,7 @@ from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
 from phonenumber_field.modelfields import PhoneNumberField
+import arrow
 
 
 
@@ -180,6 +181,40 @@ class ProcessedMessages(models.Model):
         verbose_name_plural = "Processed Messages"
         
         
+class RunningMessage(models.Model):
+    
+    message = JSONField()
+    contact_dsoi = JSONField() #contactid and dates of interest
+    reminders = JSONField() #all converted to minutes
+    job = JSONField() #completed queries
+    completed = models.BooleanField(default=False)
+    
+    created_by = models.ForeignKey(KITUser, models.PROTECT)
+    first_run_at = models.DateTimeField(auto_now_add=True)
+    
+    def set_is_completed(self):
+        if self.reminders is None:
+            self.completed = True
+            
+    def query_reminder_availability(self):
+        for reminder in self.reminders:
+            if reminder["delta"] == "before":
+                for contact_doi in self.contact_dsoi:
+                    if self.filter(job__contains = {'{}:{}:{}'.format(reminder["delta_min"],reminder["delta"],contact_doi["doi"])}):
+                        print("Its there")
+                    else:
+                        if arrow.utcnow().replace(minutes = reminder["delta_min"]) >= arrow.get(contact_doi["date"],'DD/MM/YYYY'):
+                            return contact_doi["contact"]
+            elif reminder["delta"] == "after":
+                for contact_doi in self.contact_dsoi:
+                    if arrow.utcnow().replace(minutes = -reminder["delta_min"]) >= arrow.get(contact_doi["date"],'DD/MM/YYYY'):
+                        return contact_doi["contact"]
+    
+    def __str__(self):
+        return self.message["title"]
+    
+        
+        
 class SMSReport(models.Model):
     
     STATUS = (
@@ -256,11 +291,16 @@ class ReminderMessaging(models.Model):
         return self.title
     
     def get_custom_data_header_selected_choices(self):
+        #choices and selected for the use in form
         if self.custom_data_namespace:
             
             chs = []
-            headers = self.custom_data_namespace.headers            
-            for header_item in headers:
+            hdrs = self.custom_data_namespace.headers
+            
+            # remove identity fields from selectable
+            hdrs.remove(self.custom_data_namespace.identity_column_name)
+            
+            for header_item in hdrs:
                 chs.append((header_item, header_item))
             
             headers = tuple(chs)
@@ -303,4 +343,8 @@ class Reminder(models.Model):
     
     def __str__(self):
         return "{}, {} {} {}".format(self.message, self.delta_value, self.delta_type, self.delta_direction)
+
+
+
+    
     
