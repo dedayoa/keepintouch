@@ -39,7 +39,7 @@
 			<input type="hidden" name="msgtoken" value="" />
 			<input type="reset" name="reset" value="Reset" class="reset button secondary float-left" id="reset-id-reset">
 			<input type="submit" name="submit" value="Save Draft" class="submit button float-left" id="submit-id-submit">
-			<input type="button" id="run-reminder" value="Run" class="button warning float-right">
+			<input type="button" id="reminder-run" value="Run" class="button warning float-right">
 		</form>
 	</div>
 	<div class="reveal" id="message-modal" data-reveal>
@@ -61,26 +61,34 @@
 		<script>
 		
 		$(document).ready(function(){
-	   		$( "#id_custom_data_namespace" ).change(function(){
+			
+			//widget is textfield by defaul, changed to select
+			$("#id_date_column").replaceWith('<select class="select" id="id_date_column" name="date_column"></select>');
+			
+			$( "#id_custom_data_namespace" ).change(function(e){
 	   			var url = '/data-mgmt/custom-data/headers/'+$("#id_custom_data_namespace").val();
 	   			ajaxGet(url, function(content){
-					$.each(content.result.headers, function(i, val){
-						$("#id_date_column").append($('<option />', { value: val, text: val }));
-					});
+	   				if (content.result == "nil"){
+						$("#id_date_column").empty();
+					}
+	   				else{
+	   					$("#id_date_column").empty();
+						$.each(content.result.headers, function(i, val){
+								$("#id_date_column").append($('<option />', { value: val, text: val }));
+						});
+	   				}
 	   	  		});
 	   		});
-		});
-		
-		(function(){
-			
-	   		$('#prepare-send-message').click(function(){
-	  			var payload = $("#advanced-message-form").serialize();
-	   			ajaxPost('/messaging/prepare-to-send-message/',payload, function(content){
-	   				
-	           		if (content.hasOwnProperty("errors")){
-	           			var errors = $.parseJSON(content.errors);	
-	           		
-	           			$.each(errors, function(index, value){
+	   		
+	   		$("#reminder-run").click(function(){
+	  			var payload = $("#reminder-message-form").serialize();
+	  			
+	  			console.log(payload)
+	  			
+	   			ajaxPost('/messaging/run-reminder/',payload, function(content){	   				
+	   				if (content.hasOwnProperty("errors")){
+	           			var errors = $.parseJSON(content.errors);
+           				$.each(errors, function(index, value){
 	           				if (index === '__all__'){
 	           					$('div.nonfield-ajax-error').remove();
 	           					$("#advanced-message-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
@@ -90,42 +98,16 @@
 	           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
 	           				}
 	           			});
-	           			
 	           			return;
-	           			
 	           		}else{
 	   					$('div.nonfield-ajax-error').remove();
 	   					$("small.error").remove();
 	   					
-		   				if (content.result.nocwe == 0 && content.result.total_sms_count == 0){
-		   					return;
-		   				}else{
-		   					$('input[name="msgtoken"]').val(content.result.msgtoken);
-			    			$('#message-modal p#modal-rpt').html(""+
-			    					(content.result.nocwe != 0 ? "Email will be sent to "+content.result.nocwe+" recipient"+(content.result.nocwe > 1 ?"s":"")+" via "+content.result.mail_server+"<p />":"")+
-			    					(content.result.total_sms_count != 0 ? "Total of "+content.result.total_sms_count+" SMS"+(content.result.total_sms_count > 1 ?"s":"")+" to be sent<p />":"")+
-			    					'<input type="button" id="send-message" value="Send" class="button success float-right">'+
-			    					"");
-			    			$('#message-modal').foundation('open');	   					
-		   				}
+	   					console.log(content.result);
 	   				}
 	   			});
 	   		});
-	   		
-	   		$('#message-modal p#modal-rpt').on('click', '#send-message', function(){
-	   			var payload = $("#advanced-message-form").serializeArray();
-	   			//payload.push({name:'idtdt', value:donditcode });
-	   			
-	   			ajaxPost('/messaging/send-message/',payload, function(content){
-	   				$('#message-sent-modal h4').html(content.result);
-	   				$('#message-sent-modal').foundation('open');
-	   				setTimeout(function(){
-	   					window.location.replace("/messaging/queued/messages/");
-	   				}, 2500);
-	   				//$('#message-sent-modal').foundation('open');
-	   			});
-	   		});
-		})();
+		});
 		
 	</script>
 	{{block.super}}
