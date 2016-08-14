@@ -68,7 +68,7 @@
 	           			$.each(errors, function(index, value){
 	           				if (index === '__all__'){
 	           					$('div.nonfield-ajax-error').remove();
-	           					$("#advanced-message-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+	           					$("#reminder-message-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
 	           				}else{
 	           					$("small.error").remove();
 	           					//select field with error and apply text after it
