@@ -7,10 +7,9 @@
 
 {% block content %}
 <div class="row">
-	<h3>Draft <small>Advanced Messages</small></h3>
+	<h3>Draft <small>Reminder Messages</small></h3>
 	{{ block.super }}
-	<a class="small button float-right hollow" href="{% url 'messaging:standard-draft-messages' %}">Standard</a>
-	<a class="small button float-right" href="{% url 'messaging:advanced-draft-messages' %}">Advanced</a>
+	{% include "messaging/messaging_nav_tab.html" %}
 	{% render_table table %}
 </div>
 {% endblock %}
