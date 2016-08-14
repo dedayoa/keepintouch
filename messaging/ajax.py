@@ -4,6 +4,7 @@ Created on Jul 13, 2016
 @author: Dayo
 '''
 import os, pickle
+import tablib
 import json
 import uuid
 import datetime, pytz
@@ -16,10 +17,12 @@ from django.db import transaction
 from django.conf import settings
 
 from .models import Contact, SMTPSetting, StandardMessaging, QueuedMessages, AdvancedMessaging,\
-                    ContactGroup, MessageTemplate
+                    ContactGroup, MessageTemplate, RunningMessage, ReminderMessaging
+from core.models import CustomData                    
+
 from messaging.sms_counter import SMSCounter
 
-from .forms import StandardMessagingForm, AdvancedMessagingForm
+from .forms import StandardMessagingForm, AdvancedMessagingForm, ReminderMessagingForm, ReminderFormSet
 from .helper import get_next_delivery_time 
 import base64
 from cryptography.fernet import Fernet
@@ -307,3 +310,122 @@ def send_message(request):
             )
             
             return {'result':'Success! Message Queued for Sending'}
+
+def is_date_valid(date_text):
+    
+    try:
+        if date_text != datetime.datetime.strptime(date_text, '%d/%m/%Y').strftime('%d/%m/%Y'):
+            raise ValueError("Incorrect data format, should be YYYY-MM-DD")
+        return True
+    except ValueError:
+        return False
+    '''
+    try:
+        datetime.datetime.strptime(date_text, '%d/%m/%Y')
+    except ValueError:
+        raise ValueError("Incorrect data format, should be YYYY-MM-DD")
+    '''
+
+def return_all_level_err(message):
+    return json.dumps({'__all__': [{'message' : message}]})
+
+
+
+@ajax
+@login_required
+def run_reminder(request):
+    
+    if request.method == "POST":
+        
+        rmform = ReminderMessagingForm(request.POST)
+        rm_formset = ReminderFormSet(request.POST)
+        
+        if not(rmform.is_valid() and rm_formset.is_valid()):
+            return {'errors':rmform.errors.as_json(escape_html=True)}
+        else:
+            
+            try:
+                #delete item from draft
+                if ReminderMessaging.objects.filter(pk = request.POST.get('message_id')).exists():
+                    messageid = request.POST.get('message_id')                
+            except ValueError:
+                messageid = 0
+            
+            # {"contact_id":"date_field"}
+            data_result = CustomData.objects.values('data','data_table',\
+                                'identity_column_name').get(pk=rmform.cleaned_data.get('custom_data_namespace'))
+                                
+            # convert data_table from customdata into a dataset for easy column selection
+            dataset = tablib.Dataset()
+            dataset.dict = data_result['data_table']
+            
+            # check that it is dates that are in the "date" column
+            '''
+            for item in dataset[data_result['identity_column_name']]:
+                if is_date_valid(item) is False:
+                    return {'errors': return_all_level_err('An error was encountered while validating the date column. It seems you have selected the wrong date column')}
+                    break
+                else:
+                    pass
+            '''
+            recipient_group = request.POST.getlist('contact_group',[])
+            grps = ContactGroup.objects.filter(pk__in = recipient_group).prefetch_related('contacts')
+            contacts_id = set()
+            
+            for grp in grps:
+                for contacts_per_group in grp.contacts.all():
+                    contacts_id.add(contacts_per_group.pk)
+            del grps #free memory, maybe
+            
+
+            
+            # select the 'contacts' column
+            contacts_column = dataset[data_result['identity_column_name']] #
+            
+            # get an intersection of contacts from the selected contact groups
+            # and contacts from the uploaded customdata
+            # The final contacts are less those contacts that strictly are not existing in the custom data
+            # and not existing in the (expanded) contact groups.
+            gogo_contacts = contacts_id.intersection(set(contacts_column))
+
+            if gogo_contacts is None:
+                return {'errors':return_all_level_err('It seems you have selected the wrong table column. We could not match contacts')}
+            
+            # get {contact_id:date}
+            cdsoi = {}
+            for recipient in gogo_contacts:
+                cdsoi[recipient] = data_result['data'][recipient][rmform.cleaned_data.get('date_column')]
+                
+            rmdrs = set()
+            for form in rm_formset:
+                cd = form.cleaned_data
+                if cd.get('delta_value') is None:
+                    continue
+                rmdrs.add((cd.get('delta_value'), cd.get('delta_type'), cd.get('delta_direction')))
+                  
+
+            RunningMessage.objects.create(
+                message = {
+                    'message_id' : messageid,
+                    'title': getattr(rmform.cleaned_data.get('message_template'), 'title', ''), #myform.cleaned_data.get('title',''),
+                    'email_template': getattr(rmform.cleaned_data.get('message_template'), 'email_template',''),
+                    'sms_template': getattr(rmform.cleaned_data.get('message_template'), 'sms_template',''),
+                    'send_email' : getattr(rmform.cleaned_data.get('message_template'), 'send_email', ''),
+                    'send_sms' : getattr(rmform.cleaned_data.get('message_template'), 'send_sms', ''),
+                    'sms_sender_id' : getattr(rmform.cleaned_data.get('message_template'), 'sms_sender', ''),
+                    'smtp_setting_id': getattr(rmform.cleaned_data.get('message_template'), 'smtp_setting.id',''),
+                    'others' : {
+                        'draft_title' : rmform.cleaned_data.get('title'),
+                        'template_id' : rmform.cleaned_data.get('message_template').id,
+                        'custom_data_namespace' : rmform.cleaned_data.get('custom_data_namespace'),
+                        'date_column' : rmform.cleaned_data.get('date_column')                
+                                }
+                           },
+                contact_dsoi = cdsoi,
+                reminders = list(rmdrs),
+                job = [],
+                created_by = request.user.kituser 
+                                          )
+            
+              
+            return {'result','Reminder Started Successfully'}
