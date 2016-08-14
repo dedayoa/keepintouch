@@ -42,7 +42,7 @@
 		   		<span class="float-left hide-for-small-only" style="font-size: 0.7rem; margin: 1em 0 0 1em; line-height: 1rem;">Draft Saved: {{draft_time}}</span>
 		   	{% endif %}
 			<input type="hidden" name="msgtoken" value="" />
-			<input type="button" id="run-reminder" value="Run" class="button warning float-right">
+			<input type="button" id="reminder-run" value="Run" class="button warning float-right">
 		</form>		
 		<form method="POST" action="{% url 'messaging:reminder-message-delete' rmsgid %}">
 		   {% csrf_token %}
@@ -92,13 +92,44 @@
 					}
 	   				else{
 	   					$("#id_date_column").empty();
-						$.each(content.result.headers, function(i, val){
+						$.each(content.result, function(i, val){
 								$("#id_date_column").append($('<option />', { value: val, text: val }));
 						});
 	   				}
 	   	  		});
 	   			
 	   			
+	   		});
+   	  		
+   	  		$("#reminder-run").click(function(){
+	  			var payload = $("#reminder-message-form").serialize();
+	  			
+	  			console.log(payload)
+	  			
+	   			ajaxPost('/messaging/run-reminder/',payload, function(content){	   				
+	           		if (content.hasOwnProperty("errors")){
+	           			var errors = $.parseJSON(content.errors);	
+	           		
+	           			$.each(errors, function(index, value){
+	           				if (index === '__all__'){
+	           					$('div.nonfield-ajax-error').remove();
+	           					$("#reminder-message-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+	           				}else{
+	           					$("small.error").remove();
+	           					//select field with error and apply text after it
+	           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+	           				}
+	           			});
+	           			
+	           			return;
+	           			
+	           		}else{
+	   					$('div.nonfield-ajax-error').remove();
+	   					$("small.error").remove();
+	   					
+	   					console.log(content.result);
+	   				}
+	   			});
 	   		});
 		});
 		
