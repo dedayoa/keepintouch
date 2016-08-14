@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages,\
-                    QueuedMessages, EmailReport, SMSReport, ReminderMessaging, Reminder
+                    QueuedMessages, EmailReport, SMSReport, ReminderMessaging, Reminder,\
+                    RunningMessage
 
 class EmailReportAdmin(admin.ModelAdmin):
     
@@ -20,3 +21,4 @@ admin.site.register(EmailReport, EmailReportAdmin)
 admin.site.register(SMSReport, SMSReportAdmin)
 admin.site.register(ReminderMessaging)
 admin.site.register(Reminder)
+admin.site.register(RunningMessage)
