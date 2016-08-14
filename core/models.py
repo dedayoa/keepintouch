@@ -193,6 +193,13 @@ class KITUser(models.Model):
         else:
             return queuedmessages.objects.filter(created_by = self.pk).order_by('-queued_at')
         
+    def get_running_messages(self):
+        RunningMessage = apps.get_model('messaging', 'RunningMessage')
+        if self.is_admin:
+            return RunningMessage.objects.filter(created_by__parent = self.pk).order_by('-started_at')
+        else:
+            return RunningMessage.objects.filter(created_by = self.pk).order_by('-started_at')
+        
     #####Admin Things#######
     
     def get_kituser(self):
@@ -545,7 +552,7 @@ class CustomData(models.Model):
         ('doid','Domain ID')
                   )
     
-    namespace = RandomSlugField(length=5, exclude_upper=True, exclude_vowels=True, primary_key=True)
+    namespace = RandomSlugField(length=6, exclude_vowels=True, primary_key=True)
     system_id_field = models.CharField(max_length=4, choices=IDFLD_TYPE)
     identity_column_name = models.CharField(max_length=255)
     headers = JSONField()
