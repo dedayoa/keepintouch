@@ -456,6 +456,8 @@ def get_custom_data_columns(request, pk=None):
         # watch out, you may need to do (, created_by=request.user.kituser)
         if pk is None:
             return {'result':"nil"}
-        headers = CustomData.objects.values("headers").get(pk=pk)
-        print(headers)
-        return {'result':headers}
+        hdrs = CustomData.objects.values("headers",'identity_column_name').get(pk=pk)
+
+        hdrs['headers'].remove(hdrs['identity_column_name'])
+        
+        return {'result':hdrs['headers']}
