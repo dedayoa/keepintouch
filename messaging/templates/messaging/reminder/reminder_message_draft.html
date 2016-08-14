@@ -97,14 +97,10 @@
 						});
 	   				}
 	   	  		});
-	   			
-	   			
 	   		});
    	  		
    	  		$("#reminder-run").click(function(){
 	  			var payload = $("#reminder-message-form").serialize();
-	  			
-	  			console.log(payload)
 	  			
 	   			ajaxPost('/messaging/run-reminder/',payload, function(content){	   				
 	           		if (content.hasOwnProperty("errors")){
@@ -120,14 +116,14 @@
 	           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
 	           				}
 	           			});
-	           			
 	           			return;
 	           			
 	           		}else{
 	   					$('div.nonfield-ajax-error').remove();
 	   					$("small.error").remove();
 	   					
-	   					console.log(content.result);
+	   					$('#message-sent-modal h4').text(content.result);
+		    			$('#message-sent-modal').foundation('open');
 	   				}
 	   			});
 	   		});
