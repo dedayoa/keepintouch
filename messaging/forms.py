@@ -182,12 +182,16 @@ class ReminderMessagingForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
     
-        self.dcolish = kwargs.pop('date_column_ish') or None
+        self.dcolish = kwargs.pop('date_column_ish','')# or None
         
         super(ReminderMessagingForm, self).__init__(*args, **kwargs)
         
-        self.fields["date_column"].widget = forms.Select(choices=self.dcolish[0])
-        self.fields["date_column"].initial = self.dcolish[1]
+        try:            
+            self.fields["date_column"].widget = forms.Select(choices=self.dcolish[0])
+            self.fields["date_column"].initial = self.dcolish[1]
+        except IndexError:
+            print("Must be an ajax submit call where date_column_ish is not provided")
+            pass
         
         self.helper = FormHelper()
         self.helper.form_action = '.'
@@ -201,7 +205,7 @@ class ReminderMessagingForm(forms.ModelForm):
                 Column('date_column', css_class = "float-left small-6")
             ),
             Hidden('message_type', 'REMINDER'),
-            Hidden('message_id', '{{messageid}}')
+            Hidden('message_id', '{{rmsgid}}')
         )
     
     class Meta:
@@ -214,7 +218,8 @@ class ReminderMessagingForm(forms.ModelForm):
         
         
     def clean(self, *args, **kwargs):
-        super(ReminderMessagingForm, self).clean(*args, **kwargs)
+        cleaned_data = super(ReminderMessagingForm, self).clean(*args, **kwargs)
+        
         
         
 class ReminderForm(forms.ModelForm):
@@ -231,4 +236,5 @@ class ReminderForm(forms.ModelForm):
         fields = ['message','delta_value','delta_type','delta_direction']
         
 ReminderFormSet = inlineformset_factory(ReminderMessaging, Reminder, \
-                        fields=('delta_value','delta_type','delta_direction'), form = ReminderForm, extra=3, max_num=10)   
+                        fields=('delta_value','delta_type','delta_direction'), form = ReminderForm,\
+                        extra=3, max_num=10, validate_max=True)   
