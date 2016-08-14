@@ -9,8 +9,7 @@
 <div class="row">
 	<h3>Draft <small>Standard Messages</small></h3>
 	{{ block.super }}
-	<a class="small button float-right hollow" href="{% url 'messaging:advanced-draft-messages' %}">Advanced</a>
-	<a class="small button float-right" href="{% url 'messaging:standard-draft-messages' %}">Standard</a>
+	{% include "messaging/messaging_nav_tab.html" %}
 	{% render_table table %}
 </div>
 {% endblock %}
