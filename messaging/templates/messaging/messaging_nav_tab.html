@@ -1,0 +1,4 @@
+
+<a class="small button float-right {% if herpath != 'standard' %}hollow{% endif %}" href="{% url 'messaging:standard-draft-messages' %}">Standard</a>
+<a class="small button float-right {% if herpath != 'advanced' %}hollow{% endif %}" href="{% url 'messaging:advanced-draft-messages' %}">Advanced</a>
+<a class="small button float-right {% if herpath != 'reminder' %}hollow{% endif %}" href="{% url 'messaging:reminder-draft-messages' %}">Reminder</a>
