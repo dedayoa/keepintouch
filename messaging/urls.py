@@ -19,6 +19,10 @@ urlpatterns = [
     url(r'^processed/messages/$', message_processed_status_view, name='messages-processed-status'),
     url(r'^queued/messages/$', message_queued_status_view, name='messages-queued-status'),
     url(r'^queued/message/(?P<mtype>ADVANCED|STANDARD)/(?P<pk>\d+)/dequeue/$', queued_message_dequeue_view, name='queued-message-dequeue'),
+    
+    url(r'^running/messages/$',  message_running_status_view, name='messages-running-status'),
+    url(r'^running/message/REMINDER/(?P<pk>\d+)/dequeue/$', queued_message_dequeue_view, name='running-message-dequeue'),
+    
     url(r'^standard/', include([
                 url(r'^new/$', StandardMessageCreateView.as_view(), name='new-standard-message'),
                 url(r'^draft/(?P<pk>\d+)/$', StandardMessageUpdateDraftView.as_view(), name='standard-message-draft'),
