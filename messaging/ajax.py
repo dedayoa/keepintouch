@@ -3,11 +3,12 @@ Created on Jul 13, 2016
 
 @author: Dayo
 '''
-import os, pickle
+import os, sys
+import pickle
 import tablib
 import json
 import uuid
-import datetime, pytz
+import datetime, pytz, dateutil.parser
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django_ajax.decorators import ajax
@@ -312,18 +313,21 @@ def send_message(request):
             return {'result':'Success! Message Queued for Sending'}
 
 def is_date_valid(date_text):
-    
+    try:
+        dateutil.parser.parse(date_text)
+        return [True, 'OK']
+    except ValueError as e:
+        return [False, e]
+    except:
+        e = (sys.exc_info())[1]
+        return [False, e]
+    '''
     try:
         if date_text != datetime.datetime.strptime(date_text, '%d/%m/%Y').strftime('%d/%m/%Y'):
-            raise ValueError("Incorrect data format, should be YYYY-MM-DD")
+            raise ValueError("Incorrect data format, should be DD/MM/YYYY")
         return True
     except ValueError:
         return False
-    '''
-    try:
-        datetime.datetime.strptime(date_text, '%d/%m/%Y')
-    except ValueError:
-        raise ValueError("Incorrect data format, should be YYYY-MM-DD")
     '''
 
 def return_all_level_err(message):
@@ -340,10 +344,11 @@ def run_reminder(request):
         rmform = ReminderMessagingForm(request.POST)
         rm_formset = ReminderFormSet(request.POST)
         
-        if not(rmform.is_valid() and rm_formset.is_valid()):
-            return {'errors':rmform.errors.as_json(escape_html=True)}
-        else:
-            
+        if not rmform.is_valid():
+            return {'errors': rmform.errors.as_json(escape_html=True)}
+        if not rm_formset.is_valid():
+            return {'errors': return_all_level_err(rm_formset.non_form_errors())} #
+        else:            
             try:
                 #delete item from draft
                 if ReminderMessaging.objects.filter(pk = request.POST.get('message_id')).exists():
@@ -360,14 +365,13 @@ def run_reminder(request):
             dataset.dict = data_result['data_table']
             
             # check that it is dates that are in the "date" column
-            '''
-            for item in dataset[data_result['identity_column_name']]:
-                if is_date_valid(item) is False:
-                    return {'errors': return_all_level_err('An error was encountered while validating the date column. It seems you have selected the wrong date column')}
+            for item in dataset[rmform.cleaned_data.get('date_column')]:
+                
+                if is_date_valid(item)[0] is False:
+                    return {'errors': return_all_level_err('Error encountered while validating the date column: '+\
+                                                           str(is_date_valid(item)[1]))}
                     break
-                else:
-                    pass
-            '''
+                
             recipient_group = request.POST.getlist('contact_group',[])
             grps = ContactGroup.objects.filter(pk__in = recipient_group).prefetch_related('contacts')
             contacts_id = set()
@@ -389,12 +393,14 @@ def run_reminder(request):
             gogo_contacts = contacts_id.intersection(set(contacts_column))
 
             if gogo_contacts is None:
-                return {'errors':return_all_level_err('It seems you have selected the wrong table column. We could not match contacts')}
+                return {'errors':return_all_level_err('It seems you have selected the wrong table column. We could not match any contact')}
             
             # get {contact_id:date}
             cdsoi = {}
             for recipient in gogo_contacts:
                 cdsoi[recipient] = data_result['data'][recipient][rmform.cleaned_data.get('date_column')]
+                
+            print(cdsoi)
                 
             rmdrs = set()
             for form in rm_formset:
@@ -417,15 +423,15 @@ def run_reminder(request):
                     'others' : {
                         'draft_title' : rmform.cleaned_data.get('title'),
                         'template_id' : rmform.cleaned_data.get('message_template').id,
-                        'custom_data_namespace' : rmform.cleaned_data.get('custom_data_namespace'),
+                        'custom_data_namespace' : rmform.cleaned_data.get('custom_data_namespace').pk,
                         'date_column' : rmform.cleaned_data.get('date_column')                
                                 }
                            },
                 contact_dsoi = cdsoi,
                 reminders = list(rmdrs),
-                job = [],
+                sent_details = [],
                 created_by = request.user.kituser 
                                           )
             
               
-            return {'result','Reminder Started Successfully'}
+            return {'result':'Reminder Started Successfully'}
