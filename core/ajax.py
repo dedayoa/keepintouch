@@ -16,15 +16,18 @@ import humanize
 import base64
 from cryptography.fernet import Fernet
 
-from .models import KITUser, SMSTransfer, CustomData
+from .models import KITUser, SMSTransfer, CustomData, Contact
 from .forms import SMSTransferForm, ContactImportForm, CustomDataIngestForm
 from .impexp import ContactResource
 import tablib
 import sys
 import os
 import uuid
+import logging
 from core.models import UploadedContact
 from django.utils.text import slugify
+
+logger = logging.getLogger(__name__)
 
 @ajax
 @login_required
@@ -371,16 +374,28 @@ def process_1_custom_data(request):
             'other_pets': 'Crabby'
         },
         '''
-        def process_data(ds_in_dict, identity_column_name):
+        def process_data(ds_in_dict, identity_column_name, unqfid):
             #converts a standard ds.dict into more accessible json
+            # also ensure the key is always contact ID
             new_dict = {}
             new_inner_dict = {}
             for row in ds_in_dict:
                 for k,v in row.items():
-                    if k==identity_column_name:
-                        new_dict[v] = new_inner_dict
-                    else:
-                        new_inner_dict[k] = v
+                    if unqfid == "coid":
+                        if k==identity_column_name:
+                            new_dict[v] = new_inner_dict
+                        else:
+                            new_inner_dict[k] = v
+                    elif unqfid == "doid":
+                        if k==identity_column_name:
+                            try:
+                                ctct = Contact.objects.get(domain_id=v)
+                                new_dict[ctct.pk] = new_inner_dict
+                            except Contact.DoesNotExist:
+                                logger.error('While importing Custom Data, no ContactID match was found for the DomainID {}'.format(v))
+                        else:
+                            new_inner_dict[k] = v
+                            
                 new_inner_dict = {}
             return new_dict
         
@@ -394,7 +409,7 @@ def process_1_custom_data(request):
                     identity_column_name =  ds.headers[int(id_fld_ptr)],
                     system_id_field = unqf_idfr,
                     headers = ds.headers,
-                    data = process_data(ds.dict, ds.headers[int(id_fld_ptr)]),
+                    data = process_data(ds.dict, ds.headers[int(id_fld_ptr)], unqfid="coid"),
                     data_table = ds.dict,
                     created_by = request.user.kituser
                 )
@@ -404,7 +419,7 @@ def process_1_custom_data(request):
                     identity_column_name =  ds.headers[int(id_fld_ptr)],
                     system_id_field = unqf_idfr,
                     headers = ds.headers,
-                    data = process_data(ds.dict, ds.headers[int(id_fld_ptr)]),
+                    data = process_data(ds.dict, ds.headers[int(id_fld_ptr)], unqfid="doid"),
                     data_table = ds.dict,
                     created_by = request.user.kituser
                 )
