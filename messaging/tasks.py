@@ -7,17 +7,15 @@ Created on Jun 15, 2016
 from django.template import Context, Template
 import logging
 import django_rq
-from datetime import date
 
 from django.utils import timezone
 from django.conf import settings
-from core.models import MessageTemplate, Event, PublicEvent, Contact, SMTPSetting,\
+from core.models import Event, PublicEvent, Contact, SMTPSetting,\
     KITUser
 from .helper import SMTPHelper, SMSHelper, ok_to_send, SMSLive247Helper, get_next_delivery_time
 from dateutil.relativedelta import relativedelta
 
-from .models import AdvancedMessaging, StandardMessaging, QueuedMessages, ProcessedMessages,\
-                    RunningMessage
+from .models import QueuedMessages, ProcessedMessages,RunningMessage
 
 def _compose(template, convars):
     
@@ -127,7 +125,7 @@ def process_onetime_event():
                     s_sender = _compose(queued_message.message["title"], recipient_d)
                     _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
                                       owner = queued_message.created_by
-                                      )                
+                                      )
         
         # create entry in processed message
         ProcessedMessages.objects.create(
