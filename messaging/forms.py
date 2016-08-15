@@ -243,15 +243,39 @@ class BaseReminderFormSet(BaseInlineFormSet):
             return
         entries = set()
         for form in self.forms:
-            value = form.cleaned_data['delta_value']
-            d_type = form.cleaned_data['delta_type']
-            d_dir = form.cleaned_data['delta_direction']
             
-            fs_item = (value, d_type, d_dir)
+            try:
+                #it happens that delta_value key does not exist; and you just want to ignore it
+                
+                value = form.cleaned_data['delta_value']
+                d_type = form.cleaned_data['delta_type']
+                d_dir = form.cleaned_data['delta_direction']
+                
+                fs_item = (value, d_type, d_dir)
             
-            if fs_item in entries:
-                raise forms.ValidationError("Reminders in a set must have distinct entries.")
-            entries.add(fs_item)
+                if fs_item in entries:
+                    raise forms.ValidationError("Reminders must have distinct entries.")
+                entries.add(fs_item)
+            
+                """ check that the values entered are sane """
+                if d_type == "day":
+                    if not (0 < value <= 7):
+                        raise forms.ValidationError('Value for "days" has to be between 1 and 7')
+                if d_type == "week":
+                    if not (0 < value <= 4.4286):
+                        raise forms.ValidationError('Value for "weeks" has to be between 1 and 4.4286')
+                if d_type == "month":
+                    if not (0 < value <= 12):
+                        raise forms.ValidationError('Value for "months" has to be between 1 and 12')
+                if d_type == "year":
+                    if not (0 < value <= 3):
+                        raise forms.ValidationError('Value for "years" has to be between 1 and 3')
+            
+            except KeyError:
+                pass
+            
+            
+
         
 ReminderFormSet = inlineformset_factory(ReminderMessaging, Reminder, \
                         fields=('delta_value','delta_type','delta_direction'), form = ReminderForm,\
