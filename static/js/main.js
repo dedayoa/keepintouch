@@ -9,6 +9,17 @@ if ($('#id_all_contacts').prop('checked')){
 	$('#div_id_recipients').show()
 }
 
+
+var $loading = $('#loadingDiv').hide();
+
+$(document)
+  .ajaxStart(function () {
+    $loading.show();
+  })
+  .ajaxStop(function () {
+    $loading.hide();
+  });
+
 jQuery.fn.highlight = function () {
     $(this).each(function () {
         var el = $(this);
