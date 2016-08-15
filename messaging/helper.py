@@ -41,7 +41,7 @@ def temp_log_to_db(m_type, **kwargs):
                            }
         )
     
-    if m_type == 'sms':
+    elif m_type == 'sms':
         SMSReport.objects.create(
             to_phone = kwargs['sms_msg'][2],
             status = 0,
