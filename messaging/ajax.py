@@ -282,6 +282,9 @@ def send_message(request):
                 message_reoccurs = True
                 next_delivery_time = get_next_delivery_time(my_adv_form[0].cleaned_data.get('repeat_frequency'),\
                                                             my_adv_form[0].cleaned_data.get('delivery_time'))
+            else:
+                message_reoccurs = False
+                next_delivery_time = my_adv_form[0].cleaned_data.get('delivery_time')
             
             fdt = (my_adv_form[0].cleaned_data.get('delivery_time')).strftime('%d-%m-%Y %H:%M')
             
