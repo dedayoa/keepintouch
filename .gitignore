@@ -1,6 +1,10 @@
 
 *.pyc
 help/*
-/media/
+/media/*.*
 /staticfiles/*
 .env
+/media/issue_feedback/*
+/media/tmp/*
+/media/uploaded_contact_files/*
+/media/uploads/*
