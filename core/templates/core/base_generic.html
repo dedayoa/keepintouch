@@ -1,5 +1,5 @@
 {% extends "core/base.html" %}
-
+{% load staticfiles %}
 
 {% block body %}
 	<div class="off-canvas-wrapper">
@@ -54,5 +54,9 @@
 				</div>
 			</div>
 		</div>
+	</div>
+	
+	<div class="modal" id="loadingDiv">
+		<center><img style="padding-top: 21%" src="{% static 'images/spinner.svg' %}" alt="spinner"/></center>
 	</div>
 {% endblock %}
