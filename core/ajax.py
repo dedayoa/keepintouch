@@ -26,6 +26,7 @@ import uuid
 import logging
 from core.models import UploadedContact
 from django.utils.text import slugify
+from tablib.core import UnsupportedFormat
 
 logger = logging.getLogger(__name__)
 
@@ -329,25 +330,30 @@ def upload_custom_data(request):
             upinfile = request.FILES.get('file')
             uqf_ptr = request.POST.get('unique_field')
             
-            idata_headers = tablib.Dataset().load(upinfile.read()).headers
-            #idata_headers[:] = [us_slugify(s, '_') for s in idata_headers]
-            
-            result_dict['idata_headers'] = clean_header(idata_headers)
-            
-            upinfile.seek(0)
-            
-            fext = os.path.splitext(str(upinfile))[1]
-            file_path = os.path.join(settings.MEDIA_ROOT, 'tmp/'+str(uuid.uuid4())+fext)
-            upfile_path = default_storage.save(file_path, ContentFile(upinfile.read()))
-            
-            aix = bytes(settings.SECRET_KEY[:32],'utf-8')
-            f = Fernet(base64.urlsafe_b64encode(aix))
-            token = f.encrypt(bytes(upfile_path,'utf-8'))
-            
-            result_dict['token'] = token
-            result_dict['unqf_idfr'] = uqf_ptr
-            
-            return {"result" : result_dict}
+            try:
+                idata_headers = tablib.Dataset().load(upinfile.read()).headers
+                #idata_headers[:] = [us_slugify(s, '_') for s in idata_headers]
+                
+                result_dict['idata_headers'] = clean_header(idata_headers)
+                
+                upinfile.seek(0)
+                
+                fext = os.path.splitext(str(upinfile))[1]
+                file_path = os.path.join(settings.MEDIA_ROOT, 'tmp/'+str(uuid.uuid4())+fext)
+                upfile_path = default_storage.save(file_path, ContentFile(upinfile.read()))
+                
+                aix = bytes(settings.SECRET_KEY[:32],'utf-8')
+                f = Fernet(base64.urlsafe_b64encode(aix))
+                token = f.encrypt(bytes(upfile_path,'utf-8'))
+                
+                result_dict['token'] = token
+                result_dict['unqf_idfr'] = uqf_ptr
+                
+                return {"result" : result_dict}
+            except KeyError:
+                return {'errors' : return_all_level_err(str(sys.exc_info()[1]))}
+            except UnsupportedFormat:
+                return {'errors' : return_all_level_err('A file with Unsupported table format was uploaded')}
 
 
 
