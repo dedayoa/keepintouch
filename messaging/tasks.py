@@ -160,7 +160,7 @@ def process_reminder_event():
             if ok_to_send(created_by):
                 #email
                 if message["send_email"] and recipient_d.email and message["email_template"]:
-                    smtp_setting_qsv = SMTPSetting.objects.get(pk = message["smtp_setting_id"]).values()
+                    smtp_setting_qsv = SMTPSetting.objects.get(pk = message["smtp_setting_id"])
                     e_msg = _compose(message["email_template"], recipient_d)
                     e_title = _compose(message["title"], recipient_d)
                     _send_email.delay([e_title, e_msg, recipient_d.email],\
