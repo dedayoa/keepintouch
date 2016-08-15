@@ -13,11 +13,11 @@ from django.utils import timezone
 from django.conf import settings
 from core.models import MessageTemplate, Event, PublicEvent, Contact, SMTPSetting,\
     KITUser
-from .helper import SMTPHelper, SMSHelper, ok_to_send, SMSLive247Helper
+from .helper import SMTPHelper, SMSHelper, ok_to_send, SMSLive247Helper, get_next_delivery_time
 from dateutil.relativedelta import relativedelta
 
-from .models import AdvancedMessaging, StandardMessaging, QueuedMessages, ProcessedMessages
-from .helper import get_next_delivery_time
+from .models import AdvancedMessaging, StandardMessaging, QueuedMessages, ProcessedMessages,\
+                    RunningMessage
 
 def _compose(template, convars):
     
@@ -142,6 +142,49 @@ def process_onetime_event():
         else:
             queued_message.update(delivery_time=get_next_delivery_time(queued_message.message["others"]["recurring"],\
                                                                        queued_message.delivery_time))
+
+
+
+
+def process_reminder_event():
+    
+    # get messages to run today
+    all_running_messages = RunningMessage.objects.filter(completed=False)
+    for running_message in all_running_messages:        
+        messages_due_today = running_message.get_events_due_within_the_next_day()
+        if messages_due_today == []:
+            continue
+        for message_due in messages_due_today:
+            
+            message = message_due[0]
+            created_by = KITUser.objects.get(pk=message_due[4])
+            recipient_d = Contact.objects.get(pk=message_due[1])
+            
+            if ok_to_send(created_by):
+                #email
+                if message["send_email"] and recipient_d.email and message["email_template"]:
+                    smtp_setting_qsv = SMTPSetting.objects.get(pk = message["smtp_setting_id"]).values()
+                    e_msg = _compose(message["email_template"], recipient_d)
+                    e_title = _compose(message["title"], recipient_d)
+                    _send_email.delay([e_title, e_msg, recipient_d.email],\
+                                      smtp_setting_qsv, owner = created_by
+                                      )
+                #sms
+                if message["send_sms"] and recipient_d.phone and message["sms_template"]:
+                    s_msg = _compose(message["sms_template"], recipient_d)
+                    s_sender = _compose(message["title"], recipient_d)
+                    _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
+                                      owner = created_by
+                                      )
+            # create entry in processed message
+            ProcessedMessages.objects.create(
+                message_type = 'REMINDER',
+                message = message,
+                created_by = created_by
+            )  
+                
+        
+
         
         
 def process_system_notification(**kwargs):
