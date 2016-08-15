@@ -188,18 +188,21 @@ class SMSLive247Helper():
                        'message' : message_payload[1],
                        'sender' : message_payload[0],
                        'sendto' : message_payload[2][1:], #remove leading +
-                       'msgtype' : 0             
+                       'msgtype' : 0
                        }
+            print(payload)
             r = requests.post("http://www.smslive247.com/http/index.aspx", data=payload)
-            if r.split(':')[0] is not 'OK':
+            response_text = r.text
+            print(r)
+            if response_text.split(':')[0] is not 'OK':
                 temp_log_to_db(
                     'sms',
                     sms_msg = [message_payload[0],message_payload[1],message_payload[2]],
-                    message_err_code = (r.split(':')[1]).strip(),
+                    message_err_code = (response_text.split(':')[1]).strip(),
                     owner = kwargs['owner']
                 )
             else:
-                messageid = (r.split(':')[1]).strip()
+                messageid = (response_text.split(':')[1]).strip()
                 #OK: 54142800
                 #log message
                 temp_log_to_db(
@@ -210,7 +213,7 @@ class SMSLive247Helper():
                 )
             
                 return(messageid)
-            return r
+            return r.text
         except:
             return(sys.exc_info())
     
