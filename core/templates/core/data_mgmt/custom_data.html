@@ -55,9 +55,6 @@
 	$(document).ready(function(){
 		$("span#max-file-size").text(function(){return Humanize.fileSize($(this).text())});
 		
-		
-		
-		
 		$("form#customdata-upload-form").submit(function(e){
 			e.preventDefault();
 			
