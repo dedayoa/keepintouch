@@ -277,7 +277,7 @@ class SMSReport(models.Model):
     created = models.DateTimeField(auto_now_add=True)  
     
     def __str__(self):
-        return "SMS to {}".format(self.to_phone.international)
+        return "SMS to {}".format(self.to_phone.as_international)
     
     
 class EmailReport(models.Model):
