@@ -121,7 +121,7 @@ def process_onetime_event():
                 #sms   
                 if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
                     s_msg = _compose(queued_message.message["sms_template"], recipient_d)
-                    s_sender = _compose(queued_message.message["title"], recipient_d)
+                    s_sender = _compose(queued_message.message["sms_sender_id"], recipient_d)
                     _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
                                       owner = queued_message.created_by
                                       )
