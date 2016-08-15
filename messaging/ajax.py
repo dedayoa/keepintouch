@@ -29,6 +29,7 @@ from .helper import get_next_delivery_time
 import base64
 from cryptography.fernet import Fernet
 
+
 def _compose(template, convars):
     
     t = Template(template)
@@ -242,22 +243,23 @@ def send_message(request):
                 message_id = messageid, #-1 means it was never saved to draft
                 message = {
                     'message_id' : messageid,
-                    'title':myform.cleaned_data.get('title',''),
-                    'email_template':myform.cleaned_data.get('email_message',''),
-                    'sms_template':myform.cleaned_data.get('sms_message',''),
+                    'title' : myform.cleaned_data.get('title',''),
+                    'email_template' : myform.cleaned_data.get('email_message',''),
+                    'sms_template' : myform.cleaned_data.get('sms_message',''),
                     'send_email' : myform.cleaned_data.get('send_email', False),
                     'send_sms' : myform.cleaned_data.get('send_sms', False),
                     'sms_sender_id' : myform.cleaned_data.get('sms_sender',''),
                     'recipients' : request.POST.getlist('recipients',[]),
                     'smtp_setting_id': request.POST.get('smtp_setting',''),
                     'others' : {
-                                'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None                                
+                            'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None                                
                                 }
-                           },
+                            },
                 delivery_time = myform.cleaned_data.get('delivery_time'),
                 created_by = request.user.kituser
                 
             )
+            
             return {'result':'Success! Message Queued for Sending'}
             
         elif request.POST.get("message_type") == 'ADVANCED':
