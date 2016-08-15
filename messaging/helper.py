@@ -26,9 +26,9 @@ def temp_log_to_db(m_type, **kwargs):
     if m_type == 'email':
         EmailReport.objects.create(
             to_email = kwargs['email_msg'][2],
-            from_email = kwargs['sender_mail'],
+            from_email = kwargs.get('sender_mail',''),
             status = 0,
-            owner = kwargs['owner'],
+            owner = kwargs.get('owner',''),
             email_message = {
                 'title' : kwargs['email_msg'][0],
                 'body' : kwargs['email_msg'][1]
@@ -36,7 +36,7 @@ def temp_log_to_db(m_type, **kwargs):
             email_gateway = {
                 'email_id' :'',
                 'gateway_id' : '',
-                'gateway_error_preamble' : kwargs['gw_err_preamble']
+                'gateway_error_preamble' : kwargs.get('gw_err_preamble','')
                 
                            }
         )
@@ -45,16 +45,16 @@ def temp_log_to_db(m_type, **kwargs):
         SMSReport.objects.create(
             to_phone = kwargs['sms_msg'][2],
             status = 0,
-            owner = kwargs['owner'],
+            owner = kwargs.get('owner',''),
             sms_message = {
                 'sender_id' : kwargs['sms_msg'][0],
                 'body' : kwargs['sms_msg'][1],
                 'message_type' : '0'
                            },
             sms_gateway = {
-                'message_id' : kwargs['message_id'],
+                'message_id' : kwargs.get('message_id',''),
                 'gateway_id' : '',
-                'gateway_error_code' : kwargs['gw_err_code']
+                'gateway_error_code' : kwargs.get('gw_err_code','')
                            },
         )
     
