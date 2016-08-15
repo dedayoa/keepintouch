@@ -52,9 +52,9 @@ def temp_log_to_db(m_type, **kwargs):
                 'message_type' : '0'
                            },
             sms_gateway = {
-                'message_id' : kwargs.get('message_id',''),
+                'message_id' : kwargs.get('message_id', 0),
                 'gateway_id' : '',
-                'gateway_error_code' : kwargs.get('gw_err_code','')
+                'gateway_error_code' : kwargs.get('message_err_code','')
                            },
         )
     
@@ -190,10 +190,8 @@ class SMSLive247Helper():
                        'sendto' : message_payload[2][1:], #remove leading +
                        'msgtype' : 0
                        }
-            print(payload)
             r = requests.post("http://www.smslive247.com/http/index.aspx", data=payload)
             response_text = r.text
-            print(r)
             if response_text.split(':')[0] is not 'OK':
                 temp_log_to_db(
                     'sms',
@@ -211,8 +209,6 @@ class SMSLive247Helper():
                     message_id = messageid,
                     owner = kwargs['owner']
                 )
-            
-                return(messageid)
             return r.text
         except:
             return(sys.exc_info())
