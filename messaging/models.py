@@ -1,6 +1,8 @@
+import sys
 import datetime
 import html2text
 from dateutil.relativedelta import relativedelta
+from dateutil.parser import *
 
 from django.db import models
 from django.apps import apps
@@ -180,36 +182,74 @@ class ProcessedMessages(models.Model):
     class Meta:
         verbose_name_plural = "Processed Messages"
         
+
+def event_date(period, value, date_text, direction):
+    # @params dir:direction
+    print(date_text)
+    
+    try:
         
+        usedate = parse(date_text)
+        
+        if direction == "before":
+            if period == "day":
+                return arrow.get(usedate).replace(days=-value).datetime
+            elif period == "week":
+                return arrow.get(usedate).replace(weeks=-value).datetime
+            elif period == "month":
+                return arrow.get(usedate).replace(months=-value).datetime
+            elif period == "year":
+                return arrow.get(usedate).replace(years=-value).datetime
+        elif direction == "after":
+            if period == "day":
+                return arrow.get(usedate).replace(days=+value).datetime
+            elif period == "week":
+                return arrow.get(usedate).replace(weeks=+value).datetime
+            elif period == "month":
+                return arrow.get(usedate).replace(months=+value).datetime
+            elif period == "year":
+                return arrow.get(usedate).replace(years=+value).datetime
+    except:
+        print(sys.exc_info())
+
+         
+                
+                
 class RunningMessage(models.Model):
     
     message = JSONField()
-    contact_dsoi = JSONField() #contactid and dates of interest
-    reminders = JSONField() #all converted to minutes
-    job = JSONField() #completed queries
+    contact_dsoi = JSONField() #[["X27NC6XGP", "15/8/2017"],["V27NC6XGS", "5/2/2017"]]
+    reminders = JSONField() # [[2, "week", "before"], [5, "day", "after"]]
+    last_event_on = models.DateTimeField()
     completed = models.BooleanField(default=False)
     
     created_by = models.ForeignKey(KITUser, models.PROTECT)
-    first_run_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(auto_now_add=True)
     
     def set_is_completed(self):
         if self.reminders is None:
-            self.completed = True
-            
-    def query_reminder_availability(self):
-        for reminder in self.reminders:
-            if reminder["delta"] == "before":
-                for contact_doi in self.contact_dsoi:
-                    if self.filter(job__contains = {'{}:{}:{}'.format(reminder["delta_min"],reminder["delta"],contact_doi["doi"])}):
-                        print("Its there")
-                    else:
-                        if arrow.utcnow().replace(minutes = reminder["delta_min"]) >= arrow.get(contact_doi["date"],'DD/MM/YYYY'):
-                            return contact_doi["contact"]
-            elif reminder["delta"] == "after":
-                for contact_doi in self.contact_dsoi:
-                    if arrow.utcnow().replace(minutes = -reminder["delta_min"]) >= arrow.get(contact_doi["date"],'DD/MM/YYYY'):
-                        return contact_doi["contact"]
+            self.completed = True      
     
+    def get_events_due_within_the_next_day(self):
+        # is date between now and next 1 hour?
+        # store in a to_be_processed_table, else proceed
+        
+        due_events=[]
+        
+        for reminder in self.reminders:
+            for dsoi in self.contact_dsoi:
+                
+                focal_date = event_date(reminder[1],reminder[0],dsoi[1],reminder[2])
+                if arrow.utcnow().floor('day') <= focal_date  <=  arrow.utcnow().ceil('day'):
+                    due_events.append([self.message,dsoi[0], dsoi[1], reminder, self.created_by]) 
+        
+        # check if there are any more events, if not, mark as completed            
+        if self.last_event_on <= arrow.utcnow().ceil('day'):
+            self.completed = True #setting completed shunts the entire function
+        
+        return due_events
+        
+        
     def __str__(self):
         return self.message["title"]
     
@@ -309,7 +349,7 @@ class ReminderMessaging(models.Model):
             return []
             
     def get_absolute_url(self):
-        return reverse('messaging:new-reminder-message',args=[self.pk])  
+        return reverse('messaging:reminder-message-draft',args=[self.pk])  
         
     
     def save(self, *args, **kwargs):
@@ -322,7 +362,6 @@ class ReminderMessaging(models.Model):
 class Reminder(models.Model):
     
     DELTA = (
-        ("hour",_("Hours")),
         ("day",_("Days")),
         ("week",_("Weeks")),
         ("month",_("Months")),
