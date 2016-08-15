@@ -32,8 +32,7 @@ def _compose(template, convars):
 @django_rq.job('email')
 def _send_email(email_message, smtp_profile, **kwargs):
     es = SMTPHelper(smtp_profile)
-    print(es)
-    es.send_email(email_message, **kwargs)
+    print(es.send_email(email_message, **kwargs))
 
 @django_rq.job('email')
 def _send_mass_email(email_message, smtp_profile):
@@ -43,7 +42,7 @@ def _send_mass_email(email_message, smtp_profile):
 @django_rq.job('sms')
 def _send_sms(sms_message, **kwargs):
     es = SMSLive247Helper()
-    es.send_sms(sms_message, **kwargs)
+    print(es.send_sms(sms_message, **kwargs))
 
 @django_rq.job('sms')   
 def _send_mass_sms(sms_message, **kwargs):
