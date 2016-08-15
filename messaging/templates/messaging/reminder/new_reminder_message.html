@@ -65,15 +65,18 @@
 			//widget is textfield by defaul, changed to select
 			$("#id_date_column").replaceWith('<select class="select" id="id_date_column" name="date_column"></select>');
 			
-			$( "#id_custom_data_namespace" ).change(function(e){
+	   		$( "#id_custom_data_namespace" ).change(function(e){
 	   			var url = '/data-mgmt/custom-data/headers/'+$("#id_custom_data_namespace").val();
 	   			ajaxGet(url, function(content){
+	   				
+	   				console.log(content.result)
+	   				
 	   				if (content.result == "nil"){
 						$("#id_date_column").empty();
 					}
 	   				else{
 	   					$("#id_date_column").empty();
-						$.each(content.result.headers, function(i, val){
+						$.each(content.result, function(i, val){
 								$("#id_date_column").append($('<option />', { value: val, text: val }));
 						});
 	   				}
@@ -88,10 +91,10 @@
 	   			ajaxPost('/messaging/run-reminder/',payload, function(content){	   				
 	   				if (content.hasOwnProperty("errors")){
 	           			var errors = $.parseJSON(content.errors);
-           				$.each(errors, function(index, value){
+	           			$.each(errors, function(index, value){
 	           				if (index === '__all__'){
 	           					$('div.nonfield-ajax-error').remove();
-	           					$("#advanced-message-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+	           					$("#reminder-message-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
 	           				}else{
 	           					$("small.error").remove();
 	           					//select field with error and apply text after it
@@ -99,11 +102,13 @@
 	           				}
 	           			});
 	           			return;
+	           			
 	           		}else{
 	   					$('div.nonfield-ajax-error').remove();
 	   					$("small.error").remove();
 	   					
-	   					console.log(content.result);
+	   					$('#message-sent-modal h4').text(content.result);
+		    			$('#message-sent-modal').foundation('open');
 	   				}
 	   			});
 	   		});
