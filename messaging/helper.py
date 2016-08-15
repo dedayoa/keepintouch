@@ -194,7 +194,7 @@ class SMSLive247Helper():
             if r.split(':')[0] is not 'OK':
                 temp_log_to_db(
                     'sms',
-                    [message_payload[0],message_payload[1],message_payload[2]],
+                    sms_msg = [message_payload[0],message_payload[1],message_payload[2]],
                     message_err_code = (r.split(':')[1]).strip(),
                     owner = kwargs['owner']
                 )
