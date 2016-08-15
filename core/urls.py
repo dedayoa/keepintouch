@@ -58,9 +58,9 @@ urlpatterns = [
     url(r'^data-mgmt/', include([
                 url(r'^custom-data/upload/$', upload_custom_data, name='upload-custom-data'),
                 url(r'^custom-data/process-a/$', process_1_custom_data),
-                url(r'^custom-data/(?P<pk>\w{5})/$', get_custom_data_ajax, name='custom-data-ajax'),
-                url(r'^custom-data/(?P<pk>\w{5})/delete/$', delete_custom_data_ajax, name='delete-custom-data-ajax'),
-                url(r'^custom-data/headers/(?P<pk>\w{5})/$', get_custom_data_columns, name='custom-data-columns'),
+                url(r'^custom-data/(?P<pk>\w{6})/$', get_custom_data_ajax, name='custom-data-ajax'),
+                url(r'^custom-data/(?P<pk>\w{6})/delete/$', delete_custom_data_ajax, name='delete-custom-data-ajax'),
+                url(r'^custom-data/headers/(?P<pk>\w{6})/$', get_custom_data_columns, name='custom-data-columns'),
                 url(r'^custom-data/headers/$', get_custom_data_columns),
     ])),
 
