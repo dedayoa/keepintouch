@@ -18,7 +18,8 @@ from django.db import transaction
 from django.conf import settings
 
 from .models import Contact, SMTPSetting, StandardMessaging, QueuedMessages, AdvancedMessaging,\
-                    ContactGroup, MessageTemplate, RunningMessage, ReminderMessaging
+                    ContactGroup, MessageTemplate, RunningMessage, ReminderMessaging,\
+                    event_date
 from core.models import CustomData                    
 
 from messaging.sms_counter import SMSCounter
@@ -334,6 +335,18 @@ def return_all_level_err(message):
     return json.dumps({'__all__': [{'message' : message}]})
 
 
+def get_last_event_date(reminders, contact_dsoi):
+    
+    intdates = set()
+    
+    for reminder in reminders:
+        for dsoi in contact_dsoi:
+            ed = event_date(reminder[1],reminder[0],dsoi[1],reminder[2])
+            intdates.add(ed)
+    return max(intdates)
+            
+    
+
 
 @ajax
 @login_required
@@ -396,9 +409,9 @@ def run_reminder(request):
                 return {'errors':return_all_level_err('It seems you have selected the wrong table column. We could not match any contact')}
             
             # get {contact_id:date}
-            cdsoi = {}
+            cdsoi = set()
             for recipient in gogo_contacts:
-                cdsoi[recipient] = data_result['data'][recipient][rmform.cleaned_data.get('date_column')]
+                cdsoi.add((recipient,data_result['data'][recipient][rmform.cleaned_data.get('date_column')]))
                 
             print(cdsoi)
                 
@@ -408,7 +421,8 @@ def run_reminder(request):
                 if cd.get('delta_value') is None:
                     continue
                 rmdrs.add((cd.get('delta_value'), cd.get('delta_type'), cd.get('delta_direction')))
-                  
+            
+            furthermost_event = get_last_event_date(rmdrs, cdsoi)    
 
             RunningMessage.objects.create(
                 message = {
@@ -427,9 +441,9 @@ def run_reminder(request):
                         'date_column' : rmform.cleaned_data.get('date_column')                
                                 }
                            },
-                contact_dsoi = cdsoi,
+                contact_dsoi = list(cdsoi),
                 reminders = list(rmdrs),
-                sent_details = [],
+                last_event_on = furthermost_event,
                 created_by = request.user.kituser 
                                           )
             
