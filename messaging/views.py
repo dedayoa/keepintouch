@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.contrib import messages as flash_messages
 
@@ -245,7 +245,7 @@ class ReminderCreateView(CreateView):
         
         if form.is_valid() and reminder_formset.is_valid():
             return self.form_valid(form, reminder_formset)
-        return self.form_invalid()
+        return self.form_invalid(form, reminder_formset)
     
     
     def form_valid(self, form, formset):
@@ -310,14 +310,13 @@ class ReminderUpdateDraftView(UpdateView):
     def post(self, request, *args, **kwargs):
         
         self.object = self.get_object()
-        
-        form = self.get_form(self.form_class)
+        choices_arr = self.object.get_custom_data_header_selected_choices()
+        form = self.form_class(request.POST or None, instance=self.object, date_column_ish=choices_arr)
         reminder_formset = ReminderFormSet(request.POST, instance=self.object)
-        
         
         if form.is_valid() and reminder_formset.is_valid():
             return self.form_valid(form, reminder_formset)
-        return self.form_invalid()
+        return self.form_invalid(form, reminder_formset)
     
     
     def form_valid(self, form, formset):
@@ -328,9 +327,13 @@ class ReminderUpdateDraftView(UpdateView):
         return HttpResponseRedirect(reverse('messaging:reminder-message-draft', args=[self.object.pk]))
     
     
-    def form_invalid(self):
+    def form_invalid(self, form, reminder_formset):
         
-        return HttpResponseRedirect(reverse('messaging:reminder-message-draft', args=[self.object.pk]))
+        params = self.get_context_data()
+        params["form"] = form
+        params["reminder_formset"] = reminder_formset
+        
+        return render(self.request, self.template_name, params)
     
     
     def get_context_data(self, **kwargs):
