@@ -112,7 +112,7 @@ def process_onetime_event():
             if ok_to_send(queued_message.created_by):
                 #email
                 if queued_message.message["send_email"] and recipient_d.email and queued_message.message["email_template"]:
-                    smtp_setting_qsv = SMTPSetting.objects.get(pk = queued_message.message["smtp_setting_id"]).values()
+                    smtp_setting_qsv = SMTPSetting.objects.get(pk = queued_message.message["smtp_setting_id"])
                     e_msg = _compose(queued_message.message["email_template"], recipient_d)
                     e_title = _compose(queued_message.message["title"], recipient_d)
                     _send_email.delay([e_title, e_msg, recipient_d.email],\
