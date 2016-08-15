@@ -47,11 +47,16 @@
 </div>
 {% endblock %}
 {% block foot_base_js %}
-	<script type="text/javascript" src="{% static "js/humanize.js" %}"></script>
-	<script type="text/javascript" src="{% static "js/jquery.dynatable.js" %}"></script>
+	<script type="text/javascript" src="{% static 'js/humanize.js' %}"></script>
+	<script type="text/javascript" src="{% static 'js/jquery.dynatable.js' %}"></script>
 	<script>
+
+	
 	$(document).ready(function(){
 		$("span#max-file-size").text(function(){return Humanize.fileSize($(this).text())});
+		
+		
+		
 		
 		$("form#customdata-upload-form").submit(function(e){
 			e.preventDefault();
@@ -68,7 +73,7 @@
            				if (index === '__all__'){
            					$('div.nonfield-ajax-error').remove();
            					$("small.error").remove();
-           					$("#sms-transfer-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+           					$("#customdata-upload-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
            				}else{
            					$("small.error").remove();
            					//select field with error and apply text after it
