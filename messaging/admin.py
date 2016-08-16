@@ -10,7 +10,7 @@ class EmailReportAdmin(admin.ModelAdmin):
     
 class SMSReportAdmin(admin.ModelAdmin):
     
-    list_display = ('status','created')
+    list_display = ('__str__','status','created')
 
 
 admin.site.register(StandardMessaging)
