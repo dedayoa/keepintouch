@@ -1,5 +1,6 @@
 {% load staticfiles %}
 {% load sitegate %}
+{% load google_analytics %}
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 <head>
@@ -49,5 +50,6 @@
 		<script type="text/javascript" src="{% static "js/vendor/foundation.js" %}"></script>
 		<script type="text/javascript" src="{% static "js/main.js" %}"></script>
 	{% endblock %}
+	{% google_analytics %}
 </body>
 </html>
