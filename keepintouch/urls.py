@@ -19,8 +19,6 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.conf.urls.static import static
 
-
-
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^select2/', include('django_select2.urls')),
@@ -30,3 +28,5 @@ urlpatterns = [
     url(r'^messaging/', include('messaging.urls', namespace='messaging', app_name='messaging')),
     url(r'^', include('gomez.urls', namespace='gomez', app_name='gomez')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)#+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+admin.site.site_header = 'In.Touch Email+SMS Administration'
