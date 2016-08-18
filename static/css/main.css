@@ -23,7 +23,7 @@ div#bug-report{
     opacity: 1;
 }
 
-div.off-canvas-content{
+div.off-canvas-wrapper{
 	margin-bottom: 50px;
 }
 
@@ -228,6 +228,9 @@ body.dashboard .kitapp-content h3{
 	background-color: #FF1744;
 }
 
+#dsb-free_sms_balance{
+	background-color: #8080ff;
+}
 #dsb-sms_balance{
 	background-color: #3F51B5;
 }
