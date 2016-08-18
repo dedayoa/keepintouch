@@ -16,6 +16,14 @@ from django.contrib.postgres.fields.jsonb import JSONField
     
 class KITServicePlan(models.Model):
     name = models.CharField(max_length=100)
+    ad_supported = models.BooleanField(default=False)
+    free_sms = models.BooleanField(default=False, help_text="Weekly Free SMS?")
+    free_sms_units = models.PositiveIntegerField(help_text="Number of Weekly Free SMS", default=0)
+    user_accounts_allowed = models.PositiveIntegerField(default=0)
+    user_groups_allowed = models.PositiveIntegerField(default=0)
+    can_use_custom_data = models.BooleanField(default=False)
+    api_access = models.BooleanField(default=False)
+    sms_unit_bundle = models.PositiveIntegerField(default=0)
         
     def __str__(self):
         return self.name
