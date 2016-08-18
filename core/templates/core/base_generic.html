@@ -18,7 +18,7 @@
 					<div class="title-bar">
 						<div class="title-bar-left">
 							<button class="menu-icon hide-for-large" type="button" data-toggle="offCanvas"></button>
-							<span class="title-bar-title">In.Touch</span>
+							<span class="title-bar-title"><img width="20px" src="{%  static 'images/favicon.png' %}" /> In.Touch</span>
 						</div>
 						<div class="title-bar-right">
 							<div>Hi {{user.get_username}} <a href="{% url 'core:backdoor' %}"><i class="fi-power" style="font-size: 22px; line-height: 1rem; color: red"></i></a></div>
@@ -44,12 +44,29 @@
 								{% endif %}
 							{% endblock %}
 						</div>
-					{% block rsb_ex %}<div class="medium-2 show-for-large column">{% block rsb %}{% endblock %}</div>{% endblock %}
+					{% block rsb_ex %}
+						<div class="medium-2 show-for-large column">
+							{% block rsb %}
+								{% if request.user.kituser.supported_by_ads and not debug %}
+									<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+									<!-- InTouchSaaS-FreeUser-1 -->
+									<ins class="adsbygoogle"
+									     style="display:inline-block;width:160px;height:600px"
+									     data-ad-client="ca-pub-8909496138809362"
+									     data-ad-slot="8135738467"></ins>
+									<script>
+									(adsbygoogle = window.adsbygoogle || []).push({});
+								</script>
+								{% endif %}
+							
+							{% endblock %}
+						</div>
+					{% endblock %}
 					{% endblock %}
 				</div>
 				<div class="row">
 					{% block footer %}
-						<div class="small-12 columns"><span class="float-right">Copyright &copy; 2016</span></div>
+						<div class="small-12 columns"><span class="float-right">Copyright &copy; Tekart Ltd. 2016</span></div>
 					{% endblock %}
 				</div>
 			</div>
