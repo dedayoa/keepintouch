@@ -200,6 +200,10 @@ class KITUser(models.Model):
         else:
             return RunningMessage.objects.filter(created_by = self.pk).order_by('-started_at')
         
+        
+    def supported_by_ads(self):
+        return self.kitbilling.service_plan.ad_supported
+        
     #####Admin Things#######
     
     def get_kituser(self):
