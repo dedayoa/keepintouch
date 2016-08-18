@@ -102,6 +102,7 @@ class DashboardView(TemplateView):
             self.params["body_class"] = "dashboard"
             self.params["priv_annv"] = private_events
             self.params["publ_annv"] = public_events
+            self.params["is_saas"] = settings.KIT_IS_SAAS
             return render(request,self.template_name, self.params)
         
         else:
