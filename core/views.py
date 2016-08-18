@@ -58,6 +58,10 @@ def entrance(request):
         return render(request, 'core/access.html', {'title': 'Welcome'})
 
 
+def crawler_entrance(request):
+    pass
+
+
 def exitdoor(request):
     logout(request)
     return HttpResponseRedirect('/')
