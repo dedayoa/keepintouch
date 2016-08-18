@@ -41,12 +41,21 @@ import mimetypes
 from gomez.models import KITBilling
 
 from stronghold.decorators import public
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
 @signin_view(template='core/sitegate-myfoundation.html', redirect_to='core:dashboard-view')
 @redirect_signedin('core:dashboard-view')
 def entrance(request):
-    return render(request, 'core/access.html', {'title': 'Welcome'})
+    
+    @csrf_exempt
+    def nocsrf_path(request):
+        return render(request, 'core/crawler_access.html', {'title': 'Welcome'})
+    
+    if request.GET.get('next') == '/gcrawler/': #i came here from gcrawler
+        return nocsrf_path(request)
+    else:
+        return render(request, 'core/access.html', {'title': 'Welcome'})
 
 
 def exitdoor(request):
