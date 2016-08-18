@@ -116,10 +116,14 @@ class SMTPHelper():
             
             with conn as smtp_connection:
                 mail.EmailMessage(
-                    'Test Email from IntouchNG',
-                    'This is a test email to check your SMTP setup',
+                    'This is an SMTP Test Message',
+                    '''This is a message to Test that your SMTP settings are working OK
+                    
+                    Regards,
+                    In.Touch
+                    ''',
                     self.smtp_user,
-                    ['system-notification@intouchng.com'],
+                    ['dayo@windom.biz'],
                     connection=smtp_connection,
                 ).send()
                                 
