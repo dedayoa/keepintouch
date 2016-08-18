@@ -26,21 +26,27 @@
 				<h3>Dashboard <small>Welcome</small></h3>
 				<div class="grid">
 					<div class="grid-sizer"></div>
-					<div class="grid-item" id="dsb-uptime">
-						<h4>Uptime</h4>
-						<p><span>-</span></p>
-					</div>
-					<div class="grid-item" id="dsb-cpu">
-						<h4>CPU</h4>
-						<p><span>0</span>%</p>
-					</div>
-					<div class="grid-item" id="dsb-ram">
-						<h4>Memory</h4>
-						<p><span>0</span></p>
-					</div>
-					<div class="grid-item" id="dsb-disk_usage">
-						<h4>Disk<small> (/)</small></h4>
-						<p><span>0</span>%</p>
+					{% if not is_saas %}
+						<div class="grid-item" id="dsb-uptime">
+							<h4>Uptime</h4>
+							<p><span>-</span></p>
+						</div>
+						<div class="grid-item" id="dsb-cpu">
+							<h4>CPU</h4>
+							<p><span>0</span>%</p>
+						</div>
+						<div class="grid-item" id="dsb-ram">
+							<h4>Memory</h4>
+							<p><span>0</span></p>
+						</div>
+						<div class="grid-item" id="dsb-disk_usage">
+							<h4>Disk<small> (/)</small></h4>
+							<p><span>0</span>%</p>
+						</div>
+					{% endif %}					
+					<div class="grid-item" id="dsb-free_sms_balance">
+						<h4>Free SMS</h4>
+						<p class="stat text-center"><span>0</span></p>
 					</div>
 					<div class="grid-item" id="dsb-sms_balance">
 						<h4>SMS Balance</h4>
@@ -134,6 +140,7 @@
 						$("#dsb-qmc p span").text(content.result.qmc);
 						$("#dsb-pmc p span").text(content.result.pmc);
 						$("#dsb-sms_balance p span").text(Humanize.compactInteger(content.result.total_sms_balance));
+						$("#dsb-free_sms_balance p span").text(Humanize.compactInteger(content.result.free_sms_balance));
 					}
 				}, {onError: sayserverdown});				
 				setTimeout(get_qpc_stat, 240*1000);	
