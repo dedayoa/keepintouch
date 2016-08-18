@@ -23,7 +23,6 @@ django-etc==0.9.1
 django-fernet-fields==0.4
 django-filter==0.13.0
 django-grappelli==2.8.1
-django-guardian==1.4.4
 django-import-export==0.4.5
 django-jsonify==0.3.0
 django-model-utils==2.5
@@ -42,6 +41,7 @@ django-timezone-utils==0.10
 django-tinymce==2.3.0
 -e git://github.com/dedayoa/django-ajax#egg=djangoajax
 djangorestframework==3.3.3
+easy-thumbnails==2.3
 et-xmlfile==1.0.1
 factory-boy==2.7.0
 fake-factory==0.5.9
