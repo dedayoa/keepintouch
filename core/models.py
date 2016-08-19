@@ -105,7 +105,9 @@ class KITUser(models.Model):
     city_town = models.CharField(max_length=100, blank=False)
     state = models.CharField(max_length=100, blank=False, choices=STATE, default="LAG")
     is_admin = models.BooleanField(default=False)
+    
     sms_balance = models.PositiveIntegerField(default=0)
+    free_sms_balance = models.PositiveIntegerField(default=0)
     
     objects = KITUserManager()
     
@@ -122,7 +124,10 @@ class KITUser(models.Model):
         return self.parent
     
     def get_contacts(self):
-        if self.is_admin:
+        
+        if self.kitbilling.is_full_admin == False:
+            return Contact.objects.filter(kit_user=self.pk)
+        elif self.is_admin:
             #return self.kituser_set.contact_set
             return Contact.objects.filter(kit_user__parent=self.pk)
         else:
@@ -147,12 +152,14 @@ class KITUser(models.Model):
             
             
     def get_private_events(self):
-        if self.is_admin:
+                
+        if self.kitbilling.is_full_admin == False:
+            return Event.objects.filter(contact__kit_user=self.pk)
+        elif self.is_admin:
             '''
             Return the private events of all contacts created by users
             under the groups I admin over
             '''
-            
             return Event.objects.filter(contact__kit_user__parent=self.pk)
         else:
             #get events of groups I belong to
@@ -164,7 +171,10 @@ class KITUser(models.Model):
                 return Event.objects.filter(contact__kit_user__groups_belongto__kit_admin=self.parent).distinct()
         
     def get_public_events(self):
-        if self.is_admin:
+        
+        if self.kitbilling.is_full_admin == False:
+            return PublicEvent.objects.filter(kit_user=self.pk).order_by("date")
+        elif self.is_admin:
             return PublicEvent.objects.filter(kit_user__parent=self.pk).order_by("date")
         else:
             #get events of groups I belong to. May chance this later
@@ -174,6 +184,7 @@ class KITUser(models.Model):
                 return PublicEvent.objects.filter(kit_user__groups_belongto__kit_admin=self.parent).order_by("date").distinct()
         
     def get_templates(self):
+        
         if self.is_admin:
             return MessageTemplate.objects.filter(kit_admin = self.pk)
         else:
@@ -181,21 +192,30 @@ class KITUser(models.Model):
         
     def get_processed_messages(self):
         processedmessages = apps.get_model('messaging', 'ProcessedMessages')
-        if self.is_admin:
+        
+        if self.kitbilling.is_full_admin == False:
+            return processedmessages.objects.filter(created_by = self.pk)
+        elif self.is_admin:
             return processedmessages.objects.filter(created_by__parent = self.pk)
         else:
             return processedmessages.objects.filter(created_by = self.pk)
                 
     def get_queued_messages(self):
         queuedmessages = apps.get_model('messaging', 'QueuedMessages')
-        if self.is_admin:
+        
+        if self.kitbilling.is_full_admin == False:
+            return queuedmessages.objects.filter(created_by = self.pk).order_by('-queued_at')
+        elif self.is_admin:
             return queuedmessages.objects.filter(created_by__parent = self.pk).order_by('-queued_at')
         else:
             return queuedmessages.objects.filter(created_by = self.pk).order_by('-queued_at')
         
     def get_running_messages(self):
         RunningMessage = apps.get_model('messaging', 'RunningMessage')
-        if self.is_admin:
+        
+        if self.kitbilling.is_full_admin == False:
+            return RunningMessage.objects.filter(created_by = self.pk).order_by('-started_at')
+        elif self.is_admin:
             return RunningMessage.objects.filter(created_by__parent = self.pk).order_by('-started_at')
         else:
             return RunningMessage.objects.filter(created_by = self.pk).order_by('-started_at')
@@ -207,18 +227,22 @@ class KITUser(models.Model):
     #####Admin Things#######
     
     def get_kituser(self):
-        if self.is_admin:
+        if self.is_admin and self.kitbilling.is_full_admin:
             return KITUser.objects.get(parent=self.pk)
     
     def get_kitusers(self):
         '''
         Admin, get child users
         '''
-        if self.is_admin:
+        if self.is_admin and self.kitbilling.is_full_admin:
             return KITUser.objects.filter(parent=self.pk)
+        elif not self.kitbilling.is_full_admin:
+            raise PermissionError("You don't have the necessary Permissions")
         
-    def get_user_groups(self):
-        if self.is_admin:
+    def get_user_groups(self):        
+        if self.kitbilling.is_full_admin == False:
+            raise PermissionError("You don't have the necessary Permissions")
+        elif self.is_admin:
             return CoUserGroup.objects.filter(kit_admin=self.pk)
         
     def get_smtp_items(self):
