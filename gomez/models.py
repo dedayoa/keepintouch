@@ -52,6 +52,7 @@ class KITBilling(models.Model):
     service_plan = models.ForeignKey(KITServicePlan, blank=True, null=True)
     billing_cycle = models.CharField(max_length=2, choices=BILL_CY, default='AN')
     account_status = models.CharField(max_length=2, choices=ACCT_STATUS, default='PE')
+    is_full_admin = models.BooleanField(default=False)
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
