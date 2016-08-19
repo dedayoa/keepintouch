@@ -171,7 +171,10 @@ class PublicEventForm(forms.ModelForm):
         ev_date = cleaned_data.get("date")
         print(ev_date)
         
-        if ev_date < datetime.date.today():
+        if ev_date == None:
+            raise forms.ValidationError("Date cannot be empty")
+        
+        elif ev_date < datetime.date.today():
             self.add_error('date','')
             raise forms.ValidationError("PublicEvent date has to be in the future")
         
