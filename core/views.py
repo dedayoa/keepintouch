@@ -24,6 +24,8 @@ from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateT
                     SMSTransferHistoryTable, UploadedContactFileHistoryTable, CustomDataStoreTable
 from django.views.generic.edit import UpdateView, DeleteView, CreateView,\
     FormMixin
+    
+
 from django_select2.views import AutoResponseView
 
 from django.core import mail
@@ -32,6 +34,9 @@ from django.core.mail.backends.smtp import EmailBackend
 from django.contrib.messages.api import get_messages
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
+
+from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMixin
+from django.contrib.auth.decorators import user_passes_test
 
 from messaging.helper import SMTPHelper
 
@@ -430,7 +435,9 @@ def kituser_settings(request):
         params["table"] = kituserstable
         return render(request, 'core/settings/users/index.html', params)
     
-class UserCreateView(View):
+class UserCreateView(PermissionRequiredMixin, View):
+    
+    permission_required = 'core.add_kituser'
     
     model_1 = User
     model_2 = KITUser
@@ -439,13 +446,15 @@ class UserCreateView(View):
     
     form_1 = NewUserForm
     form_2 = KITUserForm
-    
+        
     def get(self, request):
         
         q_admin = KITUser.objects.get(user=request.user)
         
+        nuform = NewUserForm(instance=None, prefix="userform", kituser=self.request.user.kituser)
+        
         self.params["title"] = "New User"
-        self.params["form_1"] = self.form_1(instance=None, prefix="userform")
+        self.params["form_1"] = nuform
         self.params["form_2"] = self.form_2(instance=None, prefix="kituform")
         
         return render(request, self.template_name, self.params)
@@ -456,7 +465,8 @@ class UserCreateView(View):
         #k_user = get_object_or_404(KITUser, pk=pk,parent=request.user.kituser)
         #uzr = k_user.user
         
-        self.params["form_1"] = userform = self.form_1(request.POST or None, prefix="userform", instance=None)
+        nuform = NewUserForm(request.POST or None, prefix="userform", instance=None, kituser=self.request.user.kituser)
+        self.params["form_1"] = userform = nuform
         self.params["form_2"] = kituform = self.form_2(request.POST or None, prefix="kituform", instance=None)
         
         if userform.is_valid() and kituform.is_valid():
@@ -483,7 +493,9 @@ class UserCreateView(View):
         return reverse('core:kituser-detail', kwargs={'pk': self.object.pk})
     
 
-class KITUserUpdateView(View):
+class KITUserUpdateView(PermissionRequiredMixin, View):
+    
+    permission_required = 'core.change_kituser'
     
     model_1 = User
     model_2 = KITUser
@@ -492,6 +504,7 @@ class KITUserUpdateView(View):
     
     form_1 = ExistingUserForm
     form_2 = KITUserForm
+    
     
     def get(self, request, pk):
         
@@ -573,7 +586,9 @@ class KITUserPersonalProfileView(View):
                 
             
         return HttpResponseRedirect(reverse('core:kituser-personal-profile'))    
-    
+
+
+   
 def smtp_settings(request):
     
     if request.method == "GET":
@@ -641,7 +656,8 @@ class CheckSMTPServerView(View):
             
             return HttpResponseRedirect(reverse('core:smtp-detail', args=[pk]))
         
-        
+
+       
 def usergroup_settings(request):
     
     if request.method == "GET":
@@ -654,7 +670,9 @@ def usergroup_settings(request):
         params["table"] = ugroupsstable
         return render(request, 'core/settings/user_groups/index.html', params)
     
-class UserGroupUpdateView(UpdateView):
+class UserGroupUpdateView(PermissionRequiredMixin, UpdateView):
+    
+    permission_required = 'core.change_cousergroup'
     
     model = CoUserGroup
     form_class = UserGroupSettingForm
@@ -666,16 +684,24 @@ class UserGroupUpdateView(UpdateView):
         params["gptitle"] = self.object.title
         return params
     
-class UserGroupCreateView(CreateView):
+class UserGroupCreateView(PermissionRequiredMixin, CreateView):
+    
+    permission_required = 'core.add_cousergroup'
     
     model = CoUserGroup
     form_class = UserGroupSettingForm
     template_name = 'core/settings/user_groups/new_user_group.html'
     
+    
     def form_valid(self, form):
         form.instance.kit_admin = self.request.user.kituser
 
-        return super(UserGroupCreateView, self).form_valid(form)    
+        return super(UserGroupCreateView, self).form_valid(form)
+    
+    def get_form_kwargs(self):
+        kwargs = super(UserGroupCreateView, self).get_form_kwargs()
+        kwargs.update({'kituser': self.request.user.kituser})
+        return kwargs
     
 def contactgroups(request):
     
@@ -733,7 +759,9 @@ class ContactGroupCreateView(CreateView):
         return kwargs
     
     
-class SMSBalanceTransferView(TemplateView):
+class SMSBalanceTransferView(PermissionRequiredMixin, TemplateView):
+    
+    permission_required = 'core.add_smstransfer'
     
     template_name = "core/settings/accounts/sms_transfer_and_log.html"
     params = {}
@@ -788,11 +816,14 @@ class ContactImportView(TemplateView):
 
 
 
-class CustomDataView(TemplateView):
+class CustomDataView(PermissionRequiredMixin, TemplateView):
+    
+    permission_required = 'core.add_customdata'
     
     template_name = 'core/data_mgmt/custom_data.html'
     params = {}
     ingest_form = CustomDataIngestForm()
+    
     
     def get(self, request):
         self.params["ingest_form"] = self.ingest_form
