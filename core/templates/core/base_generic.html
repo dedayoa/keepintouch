@@ -43,6 +43,21 @@
 								</div>
 								{% endif %}
 							{% endblock %}
+							
+							{% if request.user.kituser.supported_by_ads and not debug %}
+							<div class="show-for-small small-12 column">
+								<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+								<!-- InTouch Mobile View Content Base -->
+								<ins class="adsbygoogle"
+								     style="display:block"
+								     data-ad-client="ca-pub-8909496138809362"
+								     data-ad-slot="8297188869"
+								     data-ad-format="auto"></ins>
+								<script>
+								(adsbygoogle = window.adsbygoogle || []).push({});
+								</script>
+							</div>
+							{% endif %}
 						</div>
 						{% block rsb_ex %}
 							<div class="medium-2 show-for-large column">
