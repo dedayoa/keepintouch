@@ -24,6 +24,7 @@ class KITServicePlan(models.Model):
     can_use_custom_data = models.BooleanField(default=False)
     api_access = models.BooleanField(default=False)
     sms_unit_bundle = models.PositiveIntegerField(default=0)
+
         
     def __str__(self):
         return self.name
@@ -56,6 +57,13 @@ class KITBilling(models.Model):
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
+    
+        
+    def save(self, *args, **kwargs):
+        if self.service_plan.ad_supported and self.service_plan.user_groups_allowed == 0:
+            self.is_full_admin = False
+        super(KITBilling, self).save(*args, **kwargs)
+            
     
     class Meta:
         verbose_name = 'Billing'
