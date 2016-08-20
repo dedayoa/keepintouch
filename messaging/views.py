@@ -19,6 +19,8 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.core.urlresolvers import reverse_lazy, reverse
 from core.tables import ContactTable
 
+from django.contrib.auth.mixins import PermissionRequiredMixin
+
 # Create your views here.
 
 def messaging_standard(request):
@@ -228,7 +230,9 @@ def queued_message_dequeue_view(request, mtype, pk):
     
     
     
-class ReminderCreateView(CreateView):
+class ReminderCreateView(PermissionRequiredMixin, CreateView):
+    
+    permission_required = ('messaging.add_remindermessaging','core.add_customdata')
     
     model = ReminderMessaging
     form_class = ReminderMessagingForm
@@ -288,7 +292,9 @@ class ReminderCreateView(CreateView):
     
     
 
-class ReminderUpdateDraftView(UpdateView):
+class ReminderUpdateDraftView(PermissionRequiredMixin, UpdateView):
+    
+    permission_required = ('messaging.change_remindermessaging')
     
     model = ReminderMessaging
     form_class = ReminderMessagingForm
@@ -370,7 +376,9 @@ def reminder_draft_view(request):
         params["herpath"] = (request.path.split('/'))[2]
         return render(request, 'messaging/reminder/draft_reminder_messages_list.html', params)
 
-class ReminderDeleteView(DeleteView):
+class ReminderDeleteView(PermissionRequiredMixin, DeleteView):
+    
+    permission_required = ('messaging.delete_remindermessaging')
     
     model = ReminderMessaging
     #template_name = 'core/contacts/contact_confirm_delete.html' #POSTing so no need for template
