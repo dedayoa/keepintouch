@@ -1,4 +1,7 @@
 eclipse.preferences.version=1
 encoding//core/ajax.py=UTF-8
+encoding//core/migrations/0006_kituser_free_sms_balance.py=utf-8
+encoding//gomez/migrations/0003_auto_20160818_1335.py=utf-8
+encoding//gomez/migrations/0004_auto_20160818_2225.py=utf-8
 encoding//messaging/migrations/0003_auto_20160812_0233.py=utf-8
 encoding//messaging/sms_counter.py=utf8
