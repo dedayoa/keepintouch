@@ -25,7 +25,6 @@ class KITServicePlan(models.Model):
     api_access = models.BooleanField(default=False)
     sms_unit_bundle = models.PositiveIntegerField(default=0)
 
-        
     def __str__(self):
         return self.name
     
