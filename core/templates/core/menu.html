@@ -14,11 +14,15 @@
 		<ul class="menu vertical nested is-active">
 			<li><a href="{% url 'messaging:new-standard-message' %}">Standard</a></li>
 			<li><a href="{% url 'messaging:new-advanced-message' %}">Advanced</a></li>
+			{% if perms.messaging.add_remindermessaging %}
 			<li><a href="{% url 'messaging:new-reminder-message' %}">Reminder</a></li>
+			{% endif %}
 			<hr style="padding: 0 1rem">
 			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:standard-draft-messages' %}"><i class="fi-folder"></i> Drafts</a></li>
 			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:messages-queued-status' %}"><i class="fi-database"></i> Queued</a></li>
+			{% if perms.messaging.add_remindermessaging %}
 			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:messages-running-status' %}"><i class="fi-foot"></i> Running Reminders</a></li>
+			{% endif %}
 			<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:messages-processed-status' %}"><i class="fi-checkbox"></i> Processed</a></li>
 		</ul>
 	</li>
@@ -34,8 +38,11 @@
 		<a href="#"><i class="fi-database"></i> Data Management</a>
 		<ul class="menu vertical nested">
 			<li><a href="{% url 'core:contact-import' %}">Import Contacts</a></li>
+			{% if perms.core.add_customdata %}
 			<li><a href="{% url 'core:custom-data' %}">Custom Data</a></li>
+			{% endif %}
 			<li><a href="{% url 'core:export-data' %}">Export</a></li>
+			
 		</ul>
 	</li>
 	<li>
@@ -47,11 +54,14 @@
 	<li>
 		<a href="#"><i class="fi-wrench"></i> Settings</a>
 		<ul class="menu vertical nested">
-		{% if request.user.kituser.is_admin %}
+		{% if request.user.kituser.is_admin and request.user.kituser.kitbilling.is_full_admin %}
 			<li><a href="{% url 'core:sms-account-mgmt' %}"><i class="fi-burst"></i>SMS Transfer</a></li>
 			<li><a href="{% url 'core:kituser-settings-list' %}"><i class="fi-torsos-female-male"></i>Users</a></li>
 			<li><a href="{% url 'core:usergroup-list' %}"><i class="fi-torsos-all"></i> User Groups</a></li>
-			<li><a href="#"><i class="fi-lock"></i> Permissions</a></li>
+			<!-- <li><a href="#"><i class="fi-lock"></i> Permissions</a></li>  -->
+		
+		{% endif %}
+		{% if request.user.kituser.is_admin %}
 			<li><a href="{% url 'core:account-mgmt' %}"><i class="fi-shopping-cart"></i> Account</a></li>
 			<li><a href="{% url 'core:smtp-settings-list' %}"><i class="fi-mail"></i> SMTP</a></li>
 		{% endif %}
