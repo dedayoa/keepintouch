@@ -324,11 +324,19 @@ class NewUserForm(forms.ModelForm):
     first_name = forms.CharField(required=True)
     
     def __init__(self, *args, **kwargs):
+        
+        self.kuser = kwargs.pop('kituser') or None
+        
         super(NewUserForm, self).__init__(*args, **kwargs)
         
         self.helper = FormHelper()
         self.helper.form_action = '.'
         self.helper.form_tag = False
+        
+    def clean(self):
+        if self.kuser.get_kitusers().count() >= self.kuser.kitbilling.service_plan.user_accounts_allowed:
+            raise forms.ValidationError("Your plan allows a maximum of {} Users. Consider Upgrading".\
+                                        format(self.kuser.kitbilling.service_plan.user_accounts_allowed)) 
     
     class Meta:
         model = User
@@ -388,12 +396,20 @@ class UserGroupSettingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         
+        self.kuser = kwargs.pop('kituser') or None
+        
         super(UserGroupSettingForm, self).__init__(*args, **kwargs)
         
         self.helper = FormHelper()
         self.helper.form_action = '.'
         self.helper.add_input(Submit('submit', _('Save'), css_class="success float-right"))
         self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+        
+        
+    def clean(self):
+        if self.kuser.get_user_groups().count() >= self.kuser.kitbilling.service_plan.user_groups_allowed:
+            raise forms.ValidationError("Your plan allows a maximum of {} User Groups. Consider Upgrading".\
+                                        format(self.kuser.kitbilling.service_plan.user_groups_allowed)) 
     
     class Meta:
         model = CoUserGroup
