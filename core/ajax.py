@@ -16,7 +16,7 @@ import humanize
 import base64
 from cryptography.fernet import Fernet
 
-from .models import KITUser, SMSTransfer, CustomData, Contact
+from .models import KITUser, SMSTransfer, CustomData, Contact, KITUBalance
 from .forms import SMSTransferForm, ContactImportForm, CustomDataIngestForm
 from .impexp import ContactResource
 import tablib
@@ -27,6 +27,7 @@ import logging
 from core.models import UploadedContact
 from django.utils.text import slugify
 from tablib.core import UnsupportedFormat
+
 
 logger = logging.getLogger(__name__)
 
@@ -84,8 +85,11 @@ def sms_credit_transfer(request):
             amount = myform.cleaned_data.get("amount")
             user = myform.cleaned_data.get("users")
             try:
-                user = KITUser.objects.select_for_update().get(id=user.id)
-                admin = KITUser.objects.select_for_update().get(id=request.user.kituser.id)
+                #user = KITUser.objects.select_for_update().get(id=user.id)
+                #admin = KITUser.objects.select_for_update().get(id=request.user.kituser.id)
+                
+                user = KITUBalance.objects.select_for_update().get(kit_user=user.id)
+                admin = KITUBalance.objects.select_for_update().get(kit_user=request.user.kituser.id)
                               
                 if request.POST.get("mdir") == 'credit': #give user units
                     #check before db entry that admin has sufficient balance to execute the transaction
@@ -103,14 +107,14 @@ def sms_credit_transfer(request):
                             user.save()
                             admin.save()
                             SMSTransfer.objects.create(
-                                from_user = admin,
-                                to_user = user,
+                                from_user = admin.kit_user,
+                                to_user = user.kit_user,
                                 sms_units = amount,
                                 transaction_detail = {
-                                        'from_user_email' : admin.user.email,
-                                        'to_user_email' : user.user.email
+                                        'from_user_email' : admin.kit_user.user.email,
+                                        'to_user_email' : user.kit_user.user.email
                                                       },
-                                created_by = admin
+                                created_by = admin.kit_user
                             )
                 elif request.POST.get("mdir") == 'debit':
                     
@@ -126,14 +130,14 @@ def sms_credit_transfer(request):
                         user.save()
                         admin.save()
                         SMSTransfer.objects.create(
-                            from_user = user,
-                            to_user = admin,
+                            from_user = user.kit_user,
+                            to_user = admin.kit_user,
                             sms_units = amount,
                             transaction_detail = {
-                                    'from_user_email' : user.user.email,
-                                    'to_user_email' : admin.user.email
+                                    'from_user_email' : user.kit_user.user.email,
+                                    'to_user_email' : admin.kit_user.user.email
                                                   },
-                            created_by = admin
+                            created_by = admin.kit_user
                         )
                     
                 result_dict['user_sms_bal'] = user.sms_balance
@@ -152,8 +156,8 @@ def get_user_sms_balance(request):
     
     if request.method == "GET":
         result_dict = {}
-        ku = KITUser.objects.get(pk=request.GET.get("users"))
-        result_dict["user_sms_bal"] = ku.sms_balance 
+        ku = KITUser.objects.select_related('kitubalance').get(pk=request.GET.get("users"))
+        result_dict["user_sms_bal"] = ku.kitubalance.sms_balance
         return {'result': result_dict}
 
 
