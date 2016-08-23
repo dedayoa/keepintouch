@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from .models import Contact, KITUser, Event, PublicEvent, MessageTemplate, \
                     SentMessage, SMTPSetting, CoUserGroup, ContactGroup, SMSTransfer,\
-                    UploadedContact, CustomData
+                    UploadedContact, CustomData, KITUBalance
 
 
 class ContactAdmin(admin.ModelAdmin):
@@ -22,12 +22,24 @@ class KITUserAdmin(admin.ModelAdmin):
 class CoUserGroupAdmin(admin.ModelAdmin):
     
     list_display = ('title','kit_admin')
+
     
+class KITUBalanceAdmin(admin.ModelAdmin):
+    
+    def get_queryset(self, request):
+        qs = super(KITUBalanceAdmin, self).get_queryset(request)
+        
+        if request.user.is_staff and not request.user.is_superuser:
+            return qs.filter(kit_user__is_admin=True)
+        else:
+            return qs
+
     
 admin.site.register(Event)
 admin.site.register(PublicEvent)
 admin.site.register(UploadedContact)
 admin.site.register(SMSTransfer)
+admin.site.register(KITUBalance, KITUBalanceAdmin)
 admin.site.register(Contact, ContactAdmin)
 admin.site.register(ContactGroup)
 admin.site.register(SentMessage)
