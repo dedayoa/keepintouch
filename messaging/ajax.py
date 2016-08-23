@@ -17,14 +17,14 @@ from django.template import Context, Template
 from django.db import transaction
 from django.conf import settings
 
-from .models import Contact, SMTPSetting, StandardMessaging, QueuedMessages, AdvancedMessaging,\
-                    ContactGroup, MessageTemplate, RunningMessage, ReminderMessaging,\
-                    event_date
-from core.models import CustomData                    
+from .models import StandardMessaging, QueuedMessages, AdvancedMessaging,\
+                    RunningMessage, ReminderMessaging, event_date
+from core.models import CustomData, Contact, SMTPSetting, MessageTemplate, ContactGroup                   
 
 from messaging.sms_counter import SMSCounter
 
-from .forms import StandardMessagingForm, AdvancedMessagingForm, ReminderMessagingForm, ReminderFormSet
+from .forms import StandardMessagingForm, AdvancedMessagingForm, ReminderMessagingForm, ReminderFormSet,\
+                    IssueFeedbackForm
 from .helper import get_next_delivery_time 
 import base64
 from cryptography.fernet import Fernet
@@ -454,3 +454,21 @@ def run_reminder(request):
             
               
             return {'result':'Reminder Started Successfully'}
+        
+        
+
+
+@ajax
+@login_required
+def submit_issue_fb(request):
+    
+    if request.method == "POST":
+        
+        form = IssueFeedbackForm(request.POST, request.FILES)
+        if not form.is_valid():
+            return {'errors':form.errors.as_json(escape_html=True)}
+        else:
+            obj = form.save(commit=False)
+            obj.submitter = request.user.kituser
+            obj.save()
+            return {'result':'Feedback Received.<br />Thank You'}
