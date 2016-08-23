@@ -4,7 +4,7 @@ Created on Jul 28, 2016
 @author: Dayo
 '''
 
-from gomez.forms import IssueFeedbackForm
+from .forms import IssueFeedbackForm
 
 
 def issue_form_processor(request):
