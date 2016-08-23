@@ -106,8 +106,6 @@ class KITUser(models.Model):
     state = models.CharField(max_length=100, blank=False, choices=STATE, default="LAG")
     is_admin = models.BooleanField(default=False)
     
-    sms_balance = models.PositiveIntegerField(default=0)
-    free_sms_balance = models.PositiveIntegerField(default=0)
     
     objects = KITUserManager()
     
@@ -280,13 +278,31 @@ def create_kituser_assoc_tables(sender, instance, **kwargs):
             
         transaction.on_commit(on_commit) 
 
-          
+
+
+
+class KITUBalance(models.Model):
+    
+    kit_user = models.OneToOneField('core.KITUser')
+    sms_balance = models.PositiveIntegerField(default=0)
+    free_sms_balance = models.PositiveIntegerField(default=0)
+    
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "{}".format(self.kit_user)
+    
+    class Meta:
+        verbose_name = "User Balance"
+
+         
 class CoUserGroup(models.Model):
     title = models.CharField(max_length=100, blank=False)
     description = models.CharField(max_length=255, blank=True)
-    kit_admin = models.ForeignKey(KITUser, on_delete=models.CASCADE, related_name='groups_adminover', \
+    kit_admin = models.ForeignKey('core.KITUser', on_delete=models.CASCADE, related_name='groups_adminover', \
                                   blank=False, limit_choices_to={'is_admin':True})
-    kit_users = models.ManyToManyField(KITUser, related_name='groups_belongto', \
+    kit_users = models.ManyToManyField('core.KITUser', related_name='groups_belongto', \
                                        blank=True, limit_choices_to={'is_admin':False})
     active = models.BooleanField() #when deactivated, 
     
@@ -329,7 +345,7 @@ class SMTPSetting(models.Model):
     smtp_password = EncryptedCharField(max_length=255,blank=True)
     active = models.BooleanField()
     
-    kit_admin = models.ForeignKey(KITUser, models.CASCADE, blank=False, limit_choices_to={'is_admin':True})
+    kit_admin = models.ForeignKey('core.KITUser', models.CASCADE, blank=False, limit_choices_to={'is_admin':True})
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -369,7 +385,7 @@ class Contact(models.Model):
     #slug = modelx.SlugField(max_length=100)
     active = models.BooleanField(default=True)
     
-    kit_user = models.ForeignKey(KITUser, models.PROTECT) #limit to not admin i.e admin cannot create contact
+    kit_user = models.ForeignKey('core.KITUser', models.PROTECT) #limit to not admin i.e admin cannot create contact
     #cou_group = modelx.ManyToManyField('CoUserGroup', blank=True)
     
     last_modified = models.DateTimeField(auto_now=True)
@@ -415,8 +431,8 @@ class Contact(models.Model):
 class ContactGroup(models.Model):
     title = models.CharField(max_length=100, blank=False)
     description = models.CharField(max_length=255, blank=True)
-    contacts = models.ManyToManyField(Contact, blank=False)
-    kit_user = models.ForeignKey(KITUser, models.PROTECT, blank=False)
+    contacts = models.ManyToManyField('core.Contact', blank=False)
+    kit_user = models.ForeignKey('core.KITUser', models.PROTECT, blank=False)
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -434,13 +450,13 @@ class MessageTemplate(models.Model):
     sms_template = models.TextField(blank=True)
     
     sms_sender = models.CharField(max_length=11, blank=True)
-    smtp_setting = models.ForeignKey(SMTPSetting, models.SET_NULL, null=True, blank=True)
+    smtp_setting = models.ForeignKey('core.SMTPSetting', models.SET_NULL, null=True, blank=True)
     
     send_sms = models.BooleanField(verbose_name="Send SMS")
     send_email = models.BooleanField(verbose_name="Send Email")
     
-    cou_group = models.ForeignKey(CoUserGroup, models.SET_NULL, null=True, verbose_name="Group Availability")
-    kit_admin = models.ForeignKey(KITUser, models.PROTECT, blank=True, limit_choices_to={'is_admin':True})
+    cou_group = models.ForeignKey('core.CoUserGroup', models.SET_NULL, null=True, verbose_name="Group Availability")
+    kit_admin = models.ForeignKey('core.KITUser', models.PROTECT, blank=True, limit_choices_to={'is_admin':True})
     
     active = models.BooleanField(default=True)
     
@@ -450,7 +466,7 @@ class MessageTemplate(models.Model):
     def __str__(self):
         return self.title
     
-    @property
+    
     def get_usergroup_template_belongs_by(self):
         return '{}'.format(self.kit_admin.user_group)
     
@@ -467,9 +483,9 @@ class Event(models.Model):
     '''
     Event attached to contact
     '''
-    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, blank=True)
+    contact = models.ForeignKey('core.Contact', on_delete=models.CASCADE, blank=True)
     date = models.DateField(blank=False)
-    message = models.ForeignKey(MessageTemplate)
+    message = models.ForeignKey('core.MessageTemplate')
     title = models.CharField(max_length=100, blank=False)
     
     #created_by_group = models.ForeignKey(CoGroup,models.SET_NULL, null=True)
@@ -502,12 +518,12 @@ class PublicEvent(models.Model):
     
     title = models.CharField(max_length=100, blank=False)
     date = models.DateField(blank=False)
-    message = models.ForeignKey(MessageTemplate)
+    message = models.ForeignKey('core.MessageTemplate')
     #applies_to = models.CharField(max_length=3, choices=APPLIESTO, default='ALL')
-    recipients = models.ManyToManyField(Contact, blank=True)
+    recipients = models.ManyToManyField('core.Contact', blank=True)
     all_contacts = models.BooleanField(default=False)
     #event_group = models.ForeignKey(CoUserGroup,models.SET_NULL, null=True)
-    kit_user = models.ForeignKey(KITUser, models.PROTECT, blank=True)
+    kit_user = models.ForeignKey('core.KITUser', models.PROTECT, blank=True)
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -536,7 +552,7 @@ class PublicEvent(models.Model):
 
     
 class SentMessage(models.Model):
-    event = models.ForeignKey(Event)
+    event = models.ForeignKey('core.Event')
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -548,13 +564,13 @@ class SentMessage(models.Model):
 
 class SMSTransfer(models.Model):
     
-    from_user = models.ForeignKey(KITUser, models.SET_NULL, null=True, blank=False, related_name='from_user')
-    to_user = models.ForeignKey(KITUser, models.SET_NULL, null=True, blank=False, related_name = 'to_user')
+    from_user = models.ForeignKey('core.KITUser', models.SET_NULL, null=True, blank=False, related_name='from_user')
+    to_user = models.ForeignKey('core.KITUser', models.SET_NULL, null=True, blank=False, related_name = 'to_user')
     sms_units = models.PositiveIntegerField(blank=False)
     transaction_date = models.DateTimeField(auto_now_add=True)
     transaction_detail = JSONField(blank=False) #in case the user is deleted
     
-    created_by = models.ForeignKey(KITUser, models.PROTECT, blank=False, limit_choices_to={'is_admin':True})
+    created_by = models.ForeignKey('core.KITUser', models.PROTECT, blank=False, limit_choices_to={'is_admin':True})
     
     def __str__(self):
         return "{} units(s) from {} to {}".format(self.sms_units, self.from_user, self.to_user)
@@ -567,7 +583,7 @@ class UploadedContact(models.Model):
     import_status = JSONField()
     upload_date = models.DateTimeField(auto_now_add=True)
     
-    uploaded_by = models.ForeignKey(KITUser, models.CASCADE, blank=False)
+    uploaded_by = models.ForeignKey('core.KITUser', models.CASCADE, blank=False)
     
     def __str__(self):
         return self.name
@@ -589,7 +605,7 @@ class CustomData(models.Model):
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(KITUser, on_delete=models.PROTECT)
+    created_by = models.ForeignKey('core.KITUser', on_delete=models.PROTECT)
     
     def __str__(self):
         return "{}".format(self.namespace)
