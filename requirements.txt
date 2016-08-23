@@ -42,8 +42,6 @@ django-stronghold==0.2.8
 django-tables2==1.2.1
 django-timezone-utils==0.10
 django-tinymce==2.3.0
-django-userena==2.0.1
-djangoajax==2.3.6
 djangorestframework==3.3.3
 easy-thumbnails==2.3
 et-xmlfile==1.0.1
