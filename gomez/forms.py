@@ -11,7 +11,7 @@ from crispy_forms.layout import HTML
 from crispy_forms_foundation.layout import ButtonGroup, ButtonHolder, Div,\
                                             Submit, Reset, Button, Layout, Fieldset, Row, Column
                                             
-from .models import KITSystem, IssueFeedback
+from .models import KITSystem
 
 class SystemSettingsForm(forms.ModelForm):
     
@@ -27,21 +27,6 @@ class SystemSettingsForm(forms.ModelForm):
     class Meta:
         model = KITSystem
         fields = ['company_wide_contacts']  
-        
-        
-class IssueFeedbackForm(forms.ModelForm):
-    
-    def __init__(self, *args, **kwargs):
-        super(IssueFeedbackForm, self).__init__(*args, **kwargs)
-        
-        self.helper = FormHelper()
-        self.helper.form_tag = True
-        self.helper.form_id = 'issue-submit-form'
-        self.helper.add_input(Submit('submit', _('Submit'), css_id="issue-submit-button", css_class="success float-right"))
-        self.helper.add_input(Reset('form_reset', _('Reset'), css_class="float-right"))
-    
-    class Meta:
-        model = IssueFeedback
-        fields = ['title','detail','screenshot']
+
 
     

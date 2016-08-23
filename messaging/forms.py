@@ -8,7 +8,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.conf import settings
 
-from .models import StandardMessaging, AdvancedMessaging, ReminderMessaging, Reminder
+from .models import StandardMessaging, AdvancedMessaging, ReminderMessaging, Reminder, IssueFeedback
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import HTML
@@ -279,4 +279,22 @@ class BaseReminderFormSet(BaseInlineFormSet):
         
 ReminderFormSet = inlineformset_factory(ReminderMessaging, Reminder, \
                         fields=('delta_value','delta_type','delta_direction'), form = ReminderForm,\
-                        formset=BaseReminderFormSet, extra=3, max_num=3, validate_max=True)   
+                        formset=BaseReminderFormSet, extra=3, max_num=3, validate_max=True)
+
+
+        
+        
+class IssueFeedbackForm(forms.ModelForm):
+    
+    def __init__(self, *args, **kwargs):
+        super(IssueFeedbackForm, self).__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()
+        self.helper.form_tag = True
+        self.helper.form_id = 'issue-submit-form'
+        self.helper.add_input(Submit('submit', _('Submit'), css_id="issue-submit-button", css_class="success float-right"))
+        self.helper.add_input(Reset('form_reset', _('Reset'), css_class="float-right"))
+    
+    class Meta:
+        model = IssueFeedback
+        fields = ['title','detail','screenshot']
