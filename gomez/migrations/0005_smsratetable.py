@@ -9,7 +9,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('country_dialcode', '0001_initial'),
         ('gomez', '0004_auto_20160818_2225'),
     ]
 
