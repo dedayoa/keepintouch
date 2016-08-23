@@ -9,7 +9,7 @@ from django.conf.urls import url, include
 
 
 from .views import *
-from .ajax import prepare_to_send_message, send_message, run_reminder
+from .ajax import prepare_to_send_message, send_message, run_reminder, submit_issue_fb
 
 urlpatterns = [
     url(r'^create/success/$', StandardMessageCreateView.as_view(), name=''),
@@ -42,5 +42,6 @@ urlpatterns = [
             url(r'^draft/messages/$', reminder_draft_view, name='reminder-draft-messages'),
             url(r'^message/(?P<pk>\d+)/delete/$', ReminderDeleteView.as_view(), name='reminder-message-delete'),
             ])),
+    url(r'^system/feedback/$', submit_issue_fb, name='system-user-feedback'),
     
 ]
