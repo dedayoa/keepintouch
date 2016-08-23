@@ -768,7 +768,7 @@ class SMSBalanceTransferView(PermissionRequiredMixin, TemplateView):
 
     
     def get(self, request):
-        self.params['total_balance'] = request.user.kituser.sms_balance
+        self.params['total_balance'] = request.user.kituser.kitubalance.sms_balance
         
         smshtable = SMSTransferHistoryTable(SMSTransfer.objects.filter(created_by = request.user.kituser).order_by('-transaction_date'))
         RequestConfig(request, paginate={'per_page': 50}).configure(smshtable)
