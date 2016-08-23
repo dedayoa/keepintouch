@@ -14,7 +14,9 @@ django-appconf==1.0.2
 django-autocomplete-light==3.1.6
 django-autofixture==0.12.1
 django-autoslug==1.9.3
+django-cacheops==3.0
 django-common-helpers==0.8.0
+-e git://github.com/dedayoa/django-country-dialcode
 django-crispy-forms==1.6.0
 django-cron==0.4.6
 django-debug-toolbar==1.4
@@ -27,6 +29,7 @@ django-import-export==0.4.5
 django-jsonify==0.3.0
 django-model-utils==2.5
 django-phonenumber-field==1.1.0
+django-pickling==0.2
 django-pkgconf==0.2.0
 django-randomslugfield==0.3.0
 django-reversion==1.10.2
@@ -39,14 +42,17 @@ django-stronghold==0.2.8
 django-tables2==1.2.1
 django-timezone-utils==0.10
 django-tinymce==2.3.0
--e git://github.com/dedayoa/django-ajax#egg=djangoajax
+django-userena==2.0.1
+djangoajax==2.3.6
 djangorestframework==3.3.3
 easy-thumbnails==2.3
 et-xmlfile==1.0.1
 factory-boy==2.7.0
 fake-factory==0.5.9
+funcy==1.7.1
 gunicorn==19.6.0
 html2text==2016.5.29
+hiredis==0.2.0
 humanize==0.5.1
 idna==2.1
 jdcal==1.2
