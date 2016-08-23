@@ -49,7 +49,7 @@ $(document).ready(function(){
 		e.preventDefault();
 		
 		var payload = new FormData(this);	
-		ajaxPost('/settings/system/feedback/', payload, function(content){
+		ajaxPost('/messaging/system/feedback/', payload, function(content){
 			
 			if (content.hasOwnProperty("errors")){
        			var errors = $.parseJSON(content.errors);	
