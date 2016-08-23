@@ -4,23 +4,21 @@ import html2text
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import *
 
-from django.db import models
+from django.db import models, transaction
 from django.apps import apps
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.postgres.fields import JSONField
 
-from core.models import KITUser, Contact, SMTPSetting, ContactGroup, MessageTemplate, CustomData
-
-from model_utils.fields import StatusField, MonitorField
-from model_utils import Choices
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 
+from model_utils.fields import StatusField, MonitorField
+from model_utils import Choices
+
 from phonenumber_field.modelfields import PhoneNumberField
 import arrow
-
 
 
 def get_default_time():
@@ -35,14 +33,14 @@ class StandardMessaging(models.Model):
     sms_message = models.TextField(blank=True)
     send_sms = models.BooleanField(verbose_name="Send SMS")
     send_email = models.BooleanField(verbose_name="Send Email")
-    recipients = models.ManyToManyField(Contact)
+    recipients = models.ManyToManyField('core.Contact')
     delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
     
-    smtp_setting = models.ForeignKey(SMTPSetting, null=True, blank=True)
+    smtp_setting = models.ForeignKey('core.SMTPSetting', null=True, blank=True)
     sms_sender = models.CharField(max_length=11, blank=True)
     
     
-    created_by = models.ForeignKey(KITUser, models.PROTECT)
+    created_by = models.ForeignKey('core.KITUser', models.PROTECT)
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     
@@ -87,13 +85,13 @@ class AdvancedMessaging(models.Model):
               )
     
     title = models.CharField(max_length=100, blank=False)
-    message_template = models.ForeignKey(MessageTemplate, blank=False)
-    contact_group = models.ManyToManyField(ContactGroup)
+    message_template = models.ForeignKey('core.MessageTemplate', blank=False)
+    contact_group = models.ManyToManyField('core.ContactGroup')
     delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
     repeat_frequency = models.CharField(max_length=20, choices=REPEAT, default="norepeat")
     next_event = models.DateTimeField()
        
-    created_by = models.ForeignKey(KITUser, models.PROTECT)
+    created_by = models.ForeignKey('core.KITUser', models.PROTECT)
     
     status = StatusField()
     #waiting_at = MonitorField(monitor='status', when=['waiting'])
@@ -147,7 +145,7 @@ class QueuedMessages(models.Model):
     delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
     recurring = models.BooleanField(default=False)
     
-    created_by = models.ForeignKey(KITUser, models.PROTECT)
+    created_by = models.ForeignKey('core.KITUser', models.PROTECT)
     queued_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -170,7 +168,7 @@ class ProcessedMessages(models.Model):
     message_type = models.CharField(max_length=10, choices=MSG_TYPE)
     message = JSONField() #template, recipient_ids
 
-    created_by = models.ForeignKey(KITUser, models.PROTECT)
+    created_by = models.ForeignKey('core.KITUser', models.PROTECT)
     processed_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -223,7 +221,7 @@ class RunningMessage(models.Model):
     last_event_on = models.DateTimeField()
     completed = models.BooleanField(default=False)
     
-    created_by = models.ForeignKey(KITUser, models.PROTECT)
+    created_by = models.ForeignKey('core.KITUser', models.PROTECT)
     started_at = models.DateTimeField(auto_now_add=True)
     
     def set_is_completed(self):
@@ -253,58 +251,7 @@ class RunningMessage(models.Model):
     def __str__(self):
         return self.message["title"]
     
-        
-        
-class SMSReport(models.Model):
-    
-    STATUS = (
-        (0,'Delivered'),
-        (1,'Accepted'),
-        (2,'Expired'),
-        (3,'Undelivered'),
-        (4,'Rejected'),
-              )
-    
-    to_phone = PhoneNumberField(blank=False)
-    sms_message = JSONField() #body, messageid, 
-    sms_gateway = JSONField()
-    status = StatusField()
-    
-    owner = models.ForeignKey(KITUser, models.PROTECT)
-    last_modified = models.DateTimeField(auto_now=True)
-    
-    #datetime sms was sent,which may be different from when it entered the processing queue
-    created = models.DateTimeField(auto_now_add=True)  
-    
-    def __str__(self):
-        return "SMS to {}".format(self.to_phone.as_international)
-    
-    
-class EmailReport(models.Model):
-    
-    STATUS = (
-        (0,'Sent'),
-        (1,'Delivered'),
-        (2,'Deferred'),
-        (3,'Bounce'),
-        #(4,'Spam Report'),
-              )
-    
-    status = StatusField()
-    to_email = models.EmailField()
-    from_email = models.EmailField()
-    email_message = JSONField()
-    email_gateway = JSONField()
-    
-    owner = models.ForeignKey(KITUser, models.PROTECT)
-    last_modified = models.DateTimeField(auto_now=True)
-    
-    #datetime email was sent,which may be different from when it entered the processing queue
-    created = models.DateTimeField(auto_now_add=True)  
-    
-    
-    def __str__(self):
-        return "Email from {} to {}".format(self.from_email,self.to_email)
+
     
     
 class ReminderMessaging(models.Model):
@@ -313,13 +260,13 @@ class ReminderMessaging(models.Model):
     STATUS = Choices('draft', 'running', 'completed')
     
     title = models.CharField(max_length=100, blank=False)
-    message_template = models.ForeignKey(MessageTemplate, blank=False)
-    contact_group = models.ManyToManyField(ContactGroup)    
+    message_template = models.ForeignKey('core.MessageTemplate', blank=False)
+    contact_group = models.ManyToManyField('core.ContactGroup')    
     
-    custom_data_namespace = models.ForeignKey(CustomData, on_delete=models.PROTECT)
+    custom_data_namespace = models.ForeignKey('core.CustomData', on_delete=models.PROTECT)
     date_column = models.CharField(max_length=500)
        
-    created_by = models.ForeignKey(KITUser, models.PROTECT)
+    created_by = models.ForeignKey('core.KITUser', models.PROTECT)
     
     is_active = models.BooleanField(default=True)
     status = StatusField()
@@ -386,4 +333,46 @@ class Reminder(models.Model):
 
 
     
+class IssueFeedback(models.Model):
+    title = models.CharField(max_length=150, blank=False)
+    detail = models.TextField(blank=False)
+    screenshot = models.ImageField(upload_to="issue_feedback/", blank=True)
+    
+    resolution_flag = models.BooleanField(default=False)
+    
+    submitter = models.ForeignKey('core.KITUser', on_delete=models.SET_NULL, null=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title
+    
+    
+
+class FailedSMSMessage(models.Model):
+    
+    sms_message = JSONField()
+    reason = models.CharField(max_length=255)
+    retries = models.PositiveSmallIntegerField()
+    
+    owned_by = models.ForeignKey('core.KITUser', on_delete=models.SET_NULL, null=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "SMS Failed at {}".format(self.created)
+    
+    
+
+class FailedEmailMessage(models.Model):
+    email_message = JSONField()
+    reason = models.CharField(max_length=255)
+    retries = models.PositiveSmallIntegerField()
+    
+    owned_by = models.ForeignKey('core.KITUser', on_delete=models.SET_NULL, null=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "Email Failed at {}".format(self.created)
     
