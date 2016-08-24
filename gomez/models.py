@@ -130,7 +130,8 @@ class SMSReport(models.Model):
               )
     
     to_phone = PhoneNumberField(blank=False)
-    sms_message = JSONField() #body, messageid, 
+    gw_msg_id = models.CharField(max_length=255, blank=True, null=True)
+    sms_message = JSONField() #body, messageid,
     sms_gateway = JSONField()
     status = StatusField()
     
