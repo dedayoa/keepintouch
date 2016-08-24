@@ -9,3 +9,4 @@ class MessagingConfig(AppConfig):
 
     def ready(self):
         run_schedules()
+        import messaging.signals
