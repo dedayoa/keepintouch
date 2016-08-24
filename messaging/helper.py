@@ -266,6 +266,8 @@ class SMSHelper():
         except SMSGatewayError as e:
             # admin to handle SMSGW error...log this, alert...do something!!
             return "SMSGWERR: %s"%e.message
+        except MissingSMSRateError as e:
+            return e.message
         else:
             # sms successfully sent...no exception. Deduct balance
             print(result[0], result[1])
