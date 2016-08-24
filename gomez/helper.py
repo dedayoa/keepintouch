@@ -97,26 +97,24 @@ class KITRateEngineA(object):
     
     
     def get_dialcode(self, destination_number, dialcode=""):
-        @cached_as(Prefix, timeout=3600)
-        def _get_dialcode():
-            """
-            Retrieve the correct dialcode for a destination_number
-            """
-            if dialcode and len(dialcode) > 0:
-                return dialcode
-            else:
-                # remove prefix
-                sanitized_destination = self.remove_prefix(destination_number, settings.PREFIX_TO_IGNORE)
-                prefix_list = self.prefix_list_string(sanitized_destination)
-        
-                if prefix_list and len(sanitized_destination) > settings.PN_MAX_DIGITS and not sanitized_destination[:1].isalpha():
-                    # International call
-                    (country_id, prefix_id) = self.get_country_id_prefix(prefix_list)
-                    dialcode = prefix_id
-                else:
-                    dialcode = ''
+        """
+        Retrieve the correct dialcode for a destination_number
+        """
+
+        if dialcode and len(dialcode) > 0:
             return dialcode
-        return _get_dialcode()
+        else:
+            # remove prefix
+            sanitized_destination = self.remove_prefix(destination_number, settings.PREFIX_TO_IGNORE)
+            prefix_list = self.prefix_list_string(sanitized_destination)
+    
+            if prefix_list and len(sanitized_destination) > settings.PN_MAX_DIGITS and not sanitized_destination[:1].isalpha():
+                # International call
+                (country_id, prefix_id) = self.get_country_id_prefix(prefix_list)
+                dialcode = prefix_id
+            else:
+                dialcode = ''
+        return dialcode
     
     
     def get_sms_cost_to_number(self, receiving_number):
@@ -155,6 +153,7 @@ def temp_log_to_db(m_type, **kwargs):
         SMSReport.objects.create(
             to_phone = kwargs['sms_msg'][2],
             status = 0,
+            gw_msg_id = kwargs.get('message_id', 0),
             owner = kwargs.get('owner',''),
             sms_message = {
                 'sender_id' : kwargs['sms_msg'][0],
@@ -162,7 +161,6 @@ def temp_log_to_db(m_type, **kwargs):
                 'message_type' : '0'
                            },
             sms_gateway = {
-                'message_id' : kwargs.get('message_id', 0),
                 'gateway_id' : kwargs.get('gateway_id', ''),
                 'gateway_error_code' : kwargs.get('message_err_code','')
                            },
