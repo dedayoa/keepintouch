@@ -8,7 +8,6 @@ import requests
 from dateutil.relativedelta import relativedelta
 
 from django.utils import timezone
-
 from django.core import mail
 from django.core.mail import send_mail, EmailMessage
 from django.core.mail.backends.smtp import EmailBackend
@@ -246,30 +245,31 @@ class SMSHelper():
             owner = self.kuser
         )
         
+    
+    
         
     def send_my_sms(self):
         
+        
         try:
             result = self._check_sms_can_be_sent()
-            try:
-                # SMSLive247
-                gw_reply = SMSLive247Helper().send_sms([self.sender, self.sms_message, self.destination])
-                if gw_reply.split(':')[0] is not 'OK':
-                    # raise ALERT!!! log this for admin
-                    raise SMSGatewayError(gw_reply) #e.g ERR: 404: Insufficient credit to complete request
-                else:
-                    self.success_message_id = (gw_reply.split(':')[1]).strip()
-                    self._sms_success_logging_and_all("SMSLive247")
-            except:
-                # exception while sending
-                return(sys.exc_info())
-            else:
-                # sms successfully sent...no exception. Deduct balance
-                self._update_user_sms_balance(result[0], result[1])
+            # SMSLive247
+            gw_reply = SMSLive247Helper().send_sms([self.sender, self.sms_message, self.destination])
+                
+            self.success_message_id = (gw_reply.split(':')[1]).strip()
+            self._sms_success_logging_and_all("SMSLive247")
+
             
         except NotEnoughBalanceError as e:
             # saved message to failed table for user
-            print(e.message)
+            return e.message
+        except SMSGatewayError as e:
+            # admin to handle SMSGW error...log this, alert...do something!!
+            return "SMSGWERR: %s"%e.message
+        else:
+            # sms successfully sent...no exception. Deduct balance
+            print(result[0], result[1])
+            self._update_user_sms_balance(result[0], result[1])
         
         
 
@@ -295,9 +295,15 @@ class SMSLive247Helper():
                    'msgtype' : 0
                    }
         r = requests.post("http://www.smslive247.com/http/index.aspx", data=payload)
-            #OK: 54142800
-            #log message
-        return r.text
+        
+        if (r.text).split(':')[0] == 'OK':
+        # was using is and it caused all sorts of problems. Identity is not equality
+        # http://stackoverflow.com/questions/1504717/why-does-comparing-strings-in-python-using-either-or-is-sometimes-produce
+            return r.text
+        else:                    
+            # raise ALERT!!! log this for admin
+            raise SMSGatewayError(r.text) #e.g ERR: 404: Insufficient credit to complete request
+        
     
     def get_sms_msg_status(self, messageid):
         
