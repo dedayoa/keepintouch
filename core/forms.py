@@ -12,7 +12,8 @@ from django.forms.models import formset_factory, inlineformset_factory
 from django.conf import settings
 
 
-from .models import Contact, Event, PublicEvent, MessageTemplate, KITUser, SMTPSetting, ContactGroup
+from .models import Contact, Event, PublicEvent, MessageTemplate, KITUser, SMTPSetting, ContactGroup,\
+                    KITUBalance
 from .helper import EventFormSetHelper
 
 
@@ -349,7 +350,6 @@ class KITUserForm(forms.ModelForm):
     dob = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS,\
                            widget=forms.DateInput(attrs={'class':'dob-form-date'}))
     
-    sms_balance = forms.IntegerField(disabled=True, required=False, label="SMS Balance")
     
     def __init__(self, *args, **kwargs):
         super(KITUserForm, self).__init__(*args, **kwargs)
@@ -362,14 +362,28 @@ class KITUserForm(forms.ModelForm):
     
     class Meta:
         model = KITUser
-        fields = ['sms_balance', 'dob','phone_number','industry','company','address_1',\
+        fields = ['dob','phone_number','industry','company','address_1',\
                   'address_2','city_town','state']
         exclude = ['user']
         widgets = {
             'state': Select2Widget,
                    }
         
+class KITUBalanceForm(forms.ModelForm):
+
+    sms_balance = forms.IntegerField(disabled=True, required=False, label="SMS Balance")
+    
+    def __init__(self, *args, **kwargs):
+        super(KITUBalanceForm, self).__init__(*args, **kwargs)
         
+        self.helper = FormHelper()
+        self.helper.form_action = ''
+        self.helper.form_tag = False
+    
+    class Meta:
+        model = KITUBalance
+        fields = ['sms_balance']
+       
         
 class SMTPSettingForm(forms.ModelForm):
     
