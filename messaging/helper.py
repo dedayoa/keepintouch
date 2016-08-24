@@ -24,6 +24,7 @@ from django.apps import apps
 from gomez.helper import temp_log_to_db, KITRateEngineA
 from messaging.sms_counter import SMSCounter
 from gomez.models import KITBilling
+import smtplib
 
 
 
@@ -140,6 +141,8 @@ class SMTPHelper():
                     sender_mail = "{} <{}>".format(self.from_sender, self.smtp_user),
                     owner = kwargs['owner']
                 )
+        except smtplib.SMTPDataError:
+            return(sys.exc_info()[1])
         except Exception:
             temp_log_to_db(
                 'email',
@@ -248,8 +251,7 @@ class SMSHelper():
     
     
         
-    def send_my_sms(self):
-        
+    def send_my_sms(self):        
         
         try:
             result = self._check_sms_can_be_sent()
