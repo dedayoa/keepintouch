@@ -6,6 +6,8 @@ Created on Aug 7, 2016
 
 import re
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
+from core.exceptions import MissingSMSRateError
 from .models import SMSRateTable, EmailReport, SMSReport
 
 from cacheops import cached_as
@@ -113,15 +115,21 @@ class KITRateEngineA(object):
                 dialcode = prefix_id
             else:
                 dialcode = ''
+        
         return dialcode
     
     
     def get_sms_cost_to_number(self, receiving_number):
-        @cached_as(SMSRateTable, timeout=3600)
+        
+        @cached_as(SMSRateTable, timeout=3600)        
         def _get_sms_units_cost():
-            dc = self.get_dialcode(receiving_number)
-            sms_u = SMSRateTable.objects.get(dialcode=dc)
-            return sms_u.sms_units
+            try:
+                dc = self.get_dialcode(receiving_number)
+                sms_u = SMSRateTable.objects.get(dialcode=dc)
+                return sms_u.sms_units
+            
+            except ObjectDoesNotExist:
+                raise MissingSMSRateError("SMS Rate Missing for %s"%dc)
         
         return _get_sms_units_cost()
 
