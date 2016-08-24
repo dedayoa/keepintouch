@@ -45,3 +45,12 @@ class SMSGatewayError(Exception):
     def __str__(self):
         return repr(self.message)
     
+
+class MissingSMSRateError(Exception):
+    # balance not enogh error
+    def __init__(self, message):
+        self.message = message
+        
+    def __str__(self):
+        return repr(self.message)
+    
