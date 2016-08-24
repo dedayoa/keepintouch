@@ -259,7 +259,7 @@ class SMSHelper():
                     pass
                 else:
                     self.success_message_id = (gw_reply.split(':')[1]).strip()
-                    self._sms_success_logging_and_all(gw_id="SMSLive247")
+                    self._sms_success_logging_and_all("SMSLive247")
             except:
                 # exception while sending
                 return(sys.exc_info())
@@ -358,7 +358,7 @@ class OKToSend(object):
     def check(self):
         return self._is_active() and self._has_valid_subscription()
 
-
+'''
 def ok_to_send(owner):
     #check user is active
     #check parent subscription not expired
@@ -396,7 +396,7 @@ def ok_to_send(owner):
         else:
             print("User Account Inactive")
             return False
-    
+'''    
     
 def get_next_delivery_time(repeat_frequency, delivery_time):
     if repeat_frequency == "norepeat":
