@@ -46,7 +46,7 @@ def _send_mass_email(email_message, smtp_profile):
 @django_rq.job('sms')
 def _send_sms(sms_message, kuser, msg_type, **kwargs):
     es = SMSHelper(sms_message, kuser, msg_type, **kwargs)
-    print(es.send_sms())
+    print(es.send_my_sms())
 
 
 def process_private_anniversary():
@@ -86,6 +86,8 @@ def process_private_anniversary():
             print(e.message)
         except FailedSendingMessageError as e:
             print(e.message)
+        except SMSGatewayError as e:
+            print(e.message)
              
     
     
@@ -120,6 +122,8 @@ def process_public_anniversary():
                 print(e.message)
             except FailedSendingMessageError as e:
                 print(e.message)
+            except SMSGatewayError as e:
+                print(e.message)
             
         publicevent.update(date = timezone.now().date()+relativedelta(years=1))
     
@@ -148,7 +152,7 @@ def process_onetime_event():
                     if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
                         s_msg = _compose(queued_message.message["sms_template"], recipient_d)
                         s_sender = _compose(queued_message.message["sms_sender_id"], recipient_d)
-                        _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
+                        _send_sms([s_sender, s_msg, recipient_d.phone.as_e164],\
                                          queued_message.created_by,
                                          'one_time_msg'
                                           )
@@ -159,7 +163,9 @@ def process_onetime_event():
                 print(e.message)
             except FailedSendingMessageError as e:
                 print(e.message)
-        
+            except SMSGatewayError as e:
+                print(e.message) #save message to a db, alert admin and notify user
+        '''
         # create entry in processed message
         ProcessedMessages.objects.create(
             message_type = queued_message.message_type,
@@ -174,7 +180,7 @@ def process_onetime_event():
             queued_message.update(delivery_time=get_next_delivery_time(queued_message.message["others"]["recurring"],\
                                                                        queued_message.delivery_time))
 
-
+        '''
 
 
 def process_reminder_event():
@@ -216,6 +222,8 @@ def process_reminder_event():
             except NoActiveSubscriptionError as e:
                 print(e.message)
             except FailedSendingMessageError as e:
+                print(e.message)
+            except SMSGatewayError as e:
                 print(e.message)
                 
             # create entry in processed message
