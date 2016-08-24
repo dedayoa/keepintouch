@@ -105,7 +105,7 @@
 			crossDomain : false,
 			async : true,
 		});
-		
+		{% if not is_saas %}
 		function get_system_stat(){
 			try{
 				ajaxGet('/ping-stat/system/', function(content){
@@ -130,6 +130,7 @@
 				return;
 			}
 		}
+		{% endif %}
 		/******                     ********/
 		
 		function get_qpc_stat(){
@@ -153,7 +154,7 @@
 			
 		$( document ).ready(function() {
 			console.log('Ready');
-			setTimeout(get_system_stat, 1000);
+			{% if not is_saas %}setTimeout(get_system_stat, 1000);{% endif %}
 			setTimeout(get_qpc_stat, 1000);
 		});
 	
