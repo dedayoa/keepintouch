@@ -278,6 +278,8 @@ def create_kituser_assoc_tables(sender, instance, **kwargs):
                     )
             kitsystem.objects.create(kit_admin=instance)
             
+            KITUBalance.objects.create(kit_user=instance)
+            
         transaction.on_commit(on_commit) 
 
 
