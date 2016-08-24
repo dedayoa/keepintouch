@@ -14,6 +14,7 @@
 		{{ block.super }}
 		<form action="." method="post">
 			{% crispy form_1 %}
+			{% crispy form_3 %}
 			{% crispy form_2 %}
 			<div class="row column" style="margin-bottom: 1rem;">
 				<div><b>Last Login:</b> {{last_login}}</div>
