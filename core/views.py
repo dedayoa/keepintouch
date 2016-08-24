@@ -18,7 +18,7 @@ from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTe
 from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, ExistingUserForm,\
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
                     UserGroupSettingForm, NewUserForm, ContactGroupForm, SMSTransferForm,\
-                    ContactImportForm, PersonalProfileForm, CustomDataIngestForm
+                    ContactImportForm, PersonalProfileForm, CustomDataIngestForm, KITUBalanceForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable,\
                     SMSTransferHistoryTable, UploadedContactFileHistoryTable, CustomDataStoreTable
@@ -47,6 +47,7 @@ from gomez.models import KITBilling
 
 from stronghold.decorators import public
 from django.views.decorators.csrf import csrf_exempt
+from core.models import KITUBalance
 
 # Create your views here.
 @signin_view(template='core/sitegate-myfoundation.html', redirect_to='core:dashboard-view')
@@ -499,11 +500,13 @@ class KITUserUpdateView(PermissionRequiredMixin, View):
     
     model_1 = User
     model_2 = KITUser
+    model_3 = KITUBalance
     template_name = 'core/settings/users/kituser_detail.html'
     params = {}
     
     form_1 = ExistingUserForm
     form_2 = KITUserForm
+    form_3 = KITUBalanceForm
     
     
     def get(self, request, pk):
@@ -513,13 +516,15 @@ class KITUserUpdateView(PermissionRequiredMixin, View):
         if q_admin:
             k_user = get_object_or_404(KITUser, pk=pk,parent=q_admin)
             uzr = k_user.user
+            k_user_balance = request.user.kituser.kitubalance 
         
         self.params["title"] = "Edit User"
         self.params["uzrname"] = uzr.username
         self.params["last_login"] = uzr.last_login
         self.params["date_joined"] = uzr.date_joined
         self.params["form_1"] = self.form_1(instance=uzr, prefix="userform")
-        self.params["form_2"] = self.form_2(instance=k_user, prefix="kituform")
+        self.params["form_2"] = self.form_2(instance=k_user, prefix="kituform")        
+        self.params["form_3"] = self.form_3(instance=k_user_balance, prefix="kitubalanceform")
         
         return render(request, self.template_name, self.params)
     
@@ -546,11 +551,13 @@ class KITUserPersonalProfileView(View):
     
     model_1 = User
     model_2 = KITUser
+    model_3 = KITUBalance
     template_name = 'core/settings/users/kituser_detail.html'
     params = {}
     
     form_1 = PersonalProfileForm
     form_2 = KITUserForm
+    form_3 = KITUBalanceForm
 
     
     def get(self, request):
@@ -558,6 +565,7 @@ class KITUserPersonalProfileView(View):
         
         k_user = request.user.kituser
         uzr = request.user
+        k_user_balance = request.user.kituser.kitubalance 
         
         self.params["title"] = "Edit User"
         self.params["uzrname"] = uzr.username
@@ -565,6 +573,7 @@ class KITUserPersonalProfileView(View):
         self.params["date_joined"] = uzr.date_joined
         self.params["form_1"] = self.form_1(instance=uzr, prefix="userform")
         self.params["form_2"] = self.form_2(instance=k_user, prefix="kituform")
+        self.params["form_3"] = self.form_3(instance=k_user_balance, prefix="kitubalanceform")
         
         return render(request, self.template_name, self.params)
     
