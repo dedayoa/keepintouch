@@ -58,9 +58,8 @@ class KITRateEngineA(object):
         except ValueError:
             return False
         prefix_range = range(settings.PREFIX_LIMIT_MIN, settings.PREFIX_LIMIT_MAX + 1)
-        reversed(prefix_range)
         destination_prefix_list = ''
-        for i in prefix_range:
+        for i in reversed(prefix_range):
             if i == settings.PREFIX_LIMIT_MIN:
                 destination_prefix_list = destination_prefix_list + dest_number[0:i]
             else:
