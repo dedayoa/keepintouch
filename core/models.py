@@ -25,6 +25,7 @@ from timezone_utils.choices import PRETTY_ALL_TIMEZONES_CHOICES, PRETTY_COMMON_T
 #from messaging.models import ProcessedMessages, QueuedMessages
 
 from django.apps import apps
+from cacheops.query import cached_as
 
 
 ### Managers
@@ -115,7 +116,8 @@ class KITUser(models.Model):
         
     def get_absolute_url(self):
         return reverse('core:kituser-detail',args=[self.pk])
-        
+    
+    @cached_as(timeout=3600)    
     def get_parent(self):
         if self.is_admin:
             return self
@@ -218,7 +220,7 @@ class KITUser(models.Model):
         else:
             return RunningMessage.objects.filter(created_by = self.pk).order_by('-started_at')
         
-        
+    @cached_as(timeout=4*3600)    
     def supported_by_ads(self):
         return self.kitbilling.service_plan.ad_supported
         
