@@ -165,7 +165,7 @@ def process_onetime_event():
                 print(e.message)
             except SMSGatewayError as e:
                 print(e.message) #save message to a db, alert admin and notify user
-        '''
+        
         # create entry in processed message
         ProcessedMessages.objects.create(
             message_type = queued_message.message_type,
@@ -180,7 +180,7 @@ def process_onetime_event():
             queued_message.update(delivery_time=get_next_delivery_time(queued_message.message["others"]["recurring"],\
                                                                        queued_message.delivery_time))
 
-        '''
+        
 
 
 def process_reminder_event():
