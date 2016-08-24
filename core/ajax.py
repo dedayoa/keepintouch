@@ -56,10 +56,8 @@ def get_qpc_stats(request):
         result_dict = {}
         result_dict['qmc'] = request.user.kituser.get_queued_messages().count()
         result_dict['pmc'] = request.user.kituser.get_processed_messages().count()
-        result_dict['total_sms_balance'] = request.user.kituser.sms_balance
-        result_dict['free_sms_balance'] = request.user.kituser.free_sms_balance
-        
-        print(request.user.kituser.get_queued_messages())
+        result_dict['total_sms_balance'] = request.user.kituser.kitubalance.sms_balance
+        result_dict['free_sms_balance'] = request.user.kituser.kitubalance.free_sms_balance
         
         return {'result': result_dict}
     
