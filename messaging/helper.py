@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.core.validators import validate_email
 
 #from gomez.models import KITBilling
-from core.models import KITUser, SMTPSetting
+from core.models import KITUser, SMTPSetting, KITUBalance
 from core.exceptions import *
 
 from cacheops import cached_as
@@ -217,14 +217,14 @@ class SMSHelper():
         
         if is_company_wide(self.kuser) and self.msg_type == 'public_anniv_msg' or self.msg_type == 'private_anniv_msg':
             if balance_acct_debited == 'p_fsb':
-                self.kuser.parent.kitubalance.update(free_sms_balance=amount)
+                KITUBalance.objects.filter(kit_user=self.kuser.parent).update(free_sms_balance=amount)
             elif balance_acct_debited == 'p_sb':
-                self.kuser.parent.kitubalance.update(sms_balance=amount)
+                KITUBalance.objects.filter(kit_user=self.kuser.parent).update(sms_balance=amount)
         else:
             if balance_acct_debited == 'fsb':
-                self.kuser.kitubalance.update(free_sms_balance=amount)
+                KITUBalance.objects.filter(kit_user=self.kuser).update(free_sms_balance=amount)
             elif balance_acct_debited == 'sb':
-                self.kuser.kitubalance.update(sms_balance=amount)
+                KITUBalance.objects.filter(kit_user=self.kuser).update(sms_balance=amount)
     
     
     def _sms_success_logging_and_all(self, gw_id):        
@@ -247,16 +247,16 @@ class SMSHelper():
         )
         
         
-    def send_sms(self):
+    def send_my_sms(self):
         
         try:
             result = self._check_sms_can_be_sent()
             try:
                 # SMSLive247
-                gw_reply = SMSLive247Helper().send_sms(self.sender, self.sms_message, self.destination)
+                gw_reply = SMSLive247Helper().send_sms([self.sender, self.sms_message, self.destination])
                 if gw_reply.split(':')[0] is not 'OK':
                     # raise ALERT!!! log this for admin
-                    pass
+                    raise SMSGatewayError(gw_reply) #e.g ERR: 404: Insufficient credit to complete request
                 else:
                     self.success_message_id = (gw_reply.split(':')[1]).strip()
                     self._sms_success_logging_and_all("SMSLive247")
