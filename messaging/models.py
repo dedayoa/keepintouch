@@ -1,6 +1,7 @@
 import sys
 import datetime
 import html2text
+import uuid
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import *
 
@@ -162,9 +163,10 @@ class ProcessedMessages(models.Model):
     
     MSG_TYPE = (
         ('ADVANCED',' Advanced'),
-        ('STANDARD',' Standard')
+        ('STANDARD',' Standard'),
+        ('REMINDER',' Reminder'),
                 )
-    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     message_type = models.CharField(max_length=10, choices=MSG_TYPE)
     message = JSONField() #template, recipient_ids
 
