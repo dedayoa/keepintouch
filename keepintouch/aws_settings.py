@@ -33,7 +33,7 @@ AWS_S3_KEY_PREFIX = ""
 AWS_S3_BUCKET_AUTH = True
 
 # The expire time used to access uploaded files.
-AWS_S3_MAX_AGE_SECONDS = None #60*60  # 1 hour.
+AWS_S3_MAX_AGE_SECONDS = 60*60  # 1 hour.
 
 # A custom URL prefix to use for public-facing URLs for uploaded files.
 AWS_S3_PUBLIC_URL = ""
@@ -64,7 +64,7 @@ AWS_S3_BUCKET_AUTH_STATIC = False
 AWS_S3_KEY_PREFIX_STATIC = ""
 
 # The expire time used to access static files.
-AWS_S3_MAX_AGE_SECONDS_STATIC = None #60*60*24*365  # 1 year.
+AWS_S3_MAX_AGE_SECONDS_STATIC = 60*60*24*365  # 1 year.
 
 # A custom URL prefix to use for public-facing URLs for static files.
 AWS_S3_PUBLIC_URL_STATIC = ""
