@@ -6,6 +6,7 @@ Created on Aug 25, 2016
 
 import os
 
+
 DEFAULT_FILE_STORAGE = "django_s3_storage.storage.S3Storage"
 
 # The region to connect to when storing files.
@@ -18,13 +19,13 @@ AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID','')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY','')
 
 # The S3 bucket used to store uploaded files.
-AWS_S3_BUCKET_NAME = "intouch-saas"
+AWS_S3_BUCKET_NAME = os.environ.get('AWS_S3_BUCKET_NAME','')
 
 # The S3 calling format to use to connect to the bucket.
 AWS_S3_CALLING_FORMAT = "boto.s3.connection.OrdinaryCallingFormat"
 
 # The host to connect to (only needed if you are using a non-AWS host)
-AWS_S3_HOST = "s3.es-east-1.amazonaws.com"
+AWS_S3_HOST = "s3.us-east-1.amazonaws.com"
 
 # A prefix to add to the start of all uploaded files.
 AWS_S3_KEY_PREFIX = ""
@@ -47,6 +48,9 @@ AWS_S3_METADATA = {}
 
 # Whether to enable gzip compression for uploaded files.
 AWS_S3_GZIP = True
+
+#### STATIC FILE CONFIG
+
 
 # The S3 bucket used to store static files.
 AWS_S3_BUCKET_NAME_STATIC = ""
