@@ -6,8 +6,11 @@ Created on Aug 25, 2016
 
 import os
 
-
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+# In the event you decide to store uploaded contact files or uploaded custom data files
+# to S3, remember to uncomment the below. Also fix all the "open"s as they currently expect to open from
+# local on-disk storage
+ 
+#DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 # The region to connect to when storing files.
 AWS_REGION = "us-east-1"
