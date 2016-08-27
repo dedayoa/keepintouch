@@ -31,7 +31,7 @@ AWS_S3_HOST = "s3.us-east-1.amazonaws.com"
 AWS_S3_KEY_PREFIX = ""
 
 # Whether to enable querystring authentication for uploaded files.
-AWS_S3_BUCKET_AUTH = True
+AWS_S3_BUCKET_AUTH = False
 
 # The expire time used to access uploaded files.
 AWS_S3_MAX_AGE_SECONDS = 60*60  # 1 hour.
