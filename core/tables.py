@@ -175,23 +175,25 @@ class SMSTransferHistoryTable(tables.Table):
         
         
 class UploadedContactFileHistoryTable(tables.Table):
-
-    def render_file(self, record):
-        if record.file:
-            ext = os.path.splitext(record.file.name)[1][1:]
+    
+    file_json = tables.Column(verbose_name="File")
+    
+    def render_file_json(self, record):
+        if record.file_json:
+            ext = record.file_extension
             if ext == 'csv':
                 return mark_safe('<a href="{}"><i class="fi-page-csv" style="color: #10c710; font-size: 3rem;"></i></a>'.\
-                                 format(record.file.url))
+                                 format(record.get_absolute_url()))
             elif ext == 'xls':
                 return mark_safe('<a href="{}"><i class="fi-page" style="color: #439243; font-size: 3rem;"></i></a>'.\
-                                 format(record.file.url))
+                                 format(record.get_absolute_url()))
             else:
                 return mark_safe('<a href="{}"><i class="fi-page-filled" style="color: #ea1313; font-size: 3rem;"></i></a>'.\
-                                 format(record.file.url))
+                                 format(record.get_absolute_url()))
     
     class Meta:
         model = UploadedContact
-        fields = ('name','file','import_status','upload_date')
+        fields = ('name','file_json','import_status','upload_date')
         
 
 
