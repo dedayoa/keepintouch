@@ -693,6 +693,11 @@ class UserGroupUpdateView(PermissionRequiredMixin, UpdateView):
         params["gptitle"] = self.object.title
         return params
     
+    def get_form_kwargs(self):
+        kwargs = super(UserGroupUpdateView, self).get_form_kwargs()
+        kwargs.update({'kituser': self.request.user.kituser})
+        return kwargs
+    
 class UserGroupCreateView(PermissionRequiredMixin, CreateView):
     
     permission_required = 'core.add_cousergroup'
