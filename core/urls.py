@@ -10,7 +10,7 @@ from django.conf.urls import url, include
 
 from .views import *
 from .ajax import *
-
+from .helper import UploadedContactsDownloadView
 
 urlpatterns = [
     #url(r'^$', Index.as_view(), name='index'),
@@ -54,6 +54,7 @@ urlpatterns = [
                 url(r'import_contact/import/$', now_import_contacts, name='contact-import-action'),
                 url(r'custom_data/$', CustomDataView.as_view(), name='custom-data'),
                 url(r'export/$', now_import_contacts, name='export-data'),
+                url('^contact/(?P<id>[A-Za-z0-9_-]+)/download/$',UploadedContactsDownloadView.as_view(), name='download-contact-file'),
     ])),
     #custom Data
     url(r'^data-mgmt/', include([
