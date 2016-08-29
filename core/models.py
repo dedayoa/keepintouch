@@ -583,7 +583,9 @@ class SMSTransfer(models.Model):
 class UploadedContact(models.Model):
     
     name = models.CharField(max_length=30)
-    file = models.FileField(upload_to='uploaded_contact_files/%Y/%m/')
+    #file = models.FileField(upload_to='uploaded_contact_files/%Y/%m/')
+    file_json = JSONField()
+    file_extension = models.CharField(max_length=4, blank=False)
     import_status = JSONField()
     upload_date = models.DateTimeField(auto_now_add=True)
     
@@ -591,6 +593,10 @@ class UploadedContact(models.Model):
     
     def __str__(self):
         return self.name
+    
+    def get_absolute_url(self):
+        return reverse('core:download-contact-file',
+                       args=[self.pk])
 
 
 class CustomData(models.Model):
