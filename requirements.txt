@@ -20,6 +20,7 @@ django-common-helpers==0.8.0
 django-crispy-forms==1.6.0
 django-cron==0.4.6
 django-debug-toolbar==1.4
+django-downloadview==1.9
 django-dynamic-fixture==1.9.0
 django-etc==0.9.1
 django-fernet-fields==0.4
