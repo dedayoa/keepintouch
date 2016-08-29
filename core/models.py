@@ -26,6 +26,7 @@ from timezone_utils.choices import PRETTY_ALL_TIMEZONES_CHOICES, PRETTY_COMMON_T
 
 from django.apps import apps
 from cacheops.query import cached_as
+from cryptography.fernet import InvalidToken
 
 
 ### Managers
@@ -249,8 +250,11 @@ class KITUser(models.Model):
         '''
             Only KIT_ADMINS can configure SMTP
         '''
-        if self.is_admin:
-            return SMTPSetting.objects.filter(kit_admin=self.pk)
+        try:
+            if self.is_admin:
+                return SMTPSetting.objects.filter(kit_admin=self.pk)
+        except InvalidToken:
+            print("Seems you have changed SECRET_KEY...all encrypted tokens have been invalidated")
 
 
             
