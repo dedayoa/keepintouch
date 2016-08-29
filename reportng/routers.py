@@ -37,4 +37,4 @@ class DeliveryReportRouter(object):
         if app_label == 'reportng':
             return db == 'delivery_report'
         else:
-            return False
+            return db == 'default'
