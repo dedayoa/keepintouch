@@ -254,15 +254,15 @@ def wet_run_file(file, fext, kuserid):
         else:
             with open(file,'rb') as f:
                 dataset = tablib.Dataset().load(f.read(), format="xls")
-        
+        dataset_ut = dataset.dict
         dataset.append_col(lambda row: kuserid,'kit_user')
         
         res_cr_dr = cr.import_data(dataset, dry_run=False)
         
         if res_cr_dr.has_errors():
-            return 'err21' #error occured during dry run
+            return 'err21' #error occured during wet run
         else:
-            return res_cr_dr.totals
+            return [res_cr_dr.totals, dataset_ut] 
             
     except:
         print(sys.exc_info())#[0])    
@@ -275,26 +275,31 @@ def now_import_contacts(request):
     
     if request.method == 'POST':
                    
-        file_name = request.POST.get('namega')
-        enc_file_loc = request.POST.get('sook')
+        try:
+            file_name = request.POST.get('namega')
+            enc_file_loc = request.POST.get('sook')
         
-        aix = bytes(settings.SECRET_KEY[:32],'utf-8')
-        f = Fernet(base64.urlsafe_b64encode(aix))
-        file_loc = (f.decrypt(bytes(enc_file_loc,'utf-8'))).decode('utf-8')
-        
-        fext = os.path.splitext(str(file_loc))[1]
-        
-        result = wet_run_file(file_loc, fext, request.user.kituser.id)
-        
-        #save upload to the uploaded table
-        UploadedContact.objects.create(
-                name = file_name,
-                file = File(open(file_loc, 'rb')),
-                import_status = result,
-                uploaded_by = request.user.kituser
-                )
-        
-        return {'result':'Done!'}
+            aix = bytes(settings.SECRET_KEY[:32],'utf-8')
+            f = Fernet(base64.urlsafe_b64encode(aix))
+            file_loc = (f.decrypt(bytes(enc_file_loc,'utf-8'))).decode('utf-8')
+            
+            fext = os.path.splitext(str(file_loc))[1]
+            
+            result = wet_run_file(file_loc, fext, request.user.kituser.id)
+            
+            #save upload to the uploaded table
+            UploadedContact.objects.create(
+                    name = file_name,
+                    #file = File(open(file_loc, 'rb')),
+                    file_json = result[1],
+                    file_extension = fext[1:], #remove leading dot
+                    import_status = result[0],
+                    uploaded_by = request.user.kituser
+                    )            
+            return {'result':'Done!'}
+        except:
+            print(sys.exc_info())
+            return {'result':'Error Occured! Please Try Again'}
 
 
 
