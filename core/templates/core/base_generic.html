@@ -21,7 +21,7 @@
 							<span class="title-bar-title"><img width="20px" src="{%  static 'images/favicon.png' %}" /> In.Touch</span>
 						</div>
 						<div class="title-bar-right">
-							<div>Hi {{user.get_username}}
+							<div>Hi {% if user.get_full_name %}{{user.get_full_name}}{% else %}{{user.get_username}}{% endif %}
 								<a href="{% url 'core:backdoor' %}" style="margin-left: 2rem;"><i class="fi-power" style="font-size: 22px; line-height: 1rem; color: red"></i></a>
 							</div>
 						</div>
