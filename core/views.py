@@ -18,7 +18,8 @@ from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTe
 from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, ExistingUserForm,\
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
                     UserGroupSettingForm, NewUserForm, ContactGroupForm, SMSTransferForm,\
-                    ContactImportForm, PersonalProfileForm, CustomDataIngestForm, KITUBalanceForm
+                    ContactImportForm, PersonalProfileForm, CustomDataIngestForm, KITUBalanceForm,\
+                    VerifyAccountForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable,\
                     SMSTransferHistoryTable, UploadedContactFileHistoryTable, CustomDataStoreTable
@@ -33,14 +34,17 @@ from django.core.mail import send_mail
 from django.core.mail.backends.smtp import EmailBackend
 from django.contrib.messages.api import get_messages
 from django.contrib.auth.models import User
-from django.contrib.auth import logout
+from django.contrib.auth import logout, get_user_model
 
 from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMixin
 from django.contrib.auth.decorators import user_passes_test
 
 from messaging.helper import SMTPHelper
 
-from sitegate.decorators import signin_view, redirect_signedin
+from sitegate.decorators import signin_view, redirect_signedin, signup_view
+from sitegate.signup_flows.classic import ClassicSignup
+from sitegate.signup_flows.modern import ModernSignup
+
 from django.conf import settings
 import mimetypes
 from gomez.models import KITBilling
@@ -49,8 +53,9 @@ from stronghold.decorators import public
 from django.views.decorators.csrf import csrf_exempt
 from core.models import KITUBalance
 
+
 # Create your views here.
-@signin_view(template='core/sitegate-myfoundation.html', redirect_to='core:dashboard-view')
+@signin_view(template='core/sitegate/sitegate-myfoundation.html', redirect_to='core:dashboard-view')
 @redirect_signedin('core:dashboard-view')
 def entrance(request):
     
@@ -63,6 +68,19 @@ def entrance(request):
     else:
         return render(request, 'core/access.html', {'title': 'Welcome'})
 
+
+@signup_view(template='core/sitegate/sitegate-signup-foundation.html', flow=ModernSignup)
+def register_free(request):
+    return render(request, 'core/free_register.html',{'title':'Sign Up'})
+
+
+def validate_user_details(request):
+    form = VerifyAccountForm(user=request.user)
+    params = {}
+    params['title'] = 'Validate Email & Phone Number'
+    params['form'] = form
+    params['body_class'] = 'verify-account-gate'
+    return render(request, 'core/validate_email_phone.html', params)
 
 def crawler_entrance(request):
     pass
@@ -803,7 +821,7 @@ class AccountManagementView(TemplateView):
     
     def get(self, request):
         
-        self.params["sms_balance"] = request.user.kituser.sms_balance
+        self.params["sms_balance"] = request.user.kituser.kitubalance.sms_balance
         self.params["billing_info"] = request.user.kituser.kitbilling
         self.params["syssetid"] = request.user.kituser.kitsystem.id
         return render(request, self.template_name, self.params)
