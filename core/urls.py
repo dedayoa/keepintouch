@@ -16,6 +16,7 @@ urlpatterns = [
     #url(r'^$', Index.as_view(), name='index'),
     url(r'^exit/$', exitdoor , name='backdoor'),
     url(r'^$', entrance, name='frontdoor'),
+    url(r'^register/free/$', register_free, name='free-intouch-signup'),
     url(r'^gcrawler/$', crawler_entrance, name="gcrawler"),
     url(r'^dashboard/$', DashboardView.as_view(), name='dashboard-view'),
     url(r'^ping-stat/', include([
@@ -43,6 +44,9 @@ urlpatterns = [
                 url(r'^account/sms/$', SMSBalanceTransferView.as_view(), name='sms-account-mgmt'),
                 url(r'^account/sms/credit_transfer/$', sms_credit_transfer, name='sms-credit-transfer'),
                 url(r'^account/sms/get_user_balance/$', get_user_sms_balance),
+                
+                url(r'^account/user/send-verify-code/$', send_verification_code, name='send-verification-code'),
+                url(r'^account/user/verify/$', verify_user_details, name='now-validate-user-details'),
                 
                 #my profile
                 url(r'^user/me/$', KITUserPersonalProfileView.as_view(), name='kituser-personal-profile'),
