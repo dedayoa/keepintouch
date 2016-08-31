@@ -19,6 +19,8 @@ from dateutil.relativedelta import relativedelta
 
 from .models import QueuedMessages, ProcessedMessages,RunningMessage, IssueFeedback
 
+from .templates import TemplateForIssueFeedbackMessages, TemplateForPhoneEmailVerification
+
 #SMTPSetting = apps.get_model('core','SMTPSetting')
 
 def _compose(template, convars):
@@ -237,30 +239,10 @@ def process_reminder_event():
         
 def process_system_notification(**kwargs):
     
-    template_to_user = '''
-    Dear {{fullname}},
-    <p>Thank you for the feedback. <strong>We really appreciate it</strong>.</p>
-    <p>We will look into the issue immediately and revert</p>
+    tmpl = TemplateForIssueFeedbackMessages()
     
-    <p>Need Immediate Support, contact us via<br />
-    Phone: +2348028443225<br />
-    Email: support@intouchng.com<br /></p>
-    
-    Regards<br />
-    In.Touch Support<br />
-    
-    '''
-    template_to_dev_chan = '''
-    Dear Support
-    <p>You have received a new submission from {{fullname}}<{{email}}>.</p>
-    See Detail Below:
-    <p><strong>Title</strong>: {{title}}</p>
-    <strong>Detail</strong>:
-    <p>{{detail}}</p>
-    
-    Attachment can be found here <a href="{{screenshot_link}}">{{screenshot_link}}</a>
-    <p>Over & Out...</p>
-    '''
+    template_to_user = tmpl.template_to_user()
+    template_to_dev_chan = tmpl.template_to_dev_chan()
     
     t = Template(template_to_user)
     email_to_user = t.render(Context(
@@ -287,7 +269,10 @@ def process_system_notification(**kwargs):
                       smtp_settings,
                        owner = kwargs.get('submitter_kusr',''), #current admin
                       )
-    _send_sms.delay(["IssueReport", "New Issue Submitted", "+2348028443225"],owner = KITUser.objects.get(pk=settings.DEVS_KITUSER_ID))
+    _send_sms.delay(["IssueReport", "New Issue Submitted", "+2348028443225"],
+                    'system_msg',
+                    owner = KITUser.objects.get(pk=settings.DEVS_KITUSER_ID),
+                    )
     
     _send_email.delay(['Bug Feedback from website!', email_to_support, 'bugs@intouchng.com'],
                       smtp_settings,
@@ -295,4 +280,35 @@ def process_system_notification(**kwargs):
                       )
 
 
-
+def process_verification_messages(**kwargs):
+    
+    tmpl = TemplateForPhoneEmailVerification()
+    
+    
+    if not kwargs.get('email_is_validated'):
+        template_email = tmpl.template_email()
+        etmpl = Template(template_email)
+        email_to_user = etmpl.render(Context({
+                                'fullname':kwargs.get('fullname',''),
+                                'email_verification_code': kwargs.get('email_verification_code','')
+                                     })
+                                 )
+        smtp_settings = SMTPSetting(**settings.SUPPORT_EMAIL)
+        _send_email.delay(['Email Verification Code', email_to_user, kwargs.get('email','')],
+                          smtp_settings,
+                          owner = KITUser.objects.get(pk=settings.SYSTEM_KITUSER_ID),
+                          )
+        
+    if not kwargs.get('phone_is_validated'):    
+        template_sms = tmpl.template_sms()   
+        stmpl = Template(template_sms)
+        sms_to_user = stmpl.render(Context({
+                                'fullname':kwargs.get('fullname',''),
+                                'phone_verification_code': kwargs.get('phone_verification_code','')
+                                     })
+                                    )
+    
+        _send_sms.delay(["In.Touch NG", sms_to_user, kwargs.get('phone_number')],
+                        KITUser.objects.get(pk=settings.SYSTEM_KITUSER_ID),
+                        'system_msg',                     
+                        )
