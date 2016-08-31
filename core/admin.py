@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from .models import Contact, KITUser, Event, PublicEvent, MessageTemplate, \
                     SentMessage, SMTPSetting, CoUserGroup, ContactGroup, SMSTransfer,\
-                    UploadedContact, CustomData, KITUBalance
+                    UploadedContact, CustomData, KITUBalance, KITActivationCode
 
 
 class ContactAdmin(admin.ModelAdmin):
@@ -17,11 +17,15 @@ class KITUserAdmin(admin.ModelAdmin):
         return ", ".join(p.title for p in obj.groups_adminover.all())
     user_group.short_description = "Groups Admin Over"
     
-    list_display = ('user','parent','is_admin','user_group')
+    list_display = ('user','parent','is_admin','user_group','ip_address')
 
 class CoUserGroupAdmin(admin.ModelAdmin):
     
     list_display = ('title','kit_admin')
+    
+    
+class KITActivationCodeAdmin(admin.ModelAdmin):
+    list_display = ('user','email_activation_code','phone_activation_code','created','expired')
 
     
 class KITUBalanceAdmin(admin.ModelAdmin):
@@ -47,4 +51,5 @@ admin.site.register(CustomData)
 admin.site.register(MessageTemplate)
 admin.site.register(SMTPSetting)
 admin.site.register(KITUser, KITUserAdmin)
+admin.site.register(KITActivationCode, KITActivationCodeAdmin)
 admin.site.register(CoUserGroup, CoUserGroupAdmin)
