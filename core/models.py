@@ -52,28 +52,11 @@ def get_default_user_group():
             
     return CoUserGroup.objects.get_or_create(**data)
 
-def create_and_set_default_user_group(sender, instance, *args, **kwargs):
+class ValidatedUserAccountManager(models.Manager):
     
-    if instance.is_admin:
-        
-        #if not CoUserGroup.objects.filter(title='Default', kit_admin=instance).exists():
-        
-        kitadmin = KITUser.objects.get(pk=instance.id)
-        
-        try:
-            coug, created = CoUserGroup.objects.get_or_create(
-                    title = 'Default',
-                    description = 'Default User Group',
-                    kit_admin = kitadmin,
-                    defaults = {
-                        'active' : True
-                                }
-                )
-            if created:
-                instance.user_group = coug
-        except:
-            print("Error:", sys.exc_info())
-
+    @cached_as(timeout=3600) 
+    def get_queryset(self):
+        return super(ValidatedUserAccountManager, self).get_queryset().filter(email_validated=True, phone_validated=True)
     
 class KITUser(models.Model):
     
@@ -92,24 +75,33 @@ class KITUser(models.Model):
         ('ABJ','Abuja'),
         ('ONDO','Ondo'),
         ('KANO','Kano'),
+        ('OTHER','Other'),
              )
     
     user = models.OneToOneField(User)
-    dob = models.DateField(blank=False)
-    timezone = TimeZoneField(choices=PRETTY_COMMON_TIMEZONES_CHOICES)
+    dob = models.DateField(blank=False, null=True)
+    timezone = TimeZoneField(choices=PRETTY_COMMON_TIMEZONES_CHOICES, null=True)
     
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, limit_choices_to={'is_admin':True})
-    phone_number = PhoneNumberField(blank=True, null=True, unique=True)
-    company = models.CharField(max_length=255, blank=True)
-    industry = models.CharField(max_length=50, choices=INDUSTRY, blank=False)
-    address_1 = models.CharField(max_length=100, blank=False)
-    address_2 = models.CharField(max_length=100, blank=True)
-    city_town = models.CharField(max_length=100, blank=False)
+    phone_number = PhoneNumberField(blank=True, null=True)
+    company = models.CharField(max_length=255, blank=True, null=True)
+    industry = models.CharField(max_length=50, choices=INDUSTRY, blank=False, null=True)
+    address_1 = models.CharField(max_length=100, blank=False, null=True)
+    address_2 = models.CharField(max_length=100, blank=True, null=True)
+    city_town = models.CharField(max_length=100, blank=False, null=True)
     state = models.CharField(max_length=100, blank=False, choices=STATE, default="LAG")
     is_admin = models.BooleanField(default=False)
+    ip_address = models.GenericIPAddressField(null=True, editable=False)
+    
+    email_validated = models.BooleanField(default=False)
+    email_validated_date = models.DateTimeField(null=True)
+    
+    phone_validated = models.BooleanField(default=False)
+    phone_validated_date = models.DateTimeField(null=True)
     
     
-    objects = KITUserManager()
+    objects = models.Manager()
+    validated_objects = ValidatedUserAccountManager()
     
     def __str__(self):
         if self.user.first_name: return self.user.first_name
@@ -259,7 +251,7 @@ class KITUser(models.Model):
 
             
 
-post_save.connect(create_and_set_default_user_group, sender=KITUser)      
+  
 
 
 def prevent_save_of_group_titled_default(sender, instance, *args, **kwargs):
@@ -267,26 +259,25 @@ def prevent_save_of_group_titled_default(sender, instance, *args, **kwargs):
     if (instance.title).lower() == 'default' :
         pass
 
+def get_random_integers():
+    import random
+    n = random.randint(10000,99999)
+    return n
 
-@receiver(post_save, sender=KITUser)
-def create_kituser_assoc_tables(sender, instance, **kwargs):
-    if kwargs.get('created', False):
-        def on_commit():
-            kitbilling = apps.get_model('gomez', 'KITBilling')
-            kitsystem = apps.get_model('gomez', 'KITSystem')
-            
-            kitbilling.objects.create(
-                    kit_admin=instance,
-                    next_due_date = timezone.now().date(),
-                    registered_on = timezone.now().date()
-                    )
-            kitsystem.objects.create(kit_admin=instance)
-            
-            KITUBalance.objects.create(kit_user=instance)
-            
-        transaction.on_commit(on_commit) 
-
-
+class KITActivationCode(models.Model):
+    
+    user = models.OneToOneField(User)
+    email_activation_code = RandomSlugField(length=28, db_index=True)
+    phone_activation_code = models.CharField(max_length=5, default=get_random_integers, editable=False, db_index=True)
+    
+    expired = models.BooleanField(default=False)
+    
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "{}".format(self.user)
+    
 
 
 class KITUBalance(models.Model):
