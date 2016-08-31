@@ -508,11 +508,6 @@ def send_verification_code(request):
         if not form.is_valid():
             return {'errors':form.errors.as_json(escape_html=True)}
         else:
-            # delete existing activation keys for this user.
-            KITActivationCode.objects.filter(user=request.user).delete()
-            #create new activation key
-            activation = KITActivationCode.objects.create(user=request.user)
-            
             # update User & KITUser with info received
             user = request.user
             user.first_name = form.cleaned_data.get('first_name')
@@ -525,6 +520,12 @@ def send_verification_code(request):
             kuser.timezone = form.cleaned_data.get('timezone')
             kuser.phone_number = form.cleaned_data.get('phone_number')
             kuser.save()
+            
+            
+            # delete existing activation keys for this user.
+            KITActivationCode.objects.filter(user=request.user).delete()
+            #create new activation key
+            KITActivationCode.objects.create(user=request.user)
             
             return {'result','Verification Code Sent'}
     
