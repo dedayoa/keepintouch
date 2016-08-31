@@ -1,0 +1,55 @@
+{% load staticfiles %}
+{% load sitegate %}
+{% load google_analytics %}
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Intouch - {{title}}</title>
+	{% block head_base_links %}
+		<link rel="stylesheet" href="{% static "css/foundation.css" %}" />
+		<link rel="stylesheet" href="{% static "css/foundation-icons/foundation-icons.css" %}" />
+		<link href="{% static "css/main.css" %}" rel="stylesheet">
+		<script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+	{% endblock %}
+	<style>
+	label[for="id_signin_flow"]{
+		display: none;
+	}
+	body{
+		background: url({% static "images/background-app.png" %}) no-repeat center center fixed;
+		-webkit-background-size: cover;
+		-moz-background-size: cover;
+		-o-background-size: cover;
+		background-size: cover;
+	}
+	</style>
+</head>
+<body>
+	{% block body %}
+	<div class="row column large-12" style="margin-top: 1rem;">	
+	</div>
+	<div class="row">
+		<div class="column medium-3"><br /></div>
+		<div class="column small-12 medium-6 signup-form">		
+			<a href="#">
+				<img style="vertical-align: text-bottom;" width="50" src="{% static "images/logo-100x100.png" %}" alt="Intouch Enterprise Email & SMS Suite"/>
+				<h3 style="display: inline-block; line-height: 2rem">InTouch Communication Suite</h3>
+			</a>	
+			<h4 style="text-align: center; margin-top: 2rem;">Register for A <span style="text-decoration: underline;"><strong>FREE</strong></span> Personal Account</h4>
+			{% sitegate_signup_form %}
+			<div class="agree-tos">By clicking on "Register", you agree to our <a href="http://intouchng.com/policies/" target="_blank">Terms & Conditions</a></div>
+		</div>
+		<div class="column medium-3"><br /></div>
+	</div>
+	{% endblock %}
+	{% block foot_base_js %}
+		<script type="text/javascript" src="{% static "js/vendor/what-input.js" %}"></script>
+		<script type="text/javascript" src="{% static "js/vendor/foundation.js" %}"></script>
+		<script type="text/javascript" src="{% static "js/main.js" %}"></script>
+	{% endblock %}
+	{% google_analytics %}
+</body>
+</html>
