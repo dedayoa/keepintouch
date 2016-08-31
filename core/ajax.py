@@ -8,6 +8,7 @@ from django.core.files.storage import default_storage
 from django.db import transaction, IntegrityError
 from django.core.files.base import ContentFile, File
 from django.conf import settings
+from django.contrib import messages as flash_messages
 
 import psutil
 import json
@@ -16,8 +17,8 @@ import humanize
 import base64
 from cryptography.fernet import Fernet
 
-from .models import KITUser, SMSTransfer, CustomData, Contact, KITUBalance
-from .forms import SMSTransferForm, ContactImportForm, CustomDataIngestForm
+from .models import KITUser, SMSTransfer, CustomData, Contact, KITUBalance, KITActivationCode
+from .forms import SMSTransferForm, ContactImportForm, CustomDataIngestForm, VerifyAccountForm
 from .impexp import ContactResource
 import tablib
 import sys
@@ -27,6 +28,10 @@ import logging
 from core.models import UploadedContact
 from django.utils.text import slugify
 from tablib.core import UnsupportedFormat
+from django.http.response import HttpResponseRedirect
+from django.utils import timezone
+
+from ipware.ip import get_real_ip
 
 
 logger = logging.getLogger(__name__)
@@ -490,3 +495,78 @@ def get_custom_data_columns(request, pk=None):
         hdrs['headers'].remove(hdrs['identity_column_name'])
         
         return {'result':hdrs['headers']}
+    
+    
+@ajax
+@login_required
+def send_verification_code(request):
+    if request.method == "POST":
+        # expire every other unexpired code
+        # create new verification
+        # send email and phone number to verify...based on whether already verified
+        form = VerifyAccountForm(request.POST, user=request.user)
+        if not form.is_valid():
+            return {'errors':form.errors.as_json(escape_html=True)}
+        else:
+            # delete existing activation keys for this user.
+            KITActivationCode.objects.filter(user=request.user).delete()
+            #create new activation key
+            activation = KITActivationCode.objects.create(user=request.user)
+            
+            # update User & KITUser with info received
+            user = request.user
+            user.first_name = form.cleaned_data.get('first_name')
+            user.last_name = form.cleaned_data.get('last_name')
+            user.save()
+            
+            kuser= KITUser.objects.get(user=request.user)
+            kuser.ip_address = get_real_ip(request)
+            kuser.dob = form.cleaned_data.get('date_of_birth')
+            kuser.timezone = form.cleaned_data.get('timezone')
+            kuser.phone_number = form.cleaned_data.get('phone_number')
+            kuser.save()
+            
+            return {'result','Verification Code Sent'}
+    
+    
+@ajax
+@login_required
+def verify_user_details(request):
+    if request.method == "POST":
+        form = VerifyAccountForm(request.POST, user=request.user)
+        if not form.is_valid():
+            return {'errors':form.errors.as_json(escape_html=True)}
+        else:
+            activation_details = request.user.kitactivationcode
+            if activation_details.expired:
+                flash_messages.add_message(request, flash_messages.INFO,'Activation Codes Expired. Click "Send Code" button to generate a new set.')
+                return HttpResponseRedirect('/')
+            else:
+                evc = form.cleaned_data.get('email_verification_code','')
+                pvc = form.cleaned_data.get('phone_number_verification_code','')
+                #  check if email is verified
+                if request.user.kituser.email_validated == False:
+                    if evc == activation_details.email_activation_code:
+                        # update kituser
+                        KITUser.objects.filter(user=request.user.id).update(
+                                                email_validated = True,
+                                                email_validated_date = timezone.now()
+                                                )
+                    else:
+                        flash_messages.add_message(request, flash_messages.INFO, 'Invalid Email Verification Code. Kindly re-check or generate a new set')
+                
+                if request.user.kituser.phone_validated == False:
+                    if pvc == activation_details.phone_activation_code:
+                        if request.user.kituser.phone_number != form.cleaned_data.get('phone_number'):
+                            flash_messages.add_message(request, flash_messages.INFO, 'To change your phone number, resend Verification Code again')
+                            
+                        else:
+                            # update kituser
+                            KITUser.objects.filter(user=request.user.id).update(
+                                                    phone_validated = True,
+                                                    phone_validated_date = timezone.now()
+                                                                             )
+                    else:
+                        flash_messages.add_message(request, flash_messages.INFO, 'Invalid Phone Verification Code. Kindly re-check or generate a new set')
+                return HttpResponseRedirect('/')
+    
