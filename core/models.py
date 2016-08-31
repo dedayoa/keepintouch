@@ -104,8 +104,7 @@ class KITUser(models.Model):
     validated_objects = ValidatedUserAccountManager()
     
     def __str__(self):
-        if self.user.first_name: return self.user.first_name
-        else: return self.user.username
+        return "{}, {}".format(self.user.get_full_name(), self.user.email)
         
     def get_absolute_url(self):
         return reverse('core:kituser-detail',args=[self.pk])
