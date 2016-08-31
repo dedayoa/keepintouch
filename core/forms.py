@@ -31,6 +31,9 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 import datetime
 from django.template.defaultfilters import filesizeformat
+from phonenumber_field.formfields import PhoneNumberField
+from timezone_utils.forms import TimeZoneField
+from timezone_utils.choices import PRETTY_COMMON_TIMEZONES_CHOICES
 
 
 class ContactForm(forms.ModelForm):
@@ -527,3 +530,29 @@ class CustomDataIngestForm(forms.Form):
         
         self.helper = FormHelper()
     
+    
+        
+        
+class VerifyAccountForm(forms.Form):
+    
+    first_name = forms.CharField(max_length=100, required=True)
+    last_name = forms.CharField(max_length=100, required=True)
+    date_of_birth = forms.DateField(required=True, input_formats=settings.DATE_INPUT_FORMATS)
+    timezone = TimeZoneField(required=True, widget=Select2Widget(choices=PRETTY_COMMON_TIMEZONES_CHOICES))
+    
+    email_address = forms.EmailField(disabled=True, required=False)
+    phone_number = PhoneNumberField(required=True, help_text="Must be in International format '+234...'")
+    email_verification_code = forms.CharField(max_length=28, required=False)
+    phone_number_verification_code = forms.CharField(max_length=5, required=False)
+    
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user')
+        super(VerifyAccountForm, self).__init__(*args, **kwargs)
+        self.fields['email_address'].widget = forms.EmailInput(attrs={'value':self.user.email})
+        self.fields['first_name'].widget = forms.TextInput(attrs={'value':self.user.first_name})
+        self.fields['last_name'].widget = forms.TextInput(attrs={'value':self.user.last_name})
+        self.fields['date_of_birth'].initial = self.user.kituser.dob
+        self.fields['timezone'].initial = self.user.kituser.timezone
+        self.fields['phone_number'].widget = forms.TextInput(attrs={'value':self.user.kituser.phone_number})
+        
+             
