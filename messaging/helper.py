@@ -34,7 +34,7 @@ def is_company_wide(kuser):
         #is an admin, but not billed as a full admin e.g user on free plan
         return True
     elif kuser.is_admin and kuser.kitbilling.is_full_admin:
-        raise FailedSendingMessageError("Admin User Cannot Send Messages")
+        raise FailedSendingMessageError("Full Admin User Cannot Send Messages")
     elif not kuser.is_admin:
         return kuser.parent.kitsystem.company_wide_contacts
 
@@ -341,7 +341,7 @@ class OKToSend(object):
         
     def _is_active(self):
         if self.owner.is_admin and self.owner.kitbilling.is_full_admin:
-            raise FailedSendingMessageError("Admin User Cannot Send Messages")
+            raise FailedSendingMessageError("Full Admin User Cannot Send Messages")
         elif self.owner.is_admin and not self.owner.kitbilling.is_full_admin:
             if self.user.is_active:
                 return True
@@ -357,7 +357,7 @@ class OKToSend(object):
             
     def _has_valid_subscription(self):
         if self.owner.is_admin and self.owner.kitbilling.is_full_admin:
-            raise FailedSendingMessageError("Admin User Cannot Send Messages")
+            raise FailedSendingMessageError("Full Admin User Cannot Send Messages")
         elif self.owner.is_admin and not self.owner.kitbilling.is_full_admin:
             if self.owner.kitbilling.next_due_date >= timezone.now().date():
                 return True
