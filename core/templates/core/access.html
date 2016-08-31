@@ -36,13 +36,15 @@
 		</a>
 		<h4>All-in-One Enterprise Email and SMS</h4>		
 	</div>
+	
 	<div class="row">
 		<div class="column large-5 login-form">
 			{% sitegate_signin_form %}
+			<a href="{% url 'password_reset_recover' %}">Forgot Password</a>
 		</div>
 	</div>
-	<div class="row columns">
-		<footer class="row">Developed by <a href="http://tekartng.com">Tekart Limited</a></footer>
+	<div class="row columns" style="margin-top: 1rem;">
+		<div class="row">Developed by <a href="http://tekartng.com" style="color: #3f3f3f; font-weight: bold;">Tekart Limited</a></div>
 	</div>
 	{% endblock %}
 	{% block foot_base_js %}
