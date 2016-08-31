@@ -1,0 +1,191 @@
+{% extends "core/base_generic.html" %}
+
+{% load staticfiles %}
+
+{% block head_base_links %}
+	{{ block.super }}
+	{{ form.media.css }}
+	<link href="{% static "css/foundation-datepicker.css" %}" rel="stylesheet">
+{% endblock %}
+{% block title %}{{title}}{% endblock %}
+
+{% block container %}
+	<div class="show-for-large medium-3 column">
+		{% block lsb %}
+			{% include "core/menu.html" %}
+		{% endblock %}
+	</div>
+	<div class="small-12 large-9 column kitapp-content">
+		{% block content %}
+			<h2>Help us Know you Better</h2>
+			<p>Before you continue using In.Touch, kindly provide us these additional pieces of information 
+			to allow us know you better. It won't take long at all.</p>			
+			{% if messages %}
+			<div class="alert callout">
+				{% for message in messages %}
+					<p>{{ message }}</p>
+				{% endfor %}
+			</div>
+			{% endif %}
+			<form id="user-account-verify-form">				
+				<table style="{% if request.user.kitactivationcode %}display: None;{% endif %}">			
+					<tr>
+						<td width="50%">
+						{{ form.first_name.label}}
+						{{ form.first_name }}
+						</td>
+						<td width="50%">
+						{{ form.last_name.label }}
+						{{ form.last_name }}
+						</td>
+					</tr>						
+					<tr>
+						<td>
+						{{ form.date_of_birth.label }}
+						{{ form.date_of_birth }}
+						</td>
+						<td>
+						{{ form.timezone.label }}
+						{{ form.timezone }}
+						</td>
+					</tr>
+				</table>
+				<h5>Verify Email</h5>
+				<table>
+					<tr>
+						<td>Email Address: </td>
+						<td>{{ form.email_address }}</td>
+					</tr>
+					{% if not request.user.kituser.email_validated %}
+					<tr>
+						<td>Verification Code: </td>
+						<td>{{form.email_verification_code}}</td>
+					</tr>					
+					{% else %}					
+					<tr>
+						<td colspan=2><h4 style="text-align: center; color: green;"><i class="fi-check"></i> Email Already Verified</h4></td>
+					</tr>
+					{% endif %}
+				</table>
+				
+				<h5>Verify Phone Number</h5>
+				<table>
+					<tr>
+						<td>Phone: </td>
+						<td>
+						<span>{{ form.phone_number.help_text}}</span>	
+						{{ form.phone_number }}
+						</td>
+					</tr>
+					{% if not request.user.kituser.phone_validated %}
+					<tr>
+						<td>Verification Code: </td>
+						<td>{{form.phone_number_verification_code}}</td>
+					</tr>
+					{% else %}					
+					<tr>
+						<td colspan=2><h4 style="text-align: center; color: green;"><i class="fi-check"></i> Phone Number Already Verified</h4></td>
+					</tr>
+					{% endif %}
+				</table>
+				<input type="submit" class="button send-verification-code" value="Send Code"></input>
+				<button class="button validate-verify">Verify</button>
+			</form>
+		{% endblock %}
+			
+	</div>
+	<div class="reveal" id="verification-code-sent" data-reveal>
+		<h3 style="text-align: center;"><i class="fi-check"></i> Verification Code Sent!</h3>
+		<p id="modal-rpt" style="text-align: center;">
+		Please check your email and/or phone for the verification code.
+		</p>
+	    <button class="close-button" data-close aria-label="Close modal" type="button">
+	    <span aria-hidden="true">&times;</span>
+	</div>
+
+{% endblock %}
+
+{% block foot_base_js %}
+	{{ block.super }}
+	{{ form.media.js }}
+	<script src="{% static "js/foundation-datepicker.js" %}"></script>
+	<script>
+	$('#id_date_of_birth').fdatepicker({
+		format: 'dd-mm-yyyy',
+		disableDblClickSelection: true,
+		language: 'en',
+		pickTime: false,
+		/*onRender: function(date){
+			return date.valueOf() < now.valueOf() ? 'disabled' : '';
+		}*/
+	});
+	
+	$(document).ready(function(){
+		$("#user-account-verify-form").submit(function(e){
+			e.preventDefault();
+			//check that firstname and lastname are present
+			var payload = $("#user-account-verify-form").serializeArray();
+			
+				
+			ajaxPost('/settings/account/user/send-verify-code/', payload, function(content){
+				console.log(content)
+				if (content.hasOwnProperty("errors")){
+           			var errors = $.parseJSON(content.errors);	
+           		
+           			$.each(errors, function(index, value){
+           				if (index === '__all__'){
+           					$('div.nonfield-ajax-error').remove();
+           					$("small.error").remove();
+           					$("#user-account-verify-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+           				}else{
+           					$("small.error").remove();
+           					//select field with error and apply text after it
+           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+           				}
+           			});
+           			
+           			return;
+           			
+           		}else{
+           			$('#verification-code-sent').foundation('open');
+           			setTimeout(function(){
+	   					window.location.replace("/");
+	   				}, 2500);
+           		}
+			});
+		});
+		
+		$("button.validate-verify").click(function(e){
+			
+			e.preventDefault();
+			
+			var payload = $("#user-account-verify-form").serializeArray();
+			
+			
+			ajaxPost('/settings/account/user/verify/', payload, function(content){
+				console.log(content)
+				if (content.hasOwnProperty("errors")){
+           			var errors = $.parseJSON(content.errors);	
+           		
+           			$.each(errors, function(index, value){
+           				if (index === '__all__'){
+           					$('div.nonfield-ajax-error').remove();
+           					$("small.error").remove();
+           					$("#user-account-verify-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+           				}else{
+           					$("small.error").remove();
+           					//select field with error and apply text after it
+           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+           				}
+           			});
+           			
+           			return;
+           			
+           		}else{
+           			 
+           		}
+			});
+		});
+	})
+	</script>
+{% endblock %}
