@@ -171,7 +171,7 @@ form.qu-re-form input[type="submit"]{
 	padding: 2rem 1rem;
 }
 
-.login-form form{
+.login-form form, .signup-form{
 	border: 1px dotted #ddd;
     background-color: #f9f9f9;
 	-webkit-box-shadow: 0px 0px 9px 0px rgba(0,0,0,0.2);
@@ -291,4 +291,22 @@ ul#id_unique_field input{
 
 #customdata-upload-form div.column:nth-child(3) div{
 	margin-top: 1em;
+}
+
+label[for="id_signup_flow"]{
+	display: none;
+}
+
+
+body.verify-account-gate div.kitapp-content{
+	background-color: #e9e9e9;
+}
+
+body.verify-account-gate div.kitapp-content table{
+	border: 1px dotted #ddd;
+    background-color: #f9f9f9;
+	-webkit-box-shadow: 0px 0px 9px 0px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0px 0px 9px 0px rgba(0,0,0,0.2);
+	box-shadow: 0px 0px 9px 0px rgba(0,0,0,0.2);
+	padding: 1rem;
 }
