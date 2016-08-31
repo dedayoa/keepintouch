@@ -27,8 +27,10 @@ django-fernet-fields==0.4
 django-filter==0.13.0
 django-grappelli==2.8.1
 django-import-export==0.4.5
+django-ipware==1.1.5
 django-jsonify==0.3.0
 django-model-utils==2.5
+django-password-reset==0.9
 django-phonenumber-field==1.1.0
 django-pickling==0.2
 django-pkgconf==0.2.0
