@@ -270,13 +270,13 @@ def process_system_notification(**kwargs):
                        owner = kwargs.get('submitter_kusr',''), #current admin
                       )
     _send_sms.delay(["IssueReport", "New Issue Submitted", "+2348028443225"],
-                    'system_msg',
-                    owner = KITUser.objects.get(pk=settings.DEVS_KITUSER_ID),
+                    KITUser.objects.get(pk=settings.SYSTEM_KITUSER_ID),
+                    'system_msg'
                     )
     
     _send_email.delay(['Bug Feedback from website!', email_to_support, 'bugs@intouchng.com'],
                       smtp_settings,
-                      owner = KITUser.objects.get(pk=settings.DEVS_KITUSER_ID) #current admin
+                      owner = KITUser.objects.get(pk=settings.SYSTEM_KITUSER_ID) #current admin
                       )
 
 
