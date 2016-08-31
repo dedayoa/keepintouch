@@ -19,6 +19,7 @@ from core.models import KITActivationCode, KITUser, KITUBalance
 from sitegate.signals import sig_user_signup_success
 from django.conf import settings
 from gomez.models import KITServicePlan
+from core.signals import create_kituser_assoc_tables
         
 
 @receiver(post_save, sender=IssueFeedback)
@@ -77,7 +78,14 @@ def process_sending_verification_details(sender, instance, **kwargs):
 @receiver(sig_user_signup_success)       
 def user_signup_callback(signup_result, flow, request, **kwargs):
     if request.path == '/register/free/':
+        #disconnect the post_save signal for KITUser
+        post_save.disconnect(create_kituser_assoc_tables, sender=KITUser)
+        
+        # create new KITUser
         KITUser.objects.create(user=signup_result, is_admin=True)
+        
+        # connect again
+        post_save.connect(create_kituser_assoc_tables, sender=KITUser)
         # the above creates kitsystem,
         free_service_plan = KITServicePlan.objects.get(id=settings.FREE_SERVICE_PLAN_ID)
         
