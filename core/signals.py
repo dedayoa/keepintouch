@@ -10,7 +10,7 @@ from django.db.models.signals import post_save
 
 from .models import KITUser, KITUBalance, CoUserGroup
 from django.apps import apps
-from datetime import timezone
+from django.utils import timezone
 
 
 @receiver(post_save, sender=KITUser)
