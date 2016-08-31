@@ -93,7 +93,7 @@ def user_signup_callback(signup_result, flow, request, **kwargs):
         kitsystem = apps.get_model('gomez', 'KITSystem')
         kitsystem.objects.create(kit_admin=signup_result.kituser)
         
-        KITUBalance.objects.create(kit_user=signup_result.kituser)
+        KITUBalance.objects.create(kit_user=signup_result.kituser, free_sms_balance=10)
         #set free user permissions
         group = Group.objects.get(id=settings.FREE_GROUP_PERMS_ID)
         signup_result.groups.add(group)
