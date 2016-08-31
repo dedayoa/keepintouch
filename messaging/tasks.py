@@ -308,7 +308,7 @@ def process_verification_messages(**kwargs):
                                      })
                                     )
     
-        _send_sms.delay(["In.Touch NG", sms_to_user, kwargs.get('phone_number')],
+        _send_sms.delay(["In.Touch NG", sms_to_user, (kwargs.get('phone_number')).as_e164],
                         KITUser.objects.get(pk=settings.SYSTEM_KITUSER_ID),
                         'system_msg',                     
                         )
