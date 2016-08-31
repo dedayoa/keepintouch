@@ -202,6 +202,12 @@ class SMSHelper():
                     return ['p_sb', p_sb-(ppsms * smsct)]
                 else:
                     raise NotEnoughBalanceError("Admin does not have enough units to send SMS")
+            elif self.msg_type == 'system_msg':
+                # Always bill system messages from the admin account
+                if p_fsb >= (ppsms * smsct):
+                    return ['p_fsb', p_fsb-(ppsms * smsct)]
+                elif p_sb >= (ppsms * smsct):
+                    return ['p_sb', p_sb-(ppsms * smsct)]
         else:
             # all messages are sent using the user's account balance
             if fsb >= (ppsms * smsct):
