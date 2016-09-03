@@ -13,7 +13,7 @@ from django.conf import settings
 
 
 from .models import Contact, Event, PublicEvent, MessageTemplate, KITUser, SMTPSetting, ContactGroup,\
-                    KITUBalance
+                    KITUBalance, OrganizationContact
 from .helper import EventFormSetHelper
 
 
@@ -34,6 +34,8 @@ from django.template.defaultfilters import filesizeformat
 from phonenumber_field.formfields import PhoneNumberField
 from timezone_utils.forms import TimeZoneField
 from timezone_utils.choices import PRETTY_COMMON_TIMEZONES_CHOICES
+
+from cities_light.forms import RegionForm, CityForm, CountryForm
 
 
 class ContactForm(forms.ModelForm):
@@ -298,9 +300,7 @@ class ExistingUserForm(forms.ModelForm):
     
     class Meta:
         model = User
-        fields = ['username','email','first_name','last_name',\
-                  'is_active'
-                  ]  
+        fields = ['username','email','first_name','last_name','is_active']  
 
 
 
@@ -365,13 +365,14 @@ class KITUserForm(forms.ModelForm):
     
     class Meta:
         model = KITUser
-        fields = ['dob','phone_number','industry','company','address_1',\
-                  'address_2','city_town','state']
+        fields = ['timezone','dob','phone_number']
         exclude = ['user']
         widgets = {
-            'state': Select2Widget,
+            'timezone': Select2Widget,
                    }
-        
+
+
+
 class KITUBalanceForm(forms.ModelForm):
 
     sms_balance = forms.IntegerField(disabled=True, required=False, label="SMS Balance")
@@ -421,6 +422,7 @@ class UserGroupSettingForm(forms.ModelForm):
         self.helper.form_action = '.'
         self.helper.add_input(Submit('submit', _('Save'), css_class="success float-right"))
         self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+        self.fields['kit_users'].queryset = self.fields['kit_users'].queryset.filter(parent=self.kuser)
         
         
     def clean(self):
@@ -531,7 +533,17 @@ class CustomDataIngestForm(forms.Form):
         self.helper = FormHelper()
     
     
-        
+
+class OrganizationContactForm(forms.ModelForm):
+    
+    class Meta:
+        model = OrganizationContact
+        fields = ['organization','industry','organization_phone_number','address_1','address_2','country','state','city_town']
+        widgets = {
+            'city_town' : Select2Widget,
+            'state': Select2Widget,
+            'country':Select2Widget
+                   }        
         
 class VerifyAccountForm(forms.Form):
     
@@ -544,7 +556,7 @@ class VerifyAccountForm(forms.Form):
     phone_number = PhoneNumberField(required=True, help_text="Must be in International format '+234...'")
     email_verification_code = forms.CharField(max_length=28, required=False)
     phone_number_verification_code = forms.CharField(max_length=5, required=False)
-    
+
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user')
         super(VerifyAccountForm, self).__init__(*args, **kwargs)
@@ -554,5 +566,3 @@ class VerifyAccountForm(forms.Form):
         self.fields['date_of_birth'].initial = self.user.kituser.dob
         self.fields['timezone'].initial = self.user.kituser.timezone
         self.fields['phone_number'].widget = forms.TextInput(attrs={'value':self.user.kituser.phone_number})
-        
-             
