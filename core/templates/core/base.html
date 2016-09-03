@@ -18,15 +18,6 @@
 		<script type="text/javascript" src="{% static 'django_ajax/js/jquery.ajax.min.js' %}"></script>
 		<script type="text/javascript" src="{% static 'django_ajax/js/jquery.ajax-plugin.min.js' %}"></script>
 	{% endblock %}
-	{% if request.user.kituser.supported_by_ads and not debug %}
-		<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-		<script>
-		  (adsbygoogle = window.adsbygoogle || []).push({
-		    google_ad_client: "ca-pub-8909496138809362",
-		    enable_page_level_ads: true
-		  });
-		</script>
-	{% endif %}
 </head>
 <body class="{% block body_css_blk %}{{body_class}}{% endblock %}">
 	
