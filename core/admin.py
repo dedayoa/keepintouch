@@ -4,7 +4,8 @@ from django.contrib import admin
 
 from .models import Contact, KITUser, Event, PublicEvent, MessageTemplate, \
                     SentMessage, SMTPSetting, CoUserGroup, ContactGroup, SMSTransfer,\
-                    UploadedContact, CustomData, KITUBalance, KITActivationCode
+                    UploadedContact, CustomData, KITUBalance, KITActivationCode,\
+                    OrganizationContact
 
 
 class ContactAdmin(admin.ModelAdmin):
@@ -38,6 +39,7 @@ class KITUBalanceAdmin(admin.ModelAdmin):
         else:
             return qs
 
+
     
 admin.site.register(Event)
 admin.site.register(PublicEvent)
@@ -51,5 +53,6 @@ admin.site.register(CustomData)
 admin.site.register(MessageTemplate)
 admin.site.register(SMTPSetting)
 admin.site.register(KITUser, KITUserAdmin)
+admin.site.register(OrganizationContact)
 admin.site.register(KITActivationCode, KITActivationCodeAdmin)
 admin.site.register(CoUserGroup, CoUserGroupAdmin)
