@@ -191,7 +191,8 @@ class ReminderMessagingForm(forms.ModelForm):
             self.fields["date_column"].initial = self.dcolish[1]
         except IndexError:
             print("Must be an ajax submit call where date_column_ish is not provided")
-            pass
+        
+        self.fields['contact_group'].label = 'Contact List'
         
         self.helper = FormHelper()
         self.helper.form_action = '.'
