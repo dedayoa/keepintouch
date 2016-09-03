@@ -46,7 +46,7 @@
 								{% endif %}
 							{% endblock %}
 							
-							{% if request.user.kituser.supported_by_ads and not debug %}
+							{% if not debug %}
 							<div class="show-for-small small-12 column">
 								<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
 								<!-- InTouch Mobile View Content Base -->
@@ -64,17 +64,6 @@
 						{% block rsb_ex %}
 							<div class="medium-2 show-for-large column">
 								{% block rsb %}
-									{% if request.user.kituser.supported_by_ads and not debug %}
-										<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-										<!-- InTouchSaaS-FreeUser-1 -->
-										<ins class="adsbygoogle"
-										     style="display:inline-block;width:160px;height:600px"
-										     data-ad-client="ca-pub-8909496138809362"
-										     data-ad-slot="8135738467"></ins>
-										<script>
-										(adsbygoogle = window.adsbygoogle || []).push({});
-										</script>
-									{% endif %}
 								
 								{% endblock %}
 							</div>
