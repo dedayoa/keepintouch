@@ -17,7 +17,6 @@ from phonenumber_field.modelfields import PhoneNumberField
     
 class KITServicePlan(models.Model):
     name = models.CharField(max_length=100)
-    ad_supported = models.BooleanField(default=False)
     free_sms = models.BooleanField(default=False, help_text="Weekly Free SMS?")
     free_sms_units = models.PositiveIntegerField(help_text="Number of Weekly Free SMS", default=0)
     user_accounts_allowed = models.PositiveIntegerField(default=0)
@@ -25,6 +24,7 @@ class KITServicePlan(models.Model):
     can_use_custom_data = models.BooleanField(default=False)
     api_access = models.BooleanField(default=False)
     sms_unit_bundle = models.PositiveIntegerField(default=0)
+    data_collection_capacity = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -53,17 +53,9 @@ class KITBilling(models.Model):
     service_plan = models.ForeignKey(KITServicePlan, blank=True, null=True)
     billing_cycle = models.CharField(max_length=2, choices=BILL_CY, default='AN')
     account_status = models.CharField(max_length=2, choices=ACCT_STATUS, default='PE')
-    is_full_admin = models.BooleanField(default=False)
     
     last_modified = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now_add=True)
-    
-        
-    def save(self, *args, **kwargs):
-        if self.service_plan.ad_supported and self.service_plan.user_groups_allowed == 0:
-            self.is_full_admin = False
-        super(KITBilling, self).save(*args, **kwargs)
-            
+    created = models.DateTimeField(auto_now_add=True)            
     
     class Meta:
         verbose_name = 'Billing'
@@ -90,21 +82,6 @@ class KITSystem(models.Model):
     def get_absolute_url(self):
         return reverse('gomez:system-settings',args=[self.pk])
 
-
-
-class InCal(models.Model):
-    
-    OPTIONS = (
-        ('onetime','One Time'),
-        ('recurring','Recurring'),
-               )
-
-    
-    title = models.CharField(max_length=100)
-    message_template = models.ForeignKey('core.MessageTemplate')
-    start_date = models.DateTimeField()
-    next_date = models.DateTimeField(blank=True)
-    end_date = models.DateTimeField(blank=True)
     
     
 class SMSRateTable(models.Model):
