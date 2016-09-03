@@ -229,6 +229,13 @@ class KITUser(models.Model):
         else:
             return RunningMessage.objects.filter(created_by = self.pk).order_by('-started_at')
         
+        
+    def get_custom_data(self):
+        if self.is_admin:
+            return CustomData.objects.filter(created_by__parent = self.pk)
+        else:
+            return CustomData.objects.filter(created_by = self.pk)
+        
     #####Admin Things#######
     
     def get_kituser(self):
