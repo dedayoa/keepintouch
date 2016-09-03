@@ -3,6 +3,7 @@ import datetime
 import uuid
 
 from django.db import models, transaction
+from cities_light.models import Country, Region, City
 
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import User
@@ -57,26 +58,47 @@ class ValidatedUserAccountManager(models.Manager):
     @cached_as(timeout=3600) 
     def get_queryset(self):
         return super(ValidatedUserAccountManager, self).get_queryset().filter(email_validated=True, phone_validated=True)
-    
-class KITUser(models.Model):
+
+
+class OrganizationContact(models.Model):
     
     INDUSTRY = (
         ('AVIATION','Aviation'),
         ('ENTERTAINMENT', 'Entertainment'),
         ('RELIGIOUS','Religious'),
-        ('FINBANK','Finance & Banking'),
+        ('FIN_BANK','Finance & Banking'),
+        ('EDUCATION','Education'),
+        ('MARKETING','Marketing'),
+        ('GOVERNMENT','Government'),
+        ('OIL_ENERGY','Oil & Energy'),
+        ('NGO','NGO'),
+        ('IT','Information Technology'),
+        ('RETAIL','Retail'),
+        ('TRANSPORT_HAULAGE','Transportation & Haulage'),
+        ('TRAVEL_TOURISM','Travel & Tourism'),
         ('OTHER','Other')
     )
     
-    STATE = (
-        ('OYO','Oyo'),
-        ('ABIA','Abia'),
-        ('LAG','Lagos'),
-        ('ABJ','Abuja'),
-        ('ONDO','Ondo'),
-        ('KANO','Kano'),
-        ('OTHER','Other'),
-             )
+    organization = models.CharField(max_length=255, null=True, verbose_name="Organization Name")
+    industry = models.CharField(max_length=50, choices=INDUSTRY, null=True)
+    
+    organization_phone_number = PhoneNumberField(blank=True, null=True)
+    # on save use the address of the parent if this is not filled
+    address_1 = models.CharField(max_length=100, blank=False, null=True)
+    address_2 = models.CharField(max_length=100, blank=True, null=True)
+    
+    country = models.ForeignKey(Country,on_delete=models.PROTECT, blank=False)
+    state = models.ForeignKey(Region,on_delete=models.PROTECT, blank=False)
+    city_town = models.ForeignKey(City,on_delete=models.PROTECT, blank=False, verbose_name="City/Town")
+    
+    
+    def __str__(self):
+        return "{}, {}".format(self.address_1, self.city_town)
+    
+    class Meta:
+        verbose_name = "Organization's Contact Detail"
+    
+class KITUser(models.Model):
     
     user = models.OneToOneField(User)
     dob = models.DateField(blank=False, null=True)
@@ -84,13 +106,9 @@ class KITUser(models.Model):
     
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, limit_choices_to={'is_admin':True})
     phone_number = PhoneNumberField(blank=True, null=True)
-    company = models.CharField(max_length=255, blank=True, null=True)
-    industry = models.CharField(max_length=50, choices=INDUSTRY, blank=False, null=True)
-    address_1 = models.CharField(max_length=100, blank=False, null=True)
-    address_2 = models.CharField(max_length=100, blank=True, null=True)
-    city_town = models.CharField(max_length=100, blank=False, null=True)
-    state = models.CharField(max_length=100, blank=False, choices=STATE, default="LAG")
+    
     is_admin = models.BooleanField(default=False)
+    address = models.OneToOneField(OrganizationContact, null=True, blank=True)
     ip_address = models.GenericIPAddressField(null=True, editable=False)
     
     email_validated = models.BooleanField(default=False)
@@ -101,10 +119,9 @@ class KITUser(models.Model):
     
     
     objects = models.Manager()
-    validated_objects = ValidatedUserAccountManager()
     
     def __str__(self):
-        return "{}, {}".format(self.user.get_full_name(), self.user.email)
+        return "{}".format(self.user.get_full_name())
         
     def get_absolute_url(self):
         return reverse('core:kituser-detail',args=[self.pk])
@@ -117,9 +134,9 @@ class KITUser(models.Model):
     
     def get_contacts(self):
         
-        if self.kitbilling.is_full_admin == False:
-            return Contact.objects.filter(kit_user=self.pk)
-        elif self.is_admin:
+        #if self.kitbilling.is_full_admin == False:
+        #    return Contact.objects.filter(kit_user=self.pk)
+        if self.is_admin:
             #return self.kituser_set.contact_set
             return Contact.objects.filter(kit_user__parent=self.pk)
         else:
@@ -145,9 +162,9 @@ class KITUser(models.Model):
             
     def get_private_events(self):
                 
-        if self.kitbilling.is_full_admin == False:
-            return Event.objects.filter(contact__kit_user=self.pk)
-        elif self.is_admin:
+        #if self.kitbilling.is_full_admin == False:
+        #    return Event.objects.filter(contact__kit_user=self.pk)
+        if self.is_admin:
             '''
             Return the private events of all contacts created by users
             under the groups I admin over
@@ -164,9 +181,9 @@ class KITUser(models.Model):
         
     def get_public_events(self):
         
-        if self.kitbilling.is_full_admin == False:
-            return PublicEvent.objects.filter(kit_user=self.pk).order_by("date")
-        elif self.is_admin:
+        #if self.kitbilling.is_full_admin == False:
+        #    return PublicEvent.objects.filter(kit_user=self.pk).order_by("date")
+        if self.is_admin:
             return PublicEvent.objects.filter(kit_user__parent=self.pk).order_by("date")
         else:
             #get events of groups I belong to. May chance this later
@@ -185,9 +202,9 @@ class KITUser(models.Model):
     def get_processed_messages(self):
         processedmessages = apps.get_model('messaging', 'ProcessedMessages')
         
-        if self.kitbilling.is_full_admin == False:
-            return processedmessages.objects.filter(created_by = self.pk)
-        elif self.is_admin:
+        #if self.kitbilling.is_full_admin == False:
+        #    return processedmessages.objects.filter(created_by = self.pk)
+        if self.is_admin:
             return processedmessages.objects.filter(created_by__parent = self.pk)
         else:
             return processedmessages.objects.filter(created_by = self.pk)
@@ -195,9 +212,9 @@ class KITUser(models.Model):
     def get_queued_messages(self):
         queuedmessages = apps.get_model('messaging', 'QueuedMessages')
         
-        if self.kitbilling.is_full_admin == False:
-            return queuedmessages.objects.filter(created_by = self.pk).order_by('-queued_at')
-        elif self.is_admin:
+        #if self.kitbilling.is_full_admin == False:
+        #    return queuedmessages.objects.filter(created_by = self.pk).order_by('-queued_at')
+        if self.is_admin:
             return queuedmessages.objects.filter(created_by__parent = self.pk).order_by('-queued_at')
         else:
             return queuedmessages.objects.filter(created_by = self.pk).order_by('-queued_at')
@@ -205,36 +222,32 @@ class KITUser(models.Model):
     def get_running_messages(self):
         RunningMessage = apps.get_model('messaging', 'RunningMessage')
         
-        if self.kitbilling.is_full_admin == False:
-            return RunningMessage.objects.filter(created_by = self.pk).order_by('-started_at')
-        elif self.is_admin:
+        #if self.kitbilling.is_full_admin == False:
+        #    return RunningMessage.objects.filter(created_by = self.pk).order_by('-started_at')
+        if self.is_admin:
             return RunningMessage.objects.filter(created_by__parent = self.pk).order_by('-started_at')
         else:
             return RunningMessage.objects.filter(created_by = self.pk).order_by('-started_at')
         
-    @cached_as(timeout=4*3600)    
-    def supported_by_ads(self):
-        return self.kitbilling.service_plan.ad_supported
-        
     #####Admin Things#######
     
     def get_kituser(self):
-        if self.is_admin and self.kitbilling.is_full_admin:
+        if self.is_admin:
             return KITUser.objects.get(parent=self.pk)
     
     def get_kitusers(self):
         '''
         Admin, get child users
         '''
-        if self.is_admin and self.kitbilling.is_full_admin:
+        if self.is_admin:
             return KITUser.objects.filter(parent=self.pk)
-        elif not self.kitbilling.is_full_admin:
-            raise PermissionError("You don't have the necessary Permissions")
+        #elif not self.kitbilling.is_full_admin:
+        #    raise PermissionError("You don't have the necessary Permissions")
         
     def get_user_groups(self):        
-        if self.kitbilling.is_full_admin == False:
-            raise PermissionError("You don't have the necessary Permissions")
-        elif self.is_admin:
+        #if self.kitbilling.is_full_admin == False:
+        #    raise PermissionError("You don't have the necessary Permissions")
+        if self.is_admin:
             return CoUserGroup.objects.filter(kit_admin=self.pk)
         
     def get_smtp_items(self):
@@ -246,11 +259,6 @@ class KITUser(models.Model):
                 return SMTPSetting.objects.filter(kit_admin=self.pk)
         except InvalidToken:
             print("Seems you have changed SECRET_KEY...all encrypted tokens have been invalidated")
-
-
-            
-
-  
 
 
 def prevent_save_of_group_titled_default(sender, instance, *args, **kwargs):
@@ -296,6 +304,8 @@ class KITUBalance(models.Model):
 
          
 class CoUserGroup(models.Model):
+        
+    
     title = models.CharField(max_length=100, blank=False)
     description = models.CharField(max_length=255, blank=True)
     kit_admin = models.ForeignKey('core.KITUser', on_delete=models.CASCADE, related_name='groups_adminover', \
@@ -310,9 +320,12 @@ class CoUserGroup(models.Model):
     def get_absolute_url(self):
         return reverse('core:usergroup-detail',args=[self.pk])
     
+    
     def get_contact_managed_by_group(self):
         if self.active:
             return self.contact
+    
+    
     '''    
     def save(self, *args, **kwargs):
         #prevent save if title is default or Default
