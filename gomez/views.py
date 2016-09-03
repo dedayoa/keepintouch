@@ -22,4 +22,8 @@ class SystemSettingsUpdateView(UpdateView):
         params = super(SystemSettingsUpdateView, self).get_context_data(**kwargs)
         params["syssetid"] = self.object.pk
         return params
-
+    
+    def get_queryset(self):
+        # user should not be able to view the settings of other users
+        qs = super(SystemSettingsUpdateView, self).get_queryset()
+        return qs.filter(kit_admin=self.request.user.kituser)
