@@ -30,8 +30,9 @@ urlpatterns = [
                 
                 #User Groups
                 url(r'^user-groups/$', usergroup_settings, name='usergroup-list'),
-                url(r'^user-groups/(?P<pk>\d+)/$', UserGroupUpdateView.as_view(), name='usergroup-detail'),
-                url(r'^user-groups/new/$', UserGroupCreateView.as_view(), name='usergroup-new'),
+                url(r'^user-group/(?P<pk>\d+)/$', UserGroupUpdateView.as_view(), name='usergroup-detail'),
+                url(r'^user-group/(?P<pk>\d+)/delete/$', UserGroupDeleteView.as_view(), name='usergroup-delete'),
+                url(r'^user-group/new/$', UserGroupCreateView.as_view(), name='usergroup-new'),
                 #SMTP
                 url(r'^smtps/$', smtp_settings, name='smtp-settings-list'),
                 url(r'^smtp/(?P<pk>\d+)/$', SMTPUpdateView.as_view(), name='smtp-detail'),
