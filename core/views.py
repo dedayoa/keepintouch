@@ -823,6 +823,11 @@ class ContactGroupUpdateView(UpdateView):
         kwargs = super(ContactGroupUpdateView, self).get_form_kwargs()
         kwargs.update({'kituser': self.request.user.kituser})
         return kwargs
+    
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        qs = super(ContactGroupUpdateView, self).get_queryset(**kwargs)
+        return qs.filter(kit_user=self.request.user.kituser)
 
 
 class ContactGroupDeleteView(DeleteView):
@@ -834,6 +839,11 @@ class ContactGroupDeleteView(DeleteView):
         params = super(ContactGroupDeleteView, self).get_context_data(**kwargs)
         params["title"] = "Deleting Contact Group"
         return params
+    
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        qs = super(ContactGroupDeleteView, self).get_queryset(**kwargs)
+        return qs.filter(kit_user=self.request.user.kituser)
     
 class ContactGroupCreateView(CreateView):
     
@@ -929,3 +939,7 @@ class CustomDataView(PermissionRequiredMixin, TemplateView):
         
         
         return render(request, self.template_name, self.params)
+    
+    def get_queryset(self, **kwargs):
+        qs = super(CustomDataView, self).get_queryset(**kwargs)
+        return qs.filter(kit_user=self.request.user.kituser)
