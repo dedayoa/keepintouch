@@ -152,6 +152,11 @@ class StandardMessageDeleteView(DeleteView):
         params = super(StandardMessageDeleteView, self).get_context_data(**kwargs)
         params["title"] = "Deleting Message"
         return params
+
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        qs = super(StandardMessageDeleteView, self).get_queryset(**kwargs)
+        return qs.filter(created_by=self.request.user.kituser)
     
 
 class AdvancedMessageDeleteView(DeleteView):
@@ -163,6 +168,11 @@ class AdvancedMessageDeleteView(DeleteView):
         params = super(AdvancedMessageDeleteView, self).get_context_data(**kwargs)
         params["title"] = "Deleting Message"
         return params
+    
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        qs = super(AdvancedMessageDeleteView, self).get_queryset(**kwargs)
+        return qs.filter(created_by=self.request.user.kituser)
     
     
 def standard_message_draft_view(request):
@@ -269,24 +279,29 @@ class ReminderCreateView(PermissionRequiredMixin, CreateView):
     
     
     def get_context_data(self, **kwargs):
-        #self.params = super(ReminderCreateView, self).get_context_data(**kwargs)
-        self.params["title"] = _("Create A Reminder Message")
+        context = super(ReminderCreateView, self).get_context_data(**kwargs)
+        context["title"] = _("Create A Reminder Message")
         
         if self.request.POST:
-            self.params["form"] = self.form_class(self.request.POST)
-            self.params["reminder_formset"] = self.reminders_formset(self.request.POST)
+            context["form"] = self.form_class(self.request.POST)
+            context["reminder_formset"] = self.reminders_formset(self.request.POST)
         else:
-            self.params["form"] = self.form_class()
-            self.params["reminder_formset"] = self.reminders_formset()
+            # it took me quite a while to realize the below was the source of my problems
+            # it was overriding the form which context already had...hence I never saw all
+            # the get_form queryset overrides applied.
+            
+            #context["form"] = self.form_class()
+            context["reminder_formset"] = self.reminders_formset()
+            
+        return context
     
-        return self.params
     
-    
-    ##??  You could set the field here or using get_form_kwargs  as above ??##
+    ##  You could set the field here or using get_form_kwargs  as above ##
     def get_form(self, form_class=form_class):
         form = super(ReminderCreateView, self).get_form(form_class)
         form.fields["message_template"].queryset = self.request.user.kituser.get_templates().filter(active=True)
         form.fields['contact_group'].queryset = self.request.user.kituser.get_contact_groups()
+        form.fields['custom_data_namespace'].queryset = self.request.user.kituser.get_custom_data()
         
         return form
     
@@ -355,6 +370,14 @@ class ReminderUpdateDraftView(PermissionRequiredMixin, UpdateView):
         form.fields['contact_group'].queryset = self.request.user.kituser.get_contact_groups()        
         return form
     
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        qs = super(ReminderUpdateDraftView, self).get_queryset(**kwargs)
+        return qs.filter(created_by=self.request.user.kituser)
+
+    
+    
+    
     '''
     def get_form_kwargs(self):        
         choices_arr = self.object.get_custom_data_header_selected_choices()
@@ -390,6 +413,11 @@ class ReminderDeleteView(PermissionRequiredMixin, DeleteView):
         params["title"] = "Deleting Reminder ".format(self.object.pk)
         params["rmsgid"] = self.object.pk
         return params
+    
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        qs = super(ReminderDeleteView, self).get_queryset(**kwargs)
+        return qs.filter(created_by=self.request.user.kituser)
     
     
 def message_running_status_view(request):
