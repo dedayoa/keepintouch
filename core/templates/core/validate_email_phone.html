@@ -17,7 +17,7 @@
 	</div>
 	<div class="small-12 large-9 column kitapp-content">
 		{% block content %}
-			<h2>Help us Know you Better</h2>
+			<h2>Help us know you better</h2>
 			<p>Before you continue using In.Touch, kindly provide us these additional pieces of information 
 			to allow us know you better. It won't take long at all.</p>			
 			{% if messages %}
@@ -26,68 +26,114 @@
 					<p>{{ message }}</p>
 				{% endfor %}
 			</div>
-			{% endif %}
-			<form id="user-account-verify-form">				
-				<table style="{% if request.user.kitactivationcode %}display: None;{% endif %}">			
-					<tr>
-						<td width="50%">
-						{{ form.first_name.label}}
-						{{ form.first_name }}
-						</td>
-						<td width="50%">
-						{{ form.last_name.label }}
-						{{ form.last_name }}
-						</td>
-					</tr>						
-					<tr>
-						<td>
-						{{ form.date_of_birth.label }}
-						{{ form.date_of_birth }}
-						</td>
-						<td>
-						{{ form.timezone.label }}
-						{{ form.timezone }}
-						</td>
-					</tr>
-				</table>
-				<h5>Verify Email</h5>
-				<table>
-					<tr>
-						<td>Email Address: </td>
-						<td>{{ form.email_address }}</td>
-					</tr>
-					{% if not request.user.kituser.email_validated %}
-					<tr>
-						<td>Verification Code: </td>
-						<td>{{form.email_verification_code}}</td>
-					</tr>					
-					{% else %}					
-					<tr>
-						<td colspan=2><h4 style="text-align: center; color: green;"><i class="fi-check"></i> Email Already Verified</h4></td>
-					</tr>
-					{% endif %}
-				</table>
-				
-				<h5>Verify Phone Number</h5>
-				<table>
-					<tr>
-						<td>Phone: </td>
-						<td>
-						<span>{{ form.phone_number.help_text}}</span>	
-						{{ form.phone_number }}
-						</td>
-					</tr>
-					{% if not request.user.kituser.phone_validated %}
-					<tr>
-						<td>Verification Code: </td>
-						<td>{{form.phone_number_verification_code}}</td>
-					</tr>
-					{% else %}					
-					<tr>
-						<td colspan=2><h4 style="text-align: center; color: green;"><i class="fi-check"></i> Phone Number Already Verified</h4></td>
-					</tr>
-					{% endif %}
-				</table>
+			{% endif %}			
+			<form id="user-account-verify-form">
+				<div style="{% if request.user.kitactivationcode %}display: None;{% endif %}">
+					<h3>Your Organization</h3>	
+					<table>									
+						<tr>
+							<td width="33%">
+							{{ form_2.organization.label }}
+							{{ form_2.organization }}
+							</td>
+							<td width="33%">
+							{{ form_2.industry.label }}
+							{{ form_2.industry }}
+							</td>						
+							<td width="33%">
+							{{ form_2.organization_phone_number.label }}
+							{{ form_2.organization_phone_number }}
+							</td>
+						</tr>
+						<tr>
+							<td colspan=2>
+							{{ form_2.address_1.label }}
+							{{ form_2.address_1 }}
+							</td>
+							<td>
+							{{ form_2.address_2.label }}
+							{{ form_2.address_2 }}
+							</td>
+						</tr>
+						<tr>
+							<td>
+							{{ form_2.country.label }}
+							{{ form_2.country }}
+							</td>
+							<td>
+							{{ form_2.state.label }}
+							{{ form_2.state }}
+							</td>
+							<td>
+							{{ form_2.city_town.label }}
+							{{ form_2.city_town }}
+							</td>
+						</tr>
+					</table>
+					<h3>You</h3>			
+					<table>				
+						<tr>
+							<td width="50%">
+							{{ form.first_name.label}}
+							{{ form.first_name }}
+							</td>
+							<td width="50%">
+							{{ form.last_name.label }}
+							{{ form.last_name }}
+							</td>
+						</tr>
+						<tr>
+							<td width="50%">
+							{{ form.date_of_birth.label }}
+							{{ form.date_of_birth }}
+							</td>
+							<td width="50%">
+							{{ form.timezone.label }}
+							{{ form.timezone }}
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div style="padding: 1rem; background-color: rgba(255, 87, 0, 0.45); margin-bottom: 2rem;">
+					<h5>Verify Your Email</h5>
+					<table>
+						<tr>
+							<td>Email Address: </td>
+							<td>{{ form.email_address }}</td>
+						</tr>
+						{% if not request.user.kituser.email_validated %}
+						<tr>
+							<td>Verification Code: </td>
+							<td>{{form.email_verification_code}}</td>
+						</tr>					
+						{% else %}					
+						<tr>
+							<td colspan=2><h4 style="text-align: center; color: green;"><i class="fi-check"></i> Email Already Verified</h4></td>
+						</tr>
+						{% endif %}
+					</table>
+					
+					<h5>Verify Your Phone Number</h5>
+					<table>
+						<tr>
+							<td>Phone: </td>
+							<td>
+							<span>{{ form.phone_number.help_text}}</span>	
+							{{ form.phone_number }}
+							</td>
+						</tr>
+						{% if not request.user.kituser.phone_validated %}
+						<tr>
+							<td>Verification Code: </td>
+							<td>{{form.phone_number_verification_code}}</td>
+						</tr>
+						{% else %}					
+						<tr>
+							<td colspan=2><h4 style="text-align: center; color: green;"><i class="fi-check"></i> Phone Number Already Verified</h4></td>
+						</tr>
+						{% endif %}
+					</table>
+				</div>
 				<input type="submit" class="button send-verification-code" value="Send Code"></input>
 				<button class="button validate-verify">Verify</button>
 			</form>
