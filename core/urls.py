@@ -16,7 +16,7 @@ urlpatterns = [
     #url(r'^$', Index.as_view(), name='index'),
     url(r'^exit/$', exitdoor , name='backdoor'),
     url(r'^$', entrance, name='frontdoor'),
-    url(r'^register/free/$', register_free, name='free-intouch-signup'),
+    url(r'^register/free-trial/$', register_free_trial, name='freetrial-signup'),
     url(r'^gcrawler/$', crawler_entrance, name="gcrawler"),
     url(r'^dashboard/$', DashboardView.as_view(), name='dashboard-view'),
     url(r'^ping-stat/', include([
@@ -72,8 +72,8 @@ urlpatterns = [
 
 
     #User Groups
-    url(r'^contact-groups/$', contactgroups, name='contactgroup-list'),
-    url(r'^contact-group/', include([
+    url(r'^contact-lists/$', contactgroups, name='contactgroup-list'),
+    url(r'^contact-list/', include([
                 url(r'^new/$', ContactGroupCreateView.as_view(), name='contactgroup-new'),
                 url(r'^(?P<pk>\d+)/$', ContactGroupUpdateView.as_view(), name='contactgroup-detail'),
                 url(r'^(?P<pk>\d+)/delete/$', ContactGroupDeleteView.as_view(), name='contactgroup-delete'),
