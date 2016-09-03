@@ -76,8 +76,8 @@ def process_sending_verification_details(sender, instance, **kwargs):
 
 
 @receiver(sig_user_signup_success)       
-def user_signup_callback(signup_result, flow, request, **kwargs):
-    if request.path == '/register/free/':
+def free_trial_user_signup_callback(signup_result, flow, request, **kwargs):
+    if request.path == '/register/free-trial/':
         #disconnect the post_save signal for KITUser
         post_save.disconnect(create_kituser_assoc_tables, sender=KITUser)
         
@@ -86,14 +86,15 @@ def user_signup_callback(signup_result, flow, request, **kwargs):
         
         # connect again
         post_save.connect(create_kituser_assoc_tables, sender=KITUser)
-        # the above creates kitsystem,
-        free_service_plan = KITServicePlan.objects.get(id=settings.FREE_SERVICE_PLAN_ID)
+        
+
+        free_trial_service_plan = KITServicePlan.objects.get(id=settings.FREE_TRIAL_SERVICE_PLAN_ID)
         
         kitbilling = apps.get_model('gomez', 'KITBilling')
         kitbilling.objects.create(
                 kit_admin=signup_result.kituser,
-                service_plan = free_service_plan,
-                next_due_date = arrow.utcnow().replace(years=+1).datetime.date(),
+                service_plan = free_trial_service_plan,
+                next_due_date = arrow.utcnow().replace(days=settings.FREE_TRIAL_VALIDITY_PERIOD).datetime.date(),
                 registered_on = timezone.now().date(),
                 account_status = 'AC'
                 )
@@ -101,9 +102,9 @@ def user_signup_callback(signup_result, flow, request, **kwargs):
         kitsystem = apps.get_model('gomez', 'KITSystem')
         kitsystem.objects.create(kit_admin=signup_result.kituser)
         
-        KITUBalance.objects.create(kit_user=signup_result.kituser, free_sms_balance=10)
+        KITUBalance.objects.create(kit_user=signup_result.kituser, free_sms_balance=settings.FREE_TRIAL_FREE_SMS_UNITS)
         #set free user permissions
-        group = Group.objects.get(id=settings.FREE_GROUP_PERMS_ID)
+        group = Group.objects.get(id=settings.FREE_TRIAL_GROUP_PERMS_ID)
         signup_result.groups.add(group)
 '''
     
