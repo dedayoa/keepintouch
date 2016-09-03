@@ -14,12 +14,12 @@ from django.utils import timezone
 from django_tables2 import RequestConfig
 
 from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate,\
-                    SMTPSetting, ContactGroup, SMSTransfer, UploadedContact, CustomData
+                    SMTPSetting, ContactGroup, SMSTransfer, UploadedContact, CustomData, OrganizationContact
 from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, ExistingUserForm,\
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
                     UserGroupSettingForm, NewUserForm, ContactGroupForm, SMSTransferForm,\
                     ContactImportForm, PersonalProfileForm, CustomDataIngestForm, KITUBalanceForm,\
-                    VerifyAccountForm
+                    VerifyAccountForm, OrganizationContactForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable,\
                     SMSTransferHistoryTable, UploadedContactFileHistoryTable, CustomDataStoreTable
@@ -70,15 +70,18 @@ def entrance(request):
 
 
 @signup_view(template='core/sitegate/sitegate-signup-foundation.html', flow=ModernSignup)
-def register_free(request):
-    return render(request, 'core/free_register.html',{'title':'Sign Up'})
+def register_free_trial(request):
+    return render(request, 'core/free_trial_register.html',{'title':'Register for a Free Trial'})
 
 
 def validate_user_details(request):
     form = VerifyAccountForm(user=request.user)
+    form_2 = OrganizationContactForm(instance=request.user.kituser.address)
+    
     params = {}
-    params['title'] = 'Validate Email & Phone Number'
+    params['title'] = 'Validate User Details'
     params['form'] = form
+    params['form_2'] = form_2
     params['body_class'] = 'verify-account-gate'
     return render(request, 'core/validate_email_phone.html', params)
 
@@ -408,7 +411,9 @@ def templates(request):
         params["table"] = templatestable
         return render(request, 'core/templates/index.html', params)
     
-class MessageTemplateUpdateView(UpdateView):
+class MessageTemplateUpdateView(PermissionRequiredMixin, UpdateView):
+    
+    permission_required = 'core.change_messagetemplate'
     
     model = MessageTemplate
     form_class = MessageTemplateForm
@@ -419,7 +424,9 @@ class MessageTemplateUpdateView(UpdateView):
         params["msgtemplateid"] = self.object.pk
         return params
     
-class MessageTemplateCreateView(CreateView):
+class MessageTemplateCreateView(PermissionRequiredMixin, CreateView):
+    
+    permission_required = 'core.add_messagetemplate'
     
     model = MessageTemplate
     form_class = MessageTemplateForm
@@ -430,7 +437,9 @@ class MessageTemplateCreateView(CreateView):
 
         return super(MessageTemplateCreateView, self).form_valid(form)
     
-class MessageTemplateDeleteView(DeleteView):
+class MessageTemplateDeleteView(PermissionRequiredMixin, DeleteView):
+    
+    permission_required = 'core.delete_messagetemplate'
     
     model = MessageTemplate
     success_url = reverse_lazy('core:templates-list')
