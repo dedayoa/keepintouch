@@ -273,6 +273,10 @@ class ContactViewView(UpdateView):
         self.params["title"] = "Contact {}".format(self.object.pk)
         self.params["contactid"] = self.object.pk
         return self.params
+    
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        return self.request.user.kituser.get_contacts()
 
 class ContactDeleteView(DeleteView):
     
@@ -286,6 +290,10 @@ class ContactDeleteView(DeleteView):
         params["title"] = "Deleting Contact ".format(self.object.pk)
         params["contactid"] = self.object.pk
         return params
+    
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        return self.request.user.kituser.get_contacts()
 
     
 class ContactCreateView(CreateView):
@@ -381,6 +389,10 @@ class PublicEventUpdateView(UpdateView):
         form.fields["recipients"].queryset = self.request.user.kituser.get_contacts()       
         return form
     
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        return self.request.user.kituser.get_public_events()
+    
     
     
 class PublicEventDeleteView(DeleteView):
@@ -395,6 +407,10 @@ class PublicEventDeleteView(DeleteView):
         params["title"] = "Deleting Public Event {} ".format(self.object.title)
         params["publiceventid"] = self.object.pk
         return params
+    
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        return self.request.user.kituser.get_public_events()
     
     
 def templates(request):
@@ -424,6 +440,10 @@ class MessageTemplateUpdateView(PermissionRequiredMixin, UpdateView):
         params["msgtemplateid"] = self.object.pk
         return params
     
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        return self.request.user.kituser.get_templates()
+    
 class MessageTemplateCreateView(PermissionRequiredMixin, CreateView):
     
     permission_required = 'core.add_messagetemplate'
@@ -448,6 +468,10 @@ class MessageTemplateDeleteView(PermissionRequiredMixin, DeleteView):
         params = super(MessageTemplateDeleteView, self).get_context_data(**kwargs)
         params["title"] = "Deleting Template {} ".format(self.object.title)
         return params
+    
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        return self.request.user.kituser.get_templates()
     
 
 def kituser_settings(request):
@@ -649,6 +673,11 @@ class SMTPUpdateView(UpdateView):
         params["messages"] = get_messages(self.request)
         return params
     
+    
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        return self.request.user.kituser.get_smtp_items()
+    
 class SMTPCreateView(CreateView):
     
     model = SMTPSetting
@@ -669,6 +698,10 @@ class SMTPDeleteView(DeleteView):
         params = super(SMTPDeleteView, self).get_context_data(**kwargs)
         params["title"] = "Deleting SMTP Setting {} ".format(self.object.title)
         return params
+    
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        return self.request.user.kituser.get_smtp_items()
     
 class CheckSMTPServerView(View):
     
@@ -725,6 +758,10 @@ class UserGroupUpdateView(PermissionRequiredMixin, UpdateView):
         kwargs.update({'kituser': self.request.user.kituser})
         return kwargs
     
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        return self.request.user.kituser.get_user_groups()    
+    
 class UserGroupCreateView(PermissionRequiredMixin, CreateView):
     
     permission_required = 'core.add_cousergroup'
@@ -743,6 +780,21 @@ class UserGroupCreateView(PermissionRequiredMixin, CreateView):
         kwargs = super(UserGroupCreateView, self).get_form_kwargs()
         kwargs.update({'kituser': self.request.user.kituser})
         return kwargs
+    
+class UserGroupDeleteView(DeleteView):
+    
+    model = CoUserGroup
+    success_url = reverse_lazy('core:usergroup-list')
+    
+    def get_context_data(self, **kwargs):
+        params = super(UserGroupDeleteView, self).get_context_data(**kwargs)
+        params["title"] = "Deleting User Group {} ".format(self.object.title)
+        params["usergroupid"] = self.object.pk
+        return params
+    
+    def get_queryset(self, **kwargs):
+        # user should not be able to view/edit only settings of her group/company
+        return self.request.user.kituser.get_user_groups()
     
 def contactgroups(request):
     
