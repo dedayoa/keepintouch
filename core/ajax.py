@@ -17,8 +17,10 @@ import humanize
 import base64
 from cryptography.fernet import Fernet
 
-from .models import KITUser, SMSTransfer, CustomData, Contact, KITUBalance, KITActivationCode
-from .forms import SMSTransferForm, ContactImportForm, CustomDataIngestForm, VerifyAccountForm
+from .models import KITUser, SMSTransfer, CustomData, Contact, KITUBalance, KITActivationCode,\
+                    OrganizationContact
+from .forms import SMSTransferForm, ContactImportForm, CustomDataIngestForm, VerifyAccountForm,\
+                    OrganizationContactForm
 from .impexp import ContactResource
 import tablib
 import sys
@@ -505,8 +507,11 @@ def send_verification_code(request):
         # create new verification
         # send email and phone number to verify...based on whether already verified
         form = VerifyAccountForm(request.POST, user=request.user)
+        form_2 = OrganizationContactForm(request.POST)
         if not form.is_valid():
             return {'errors':form.errors.as_json(escape_html=True)}
+        elif not form_2.is_valid():
+            return {'errors':form_2.errors.as_json(escape_html=True)}
         else:
             # update User & KITUser with info received           
             user = request.user
@@ -514,12 +519,19 @@ def send_verification_code(request):
             user.last_name = form.cleaned_data.get('last_name')
             user.save()
             
+            oc = form_2.save()
+            
             kuser= request.user.kituser #previously used a select, resulted in a "miss" for every param until next request. BEWARE!
             kuser.ip_address = get_real_ip(request)
             kuser.dob = form.cleaned_data.get('date_of_birth')
             kuser.timezone = form.cleaned_data.get('timezone')
             kuser.phone_number = form.cleaned_data.get('phone_number')
+            kuser.organization = form.cleaned_data.get('organization_name')
+            kuser.industry = form.cleaned_data.get('industry')
+            kuser.address = oc
             kuser.save()
+            
+            
             
             # delete existing activation keys for this user.
             KITActivationCode.objects.filter(user=request.user).delete()
