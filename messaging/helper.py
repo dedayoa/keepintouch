@@ -172,8 +172,9 @@ class SMSHelper():
         sb = self.kuser.kitubalance.sms_balance
         
         #get parent balance
-        kuser_parent = self.kuser.get_parent()
+        
         try:
+            kuser_parent = self.kuser.get_parent()
             p_fsb = kuser_parent.kitubalance.free_sms_balance
             p_sb = kuser_parent.kitubalance.sms_balance
         except AttributeError:
