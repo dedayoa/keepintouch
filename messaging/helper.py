@@ -30,11 +30,8 @@ import smtplib
 
 #@cached_as(KITBilling, KITUser, timeout=4*3600)        
 def is_company_wide(kuser):
-    if kuser.is_admin and not kuser.kitbilling.is_full_admin:
-        #is an admin, but not billed as a full admin e.g user on free plan
-        return True
-    elif kuser.is_admin and kuser.kitbilling.is_full_admin:
-        raise FailedSendingMessageError("Full Admin User Cannot Send Messages")
+    if kuser.is_admin:
+        raise FailedSendingMessageError("Admin User Cannot Send Messages")
     elif not kuser.is_admin:
         return kuser.parent.kitsystem.company_wide_contacts
 
@@ -185,9 +182,19 @@ class SMSHelper():
         #sms pages     
         smsct = SMSCounter().get_messages_count_only(self.sms_message)
         
-        if is_company_wide(self.kuser):
-            # public and private messages are sent using the admin (main) account; so they don't fail
-            # reminders and one-shot messages are sent using the users account            
+        if self.msg_type == 'system_msg':
+            # Always bill system messages from the admin account, even if admin is self
+            if fsb >= (ppsms * smsct):
+                return ['fsb', fsb-(ppsms * smsct)]
+            elif sb >= (ppsms * smsct):
+                return ['sb', sb-(ppsms * smsct)]
+            else:
+                raise NotEnoughBalanceError("System does not have enough units to send SMS")
+        
+        elif is_company_wide(self.kuser):
+            # public and private messages are billed on the admin (main) account; so they don't fail often
+            
+            # reminders and one-shot messages are billed on the users account            
             if self.msg_type == 'reminder_msg' or self.msg_type == 'one_time_msg':
                 if fsb >= (ppsms * smsct):
                     return ['fsb', fsb-(ppsms * smsct)]
@@ -202,14 +209,8 @@ class SMSHelper():
                     return ['p_sb', p_sb-(ppsms * smsct)]
                 else:
                     raise NotEnoughBalanceError("Admin does not have enough units to send SMS")
-            elif self.msg_type == 'system_msg':
-                # Always bill system messages from the admin account
-                if p_fsb >= (ppsms * smsct):
-                    return ['p_fsb', p_fsb-(ppsms * smsct)]
-                elif p_sb >= (ppsms * smsct):
-                    return ['p_sb', p_sb-(ppsms * smsct)]
         else:
-            # all messages are sent using the user's account balance
+            # all messages are billed using the user's account balance
             if fsb >= (ppsms * smsct):
                 return ['fsb', fsb-(ppsms * smsct)]
             elif sb >= (ppsms * smsct):
@@ -340,14 +341,9 @@ class OKToSend(object):
 
         
     def _is_active(self):
-        if self.owner.is_admin and self.owner.kitbilling.is_full_admin:
-            raise FailedSendingMessageError("Full Admin User Cannot Send Messages")
-        elif self.owner.is_admin and not self.owner.kitbilling.is_full_admin:
-            if self.user.is_active:
-                return True
-            else:
-                raise IsNotActiveError("User is not active")
-        elif not self.owner.is_admin:
+        if self.owner.is_admin:
+            raise FailedSendingMessageError("Admin User Cannot Send Messages")
+        else:
             if self.user.is_active and self.owner.parent.user.is_active:
                 return True            
             elif not self.user.is_active:
@@ -356,14 +352,9 @@ class OKToSend(object):
                 raise IsNotActiveError("Parent is not active")
             
     def _has_valid_subscription(self):
-        if self.owner.is_admin and self.owner.kitbilling.is_full_admin:
-            raise FailedSendingMessageError("Full Admin User Cannot Send Messages")
-        elif self.owner.is_admin and not self.owner.kitbilling.is_full_admin:
-            if self.owner.kitbilling.next_due_date >= timezone.now().date():
-                return True
-            else:
-                raise NoActiveSubscriptionError("Subscription has expired")
-        elif not self.owner.is_admin:
+        if self.owner.is_admin:
+            raise FailedSendingMessageError("Admin User Cannot Send Messages")
+        else:
             if self.owner.parent.kitbilling.next_due_date >= timezone.now().date():
                 return True
             else:
@@ -373,46 +364,7 @@ class OKToSend(object):
     #@cached_as(User, KITUser, timeout=3600)   
     def check(self):
         return self._is_active() and self._has_valid_subscription()
-
-'''
-def ok_to_send(owner):
-    #check user is active
-    #check parent subscription not expired
-    #check parent is active
-    #check i have enough credit balance
-    ## if company_wide_contacts, use admin balance for private and public
-    ## for one-shot always use users balance
-    cw = owner.parent.kitsystem.company_wide_contacts
-    if cw is True: #company wide contacts set
-        if owner.parent.user.is_active:
-            if owner.parent.kitbilling.next_due_date >= timezone.now().date():
-                if owner.parent.sms_balance >= 1: #parent has at least 1unit
-                    return True
-                else:
-                    print("Not Enough Balance")
-                    return False
-            else:
-                print("Parent Account Expired")
-                return False
-        else:
-            print("Parent Account inactive")
-            return False
-                
-    else:
-        if owner.user.is_active:
-            if owner.parent.kitbilling.next_due_date >= timezone.now().date():
-                if owner.sms_balance >= 1:
-                    return True
-                else:
-                    print("Not Enough Balance")
-                    return False
-            else:
-                print("Parent Account Expired")
-                return False
-        else:
-            print("User Account Inactive")
-            return False
-'''    
+   
     
 def get_next_delivery_time(repeat_frequency, delivery_time):
     if repeat_frequency == "norepeat":
