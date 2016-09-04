@@ -30,10 +30,14 @@ import smtplib
 
 #@cached_as(KITBilling, KITUser, timeout=4*3600)        
 def is_company_wide(kuser):
-    if kuser.is_admin:
-        raise FailedSendingMessageError("Admin User Cannot Send Messages")
-    elif not kuser.is_admin:
-        return kuser.parent.kitsystem.company_wide_contacts
+    try:
+        if kuser.is_admin:
+            raise FailedSendingMessageError("Admin User Cannot Send Messages")
+        elif not kuser.is_admin:
+            return kuser.parent.kitsystem.company_wide_contacts
+    except AttributeError:
+        # this is here to take care of system which has no parent
+        return False
 
 
 class SMTPHelper():
@@ -100,7 +104,8 @@ class SMTPHelper():
             with conn as smtp_connection:
                 mail.EmailMessage(
                     'This is an SMTP Test Message',
-                    '''This is a message to Test that your SMTP settings are working OK
+                    '''
+                    This is a message to Test that your SMTP settings are working OK
                     
                     Regards,
                     In.Touch
@@ -124,7 +129,8 @@ class SMTPHelper():
                 msg = EmailMessage(
                     subject = email_message[0], #title
                     body = email_message[1], #body
-                    from_email = "{} <{}>".format(self.from_sender, self.smtp_user),
+                    #from_email = "{} <{}>".format(self.from_sender, self.smtp_user),
+                    from_email = self.smtp_user,
                     to = [email_message[2]], #recipient
                     connection=smtp_connection,
                     #headers={'Message-ID': 'foo'},
