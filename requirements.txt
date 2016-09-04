@@ -15,6 +15,7 @@ django-autocomplete-light==3.1.6
 django-autofixture==0.12.1
 django-autoslug==1.9.3
 django-cacheops==3.0
+django-cities-light==3.3.0
 django-common-helpers==0.8.0
 -e git://github.com/dedayoa/django-country-dialcode#egg=country_dialcode
 django-crispy-forms==1.6.0
