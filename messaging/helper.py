@@ -173,8 +173,12 @@ class SMSHelper():
         
         #get parent balance
         kuser_parent = self.kuser.get_parent()
-        p_fsb = kuser_parent.kitubalance.free_sms_balance
-        p_sb = kuser_parent.kitubalance.sms_balance
+        try:
+            p_fsb = kuser_parent.kitubalance.free_sms_balance
+            p_sb = kuser_parent.kitubalance.sms_balance
+        except AttributeError:
+            # some users don't have parents...like system
+            print('This User Does Not Have A Parent')
         
         #get cost per sms unit for destination
         ppsms = KITRateEngineA().get_sms_cost_to_number(self.destination)
