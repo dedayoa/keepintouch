@@ -129,8 +129,8 @@ class SMTPHelper():
                 msg = EmailMessage(
                     subject = email_message[0], #title
                     body = email_message[1], #body
-                    #from_email = "{} <{}>".format(self.from_sender, self.smtp_user),
-                    from_email = self.smtp_user,
+                    from_email = '"{}" <{}>'.format(self.from_sender, self.smtp_user),
+                    #from_email = self.smtp_user,
                     to = [email_message[2]], #recipient
                     connection=smtp_connection,
                     #headers={'Message-ID': 'foo'},
