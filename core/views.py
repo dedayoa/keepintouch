@@ -76,7 +76,7 @@ def register_free_trial(request):
 
 def validate_user_details(request):
     form = VerifyAccountForm(user=request.user)
-    form_2 = OrganizationContactForm(instance=request.user.kituser.address)
+    form_2 = OrganizationContactForm(instance=request.user.kituser.address or request.user.kituser.parent.address)
     
     params = {}
     params['title'] = 'Validate User Details'
