@@ -102,7 +102,7 @@ def free_trial_user_signup_callback(signup_result, flow, request, **kwargs):
         kitsystem = apps.get_model('gomez', 'KITSystem')
         kitsystem.objects.create(kit_admin=signup_result.kituser)
         
-        KITUBalance.objects.create(kit_user=signup_result.kituser, free_sms_balance=settings.FREE_TRIAL_FREE_SMS_UNITS)
+        KITUBalance.objects.create(kit_user=signup_result.kituser, sms_balance=settings.FREE_TRIAL_FREE_SMS_UNITS)
         #set free user permissions
         group = Group.objects.get(id=settings.FREE_TRIAL_GROUP_PERMS_ID)
         signup_result.groups.add(group)
