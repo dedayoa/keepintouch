@@ -98,13 +98,7 @@ class SMSRateTable(models.Model):
         
 class SMSReport(models.Model):
     
-    STATUS = (
-        (0,'Delivered'),
-        (1,'Accepted'),
-        (2,'Expired'),
-        (3,'Undelivered'),
-        (4,'Rejected'),
-              )
+    STATUS = ('Delivered','Accepted','Expired','Undelivered','Rejected')
     
     to_phone = PhoneNumberField(blank=False)
     gw_msg_id = models.CharField(max_length=255, blank=True, null=True)
@@ -119,18 +113,13 @@ class SMSReport(models.Model):
     created = models.DateTimeField(auto_now_add=True)  
     
     def __str__(self):
-        return "SMS to {}".format(self.to_phone.as_international)
+        return "SMS from {} to {}".format(self.owner, self.to_phone.as_international)
     
     
 class EmailReport(models.Model):
     
-    STATUS = (
-        (0,'Sent'),
-        (1,'Delivered'),
-        (2,'Deferred'),
-        (3,'Bounce'),
-        #(4,'Spam Report'),
-              )
+    STATUS = ('Sent','Delivered','Deferred','Bounce')
+    #(4,'Spam Report'),
     
     status = StatusField()
     to_email = models.EmailField()
