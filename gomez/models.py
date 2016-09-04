@@ -98,7 +98,7 @@ class SMSRateTable(models.Model):
         
 class SMSReport(models.Model):
     
-    STATUS = Choices('Delivered','Accepted','Expired','Undelivered','Rejected')
+    STATUS = ('Delivered','Accepted','Expired','Undelivered','Rejected')
     
     to_phone = PhoneNumberField(blank=False)
     gw_msg_id = models.CharField(max_length=255, blank=True, null=True)
@@ -118,7 +118,7 @@ class SMSReport(models.Model):
     
 class EmailReport(models.Model):
     
-    STATUS = Choices('Sent','Delivered','Deferred','Bounce')
+    STATUS = ('Sent','Delivered','Deferred','Bounce')
     #(4,'Spam Report'),
     
     status = StatusField()
