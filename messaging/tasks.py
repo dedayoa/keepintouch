@@ -17,7 +17,7 @@ from core.exceptions import *
 from core.models import Contact, PublicEvent, KITUser, SMTPSetting, Event
 from dateutil.relativedelta import relativedelta
 
-from .models import QueuedMessages, ProcessedMessages,RunningMessage, IssueFeedback
+from .models import QueuedMessages, ProcessedMessages,RunningMessage, IssueFeedback, FailedKITMessage
 
 from .templates import TemplateForIssueFeedbackMessages, TemplateForPhoneEmailVerification
 
@@ -51,10 +51,12 @@ def _send_sms(sms_message, kuser, msg_type, **kwargs):
     print(es.send_my_sms())
 
 
-def process_private_anniversary():
+def process_private_anniversary(private_events=None):
     #get anniversaries that occur today and which have not been handled
-    
-    due_private_events = Event.objects.select_related('contact','message').filter(date__day = timezone.now().day,
+    if private_events:
+        due_private_events = private_events
+    else:
+        due_private_events = Event.objects.select_related('contact','message').filter(date__day = timezone.now().day,
                                                                       date__month = timezone.now().month,
                                                                       last_run__year__lte = timezone.now().year)
     # For each due private anniversary, prepare email and sms
@@ -66,7 +68,7 @@ def process_private_anniversary():
                 if peven.message.send_email and peven.contact.email and peven.message.email_template:
                     etempl = _compose(peven.message.email_template, peven.contact) #compose title
                     rttempl = _compose(peven.message.title, peven.contact) #compose message
-                    e_job = _send_email.delay([rttempl,etempl,peven.contact.email],\
+                    _send_email.delay([rttempl,etempl,peven.contact.email],\
                                               peven.message.smtp_setting.values(),\
                                               owner = peven.contact.kit_user
                                               )
@@ -74,7 +76,7 @@ def process_private_anniversary():
                 if peven.message.send_sms and peven.contact.phone and peven.message.sms_template:
                     sms_msg = _compose(peven.message.sms_template, peven.contact)
                     sender = _compose(peven.message.sms_sender, peven.contact)
-                    s_job = _send_sms.delay([sender,sms_msg,peven.contact.phone.as_e164],\
+                    _send_sms.delay([sender,sms_msg,peven.contact.phone.as_e164],\
                                             peven.contact.kit_user,
                                             'private_anniv_msg'
                                             )
@@ -83,20 +85,35 @@ def process_private_anniversary():
         # move messages to a paused queue pending when error is resolved
         # also, send user a message about the issue
         except IsNotActiveError as e:
-            print(e.message)
+            FailedKITMessage.objects.create(
+                    message_data = [peven],
+                    message_category = 'private_anniv_msg',
+                    reason = e.message,
+                    owned_by = peven.contact.kit_user
+                                            )
         except NoActiveSubscriptionError as e:
-            print(e.message)
+            FailedKITMessage.objects.create(
+                    message_data = [peven],
+                    message_category = 'private_anniv_msg',
+                    reason = e.message,
+                    owned_by = peven.contact.kit_user
+                                            )
         except FailedSendingMessageError as e:
-            print(e.message)
-        except SMSGatewayError as e:
-            print(e.message)
+            FailedKITMessage.objects.create(
+                    message_data = [peven],
+                    message_category = 'private_anniv_msg',
+                    reason = e.message,
+                    owned_by = peven.contact.kit_user
+                                            )
              
     
     
-def process_public_anniversary():
+def process_public_anniversary(public_events=None):
     #get anniversaries that occur today
-    
-    due_public_events = PublicEvent.objects.select_related('message').filter(date = timezone.now().date())
+    if public_events:
+        due_public_events = public_events
+    else:
+        due_public_events = PublicEvent.objects.select_related('message').filter(date = timezone.now().date())
     # For each due private anniversary,
     for publicevent in due_public_events:
         for recipient_d in publicevent.get_recipients():
@@ -119,23 +136,37 @@ def process_public_anniversary():
                                         'public_anniv_msg'
                                         )
             except IsNotActiveError as e:
-                print(e.message)
+                FailedKITMessage.objects.create(
+                        message_data = [publicevent],
+                        message_category = 'public_anniv_msg',
+                        reason = e.message,
+                        owned_by = publicevent.kit_user
+                                                )
             except NoActiveSubscriptionError as e:
-                print(e.message)
+                FailedKITMessage.objects.create(
+                        message_data = [publicevent],
+                        message_category = 'public_anniv_msg',
+                        reason = e.message,
+                        owned_by = publicevent.kit_user
+                                                )
             except FailedSendingMessageError as e:
-                print(e.message)
-            except SMSGatewayError as e:
-                print(e.message)
+                FailedKITMessage.objects.create(
+                        message_data = [publicevent],
+                        message_category = 'public_anniv_msg',
+                        reason = e.message,
+                        owned_by = publicevent.kit_user
+                                                )
             
         publicevent.update(date = timezone.now().date()+relativedelta(years=1))
     
-def process_onetime_event():
+def process_onetime_event(queued_messages=None):
     
-    due_queued_messages = QueuedMessages.objects.filter(delivery_time__lte = timezone.now())
+    if queued_messages:
+        due_queued_messages = queued_messages
+    else:
+        due_queued_messages = QueuedMessages.objects.filter(delivery_time__lte = timezone.now())
     
     for queued_message in due_queued_messages:
-        
-        
         recipients_qs = Contact.objects.filter(pk__in = queued_message.message["recipients"])
         
         for recipient_d in recipients_qs:
@@ -160,13 +191,26 @@ def process_onetime_event():
                                           )
                         
             except IsNotActiveError as e:
-                print(e.message)
+                FailedKITMessage.objects.create(
+                        message_data = [queued_message],
+                        message_category = 'queued_msg',
+                        reason = e.message,
+                        owned_by = queued_message.created_by
+                                                )
             except NoActiveSubscriptionError as e:
-                print(e.message)
+                FailedKITMessage.objects.create(
+                        message_data = [queued_message],
+                        message_category = 'queued_msg',
+                        reason = e.message,
+                        owned_by = queued_message.created_by
+                                                )
             except FailedSendingMessageError as e:
-                print(e.message)
-            except SMSGatewayError as e:
-                print(e.message) #save message to a db, alert admin and notify user
+                FailedKITMessage.objects.create(
+                        message_data = [queued_message],
+                        message_category = 'queued_msg',
+                        reason = e.message,
+                        owned_by = queued_message.created_by
+                                                )
         
         # create entry in processed message
         ProcessedMessages.objects.create(
@@ -185,10 +229,14 @@ def process_onetime_event():
         
 
 
-def process_reminder_event():
+def process_reminder_event(running_messages=None):
     
     # get messages to run today
-    all_running_messages = RunningMessage.objects.filter(completed=False)
+    if running_messages:
+        all_running_messages = running_messages
+    else:
+        all_running_messages = RunningMessage.objects.filter(completed=False)
+    
     for running_message in all_running_messages:        
         messages_due_today = running_message.get_events_due_within_the_next_day()
         if messages_due_today == []:
@@ -220,13 +268,26 @@ def process_reminder_event():
                                           )
                         
             except IsNotActiveError as e:
-                print(e.message)
+                FailedKITMessage.objects.create(
+                        message_data = [running_message],
+                        message_category = 'running_msg',
+                        reason = e.message,
+                        owned_by = created_by
+                                                )
             except NoActiveSubscriptionError as e:
-                print(e.message)
+                FailedKITMessage.objects.create(
+                        message_data = [running_message],
+                        message_category = 'running_msg',
+                        reason = e.message,
+                        owned_by = created_by
+                                                )
             except FailedSendingMessageError as e:
-                print(e.message)
-            except SMSGatewayError as e:
-                print(e.message)
+                FailedKITMessage.objects.create(
+                        message_data = [running_message],
+                        message_category = 'running_msg',
+                        reason = e.message,
+                        owned_by = created_by
+                                                )
                 
             # create entry in processed message
             ProcessedMessages.objects.create(
