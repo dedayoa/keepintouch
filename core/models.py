@@ -354,8 +354,8 @@ class SMTPSetting(models.Model):
         ('SSLTLS','SSL/TLS')
               )
     
-    description = models.CharField(max_length=100, blank=True)
-    from_user = models.EmailField()
+    description = models.CharField(max_length=100, blank=False)
+    from_user = models.CharField(max_length=100, blank=True)
     smtp_server = models.CharField(max_length=255, blank=False)
     smtp_port = models.PositiveSmallIntegerField(blank=False)
     connection_security = models.CharField(max_length=20, choices=CONSEC, default='NO', blank=False)
