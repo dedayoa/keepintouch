@@ -20,6 +20,7 @@ from model_utils import Choices
 
 from phonenumber_field.modelfields import PhoneNumberField
 import arrow
+from picklefield.fields import PickledObjectField
 
 
 def get_default_time():
@@ -349,13 +350,34 @@ class IssueFeedback(models.Model):
     def __str__(self):
         return self.title
     
+class FailedKITMessage(models.Model):
+    
+    mcat = (
+        ('running_msg', 'Running'),
+        ('queued_msg', 'Queued'),
+        ('private_anniv_msg', 'Private Anniv.'),
+        ('public_anniv_msg', 'Public Anniv.'),
+            )
+    
+    message_data = PickledObjectField()
+    message_category = models.CharField(max_length=20, choices=mcat)
+    reason = models.CharField(max_length=255)
+    retries = models.PositiveSmallIntegerField(default=0)
+    
+    owned_by = models.ForeignKey('core.KITUser', on_delete=models.SET_NULL, null=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "{} Message Failed at {}".format(self.message_category, self.created)    
+    
     
 
 class FailedSMSMessage(models.Model):
     
-    sms_message = JSONField()
+    sms_pickled_data = PickledObjectField()
     reason = models.CharField(max_length=255)
-    retries = models.PositiveSmallIntegerField()
+    retries = models.PositiveSmallIntegerField(default=0)
     
     owned_by = models.ForeignKey('core.KITUser', on_delete=models.SET_NULL, null=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -367,9 +389,10 @@ class FailedSMSMessage(models.Model):
     
 
 class FailedEmailMessage(models.Model):
-    email_message = JSONField()
+    
+    email_pickled_data = PickledObjectField()
     reason = models.CharField(max_length=255)
-    retries = models.PositiveSmallIntegerField()
+    retries = models.PositiveSmallIntegerField(default=0)
     
     owned_by = models.ForeignKey('core.KITUser', on_delete=models.SET_NULL, null=True)
     last_modified = models.DateTimeField(auto_now=True)
