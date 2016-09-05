@@ -38,17 +38,12 @@ def _compose(template, convars):
 @django_rq.job('email')
 def _send_email(email_message, smtp_profile, **kwargs):
     es = SMTPHelper(smtp_profile)
-    print(es.send_email(email_message, **kwargs))
-
-@django_rq.job('email')
-def _send_mass_email(email_message, smtp_profile):
-    es = SMTPHelper(smtp_profile)
-    es.send_mass_email(email_message)
+    es.send_email(email_message, **kwargs)
 
 @django_rq.job('sms')
 def _send_sms(sms_message, kuser, msg_type, **kwargs):
     es = SMSHelper(sms_message, kuser, msg_type, **kwargs)
-    print(es.send_my_sms())
+    es.send_my_sms()
 
 
 def process_private_anniversary(private_events=None):
