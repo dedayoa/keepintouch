@@ -25,6 +25,7 @@ from gomez.helper import temp_log_to_db, KITRateEngineA
 from messaging.sms_counter import SMSCounter
 from gomez.models import KITBilling
 import smtplib
+from messaging.models import FailedSMSMessage
 
 
 
@@ -162,9 +163,10 @@ class SMSHelper():
     
     def __init__(self, message, kuser, msg_type, **kwargs):
         
-        self.sender = message[0]
-        self.destination = message[2]
-        self.sms_message = message[1]
+        self.message = message
+        self.sender = self.message[0]
+        self.destination = self.message[2]
+        self.sms_message = self.message[1]
         self.kuser = kuser
         self.msg_type = msg_type
         
@@ -282,7 +284,11 @@ class SMSHelper():
             
         except NotEnoughBalanceError as e:
             # saved message to failed table for user
-            return e.message
+            FailedSMSMessage.objects.create(
+                        email_pickled_data = self.message,
+                        reason = e.message,
+                        owned_by = self.kuser
+                                            )
         except SMSGatewayError as e:
             # admin to handle SMSGW error...log this, alert...do something!!
             return "SMSGWERR: %s"%e.message
