@@ -33,7 +33,7 @@ from django.core import mail
 from django.core.mail import send_mail
 from django.core.mail.backends.smtp import EmailBackend
 from django.contrib.messages.api import get_messages
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth import logout, get_user_model
 
 from django.contrib.auth.mixins import UserPassesTestMixin, PermissionRequiredMixin
@@ -525,6 +525,11 @@ class UserCreateView(PermissionRequiredMixin, View):
             
             with transaction.atomic():
                 f1 = userform.save()
+                
+                # Assign this user to the standard kituser group
+                group = Group.objects.get(id=settings.STANDARD_KITUSER_GROUP_PERMS_ID)
+                f1.groups.add(group)
+                
                 f2 = kituform.save(commit=False)
                 f2.user = f1
                 f2.parent= request.user.kituser
