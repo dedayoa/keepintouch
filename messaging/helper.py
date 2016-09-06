@@ -365,7 +365,7 @@ class OKToSend(object):
                 return True            
             elif not self.user.is_active:
                 raise IsNotActiveError("User is not active")
-            elif not self.user.parent.is_active:
+            elif not self.owner.parent.user.is_active:
                 raise IsNotActiveError("Parent is not active")
             
     def _has_valid_subscription(self):
