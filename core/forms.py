@@ -399,6 +399,7 @@ class SMTPSettingForm(forms.ModelForm):
         
         self.helper = FormHelper()
         self.helper.form_action = '.'
+        self.helper.form_class = 'smtp-setting'
         self.helper.add_input(Submit('submit', _('Save'), css_class="success float-right"))
         self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
         #self.helper.add_input(Button('test_smtp_server', _('Test Server'), css_class="warning float-right test-smtp-button"))
@@ -407,8 +408,11 @@ class SMTPSettingForm(forms.ModelForm):
         model = SMTPSetting
         fields = [
                   'description','from_user','smtp_server','smtp_port','connection_security',\
-                  'smtp_user','smtp_password', 'active'
+                  'smtp_user','smtp_password', 'active', 'cou_group'
                   ]
+        widgets = {
+            'cou_group' : Select2MultipleWidget
+                   }
         
 class UserGroupSettingForm(forms.ModelForm):
 
