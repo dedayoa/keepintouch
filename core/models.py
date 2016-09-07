@@ -195,9 +195,15 @@ class KITUser(models.Model):
     def get_templates(self):
         
         if self.is_admin:
-            return MessageTemplate.objects.filter(kit_admin = self.pk)
+            return MessageTemplate.objects.filter(kit_admin = self)
         else:
-            return MessageTemplate.objects.filter(cou_group__kit_users = self.pk)
+            if self.parent.kitsystem.company_wide_contacts == True:
+                # get all smtp settings created by the admin
+                return MessageTemplate.objects.filter(kit_admin = self.parent)
+            else:
+                # get smtp settings of groups I belong to.
+                gib2 = self.groups_belongto.all()
+                return MessageTemplate.objects.filter(cou_group__in = gib2)
         
     def get_processed_messages(self):
         processedmessages = apps.get_model('messaging', 'ProcessedMessages')
@@ -205,9 +211,9 @@ class KITUser(models.Model):
         #if self.kitbilling.is_full_admin == False:
         #    return processedmessages.objects.filter(created_by = self.pk)
         if self.is_admin:
-            return processedmessages.objects.filter(created_by__parent = self.pk)
+            return processedmessages.objects.filter(created_by__parent = self.pk).order_by('-processed_at')
         else:
-            return processedmessages.objects.filter(created_by = self.pk)
+            return processedmessages.objects.filter(created_by = self.pk).order_by('-processed_at')
                 
     def get_queued_messages(self):
         queuedmessages = apps.get_model('messaging', 'QueuedMessages')
@@ -236,6 +242,13 @@ class KITUser(models.Model):
         else:
             return CustomData.objects.filter(created_by = self.pk)
         
+        
+    def get_failed_email_messages(self):
+        failedemailmessage = apps.get_model('messaging', 'FailedEmailMessage')
+        if self.is_admin:
+            return failedemailmessage.objects.filter(owned_by__parent = self.pk)
+        else:
+            return failedemailmessage.objects.filter(owned_by = self.pk).order_by('-created')
     #####Admin Things#######
     
     def get_kituser(self):
@@ -264,6 +277,14 @@ class KITUser(models.Model):
         try:
             if self.is_admin:
                 return SMTPSetting.objects.filter(kit_admin=self.pk)
+            else:
+                if self.parent.kitsystem.company_wide_contacts == True:
+                    # get all smtp settings created by the admin
+                    return SMTPSetting.objects.filter(kit_admin = self.parent)
+                else:
+                    # get smtp settings of groups I belong to.
+                    gib2 = self.groups_belongto.all()
+                    return SMTPSetting.objects.filter(cou_group__in = gib2)
         except InvalidToken:
             print("Seems you have changed SECRET_KEY...all encrypted tokens have been invalidated")
 
@@ -364,6 +385,7 @@ class SMTPSetting(models.Model):
     active = models.BooleanField()
     
     kit_admin = models.ForeignKey('core.KITUser', models.CASCADE, blank=False, limit_choices_to={'is_admin':True})
+    cou_group = models.ManyToManyField(CoUserGroup, verbose_name="Group Availability")
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -461,6 +483,9 @@ class ContactGroup(models.Model):
     
     def get_absolute_url(self):
         return reverse('core:contactgroup-detail',args=[self.pk])
+    
+    class Meta:
+        verbose_name = 'Contact List'
 
 class MessageTemplate(models.Model):
     title = models.CharField(max_length=100)
