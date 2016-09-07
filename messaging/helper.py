@@ -363,10 +363,11 @@ class OKToSend(object):
         else:
             if self.user.is_active and self.owner.parent.user.is_active:
                 return True            
-            elif not self.user.is_active:
+            elif self.user.is_active == False:
                 raise IsNotActiveError("User is not active")
-            elif not self.owner.parent.user.is_active:
+            elif self.owner.parent.user.is_active == False:
                 raise IsNotActiveError("Parent is not active")
+        
             
     def _has_valid_subscription(self):
         if self.owner.is_admin:
@@ -378,9 +379,9 @@ class OKToSend(object):
                 raise NoActiveSubscriptionError("Admin Subscription has expired")
     
     
-    #@cached_as(User, KITUser, timeout=3600)   
+       
     def check(self):
-        return self._is_active() and self._has_valid_subscription()
+        return (self._is_active() and self._has_valid_subscription())
    
     
 def get_next_delivery_time(repeat_frequency, delivery_time):
