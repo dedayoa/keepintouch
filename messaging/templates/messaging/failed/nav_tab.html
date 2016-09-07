@@ -1,0 +1,3 @@
+<a class="small button float-right {% if herpath != 'emails' %}hollow{% endif %}" href="{% url 'messaging:email-messages-failed' %}">Email</a>
+<a class="small button float-right {% if herpath != 'smss' %}hollow{% endif %}" href="{% url 'messaging:sms-messages-failed' %}">SMS</a>
+<a class="small button warning float-right {% if herpath != 'messages' %}hollow{% endif %}" href="{% url 'messaging:kit-messages-failed' %}">Messages</a>
