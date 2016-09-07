@@ -24,10 +24,10 @@
 			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:messages-running-status' %}"><i class="fi-foot"></i> Running Reminders</a></li>
 			{% endif %}
 			<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:messages-processed-status' %}"><i class="fi-checkbox"></i> Processed</a></li>
-			<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:messages-processed-status' %}"><i class="fi-prohibited"></i> Failed</a></li>
+			<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:kit-messages-failed' %}"><i class="fi-prohibited"></i> Failed</a></li>
 		</ul>
 	</li>
-	{% if perms.messaging.add_messagetemplate %}
+	{% if perms.core.add_messagetemplate %}
 	<li><a href="{% url 'core:templates-list' %}"><i class="fi-page-multiple"></i> Templates</a></li>
 	{% endif %}
 	<li>
