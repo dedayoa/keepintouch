@@ -1,0 +1,15 @@
+{% extends "core/base_generic.html" %}
+{% load render_table from django_tables2 %}
+{% block head_base_links %}
+	{{ block.super }}
+{% endblock %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="row">
+	<h3>Failed <small>SMSs</small></h3>
+	{{ block.super }}
+	{% include "messaging/failed/nav_tab.html" %}
+	{% render_table table %}
+</div>
+{% endblock %}
