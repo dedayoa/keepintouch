@@ -8,7 +8,8 @@ import django_tables2 as tables
 from django_tables2.utils import A
 
 from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages, QueuedMessages,\
-                    ReminderMessaging
+                    ReminderMessaging, FailedEmailMessage, FailedSMSMessage, FailedKITMessage,\
+                    RunningMessage
 from django.utils.html import format_html_join, format_html
 from django.utils.safestring import mark_safe
 
@@ -18,6 +19,14 @@ import json
 import re
 from django.forms.models import model_to_dict
 from django.core.urlresolvers import reverse
+
+
+    
+def text_2_wordlist(text, max_number_of_words):
+    text_list = re.sub("[^\w]", " ",  text).split()
+    return " ".join(text_list[0:max_number_of_words])+"..." if len(text_list) > max_number_of_words else text
+
+
 
 class DraftStandardMessagesTable(tables.Table):
     
@@ -46,11 +55,10 @@ class DraftStandardMessagesTable(tables.Table):
     
     def render_title(self, record):
         if record.title:
-            text_2_wordlist = re.sub("[^\w]", " ",  record.title).split()
             return format_html('<span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex=1 title="{}">{}</span>',\
                                record.__str__(),
                                #nltk.sent_tokenize(record.title)[0:5].join(" ")
-                               (" ".join(text_2_wordlist[0:3])+"...") if len(text_2_wordlist) > 3 else record.title 
+                               text_2_wordlist(record.title, 3)
                                )
             
     class Meta:
@@ -107,7 +115,8 @@ class QueuedMessagesTable(tables.Table):
     class Meta:
         model = QueuedMessages
         fields = ['message','message_type','delivery_time','message_id']
-    
+
+
     
 class DraftReminderMessagesTable(tables.Table):
     
@@ -121,10 +130,8 @@ class DraftReminderMessagesTable(tables.Table):
     
     def render_title(self, record):
         if record.title:
-            text_2_wordlist = re.sub("[^\w]", " ",  record.title).split()
             return format_html('<span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex=1 title="{}">{}</span>',\
-                               record.__str__(),
-                               (" ".join(text_2_wordlist[0:3])+"...") if len(text_2_wordlist) > 3 else record.title 
+                               record.__str__(),text_2_wordlist(record.title, 3)
                                )
     
     def render_contact_group(self, record):
@@ -144,5 +151,55 @@ class DraftReminderMessagesTable(tables.Table):
 class RunningMessagesTable(tables.Table):
     
     class Meta:
-        model = QueuedMessages
+        model = RunningMessage
         fields = ['message','contact_dsoi','reminders','started_at']
+        
+
+class FailedKITMessagesTable(tables.Table):
+    record_action = tables.LinkColumn(verbose_name="", \
+                                       text=mark_safe('<span class="button small warning">Retry</span>'), \
+                                       args=[A('pk')])
+    
+    created = tables.DateTimeColumn(verbose_name='Failed')
+    message_category = tables.Column(verbose_name='Message Category')
+    retries = tables.Column(verbose_name="Retries")
+    reason = tables.Column(verbose_name="Reason")
+    #message_data = tables.Column(verbose_name="Message")
+    
+    #def render_record_action(self, record):
+    #    return format_html('<a class="button" href="{}">Retry</a>',record.get_absolute_url())
+    
+    '''
+    def render_message_data(self, record):
+        
+        msg_data = record.message_data[0]
+        
+        if record.message_category == 'queued_msg':
+            return msg_data.message.get('title')
+        elif record.message_category == 'running_msg':
+            return msg_data.'''
+        
+    
+    class Meta:
+        model = FailedKITMessage
+        fields = ('message_category','reason','created','retries','record_action')
+        
+class FailedSMSMessagesTable(tables.Table):
+    
+    created = tables.DateTimeColumn(verbose_name='Failed')
+    
+    class Meta:
+        model = FailedSMSMessage
+        fields = ('reason','retries','created')
+        
+        
+class FailedEmailMessagesTable(tables.Table):
+    
+    created = tables.DateTimeColumn(verbose_name='Failed')
+    
+    class Meta:
+        model = FailedEmailMessage
+        fields = ('reason','retries','created')
+        
+        
+      
