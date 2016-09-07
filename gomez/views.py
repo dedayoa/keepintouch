@@ -18,6 +18,9 @@ class SystemSettingsUpdateView(UpdateView):
     form_class = SystemSettingsForm
     template_name = 'gomez/system_settings.html'
     
+    def get_object(self, queryset=None):
+        return self.request.user.kituser.kitsystem
+    
     def get_context_data(self, **kwargs):
         params = super(SystemSettingsUpdateView, self).get_context_data(**kwargs)
         params["syssetid"] = self.object.pk
