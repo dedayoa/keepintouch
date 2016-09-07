@@ -14,15 +14,17 @@ class UserValidatedMiddleware(object):
     
     PIPTHRU_PATHS = (
         '/settings/account/user/send-verify-code/',
-        '/settings/account/user/verify/'  
+        '/settings/account/user/verify/'
                      )
     
     def process_view(self, request, view_func, view_args, view_kwargs):
         try:
-            if request.user.kituser.email_validated and request.user.kituser.phone_validated:
-                return None
-            elif request.path in self.PIPTHRU_PATHS:
-                return None
-            return validate_user_details(request, *view_args, **view_kwargs)
+            if not (request.user.is_staff) :
+                if request.user.kituser.email_validated and request.user.kituser.phone_validated:
+                    return None
+                elif request.path in self.PIPTHRU_PATHS:
+                    return None
+                return validate_user_details(request, *view_args, **view_kwargs)
         except AttributeError:
+            # for AnonymousUser
             return None
