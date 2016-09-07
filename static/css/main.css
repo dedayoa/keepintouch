@@ -1,4 +1,8 @@
 
+form.smtp-setting #div_id_cou_group{
+	margin-bottom: 1rem;
+}
+
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -37,7 +41,7 @@ div.kitapp-header{
 }
 
 div.kitapp-content{
-	/*min-height: 30rem;*/
+	min-height: 100vh;
 }
 
 div.alert ul{
