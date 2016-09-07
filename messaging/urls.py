@@ -43,5 +43,11 @@ urlpatterns = [
             url(r'^message/(?P<pk>\d+)/delete/$', ReminderDeleteView.as_view(), name='reminder-message-delete'),
             ])),
     url(r'^system/feedback/$', submit_issue_fb, name='system-user-feedback'),
+    url(r'^failed/', include([
+            url(r'^messages/$', failed_kit_messages_view, name='kit-messages-failed'),
+            url(r'^message/(?P<pk>\d+)/retry/$', failed_messaging_retry, name='failed-kit-message-retry'),
+            url(r'^smss/$', failed_sms_messages_view, name='sms-messages-failed'),
+            url(r'^emails/$', failed_email_messages_view, name='email-messages-failed'),
+            ])),
     
 ]
