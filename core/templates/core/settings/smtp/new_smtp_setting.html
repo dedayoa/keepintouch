@@ -2,6 +2,11 @@
 {% load crispy_forms_tags %}
 {% load staticfiles %}
 
+{% block head_base_links %}
+	{{ block.super }}
+	{{ form.media.css }}
+{% endblock %}
+
 {% block title %}{{title}}{% endblock %}
 {% block content %}
 	<h3>SMTP Settings <small>New</small></h3>
@@ -12,4 +17,5 @@
 {% endblock %}
 {% block foot_base_js %}
 	{{block.super}}
+	{{ form.media.js }}
 {% endblock %}
