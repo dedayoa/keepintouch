@@ -5,14 +5,19 @@ from django.contrib import messages as flash_messages
 from django_tables2   import RequestConfig
 
 from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages,\
-                    QueuedMessages, ReminderMessaging, Reminder
+                    QueuedMessages, ReminderMessaging, Reminder, FailedEmailMessage, FailedSMSMessage,\
+                    FailedKITMessage
 from core.models import KITUser
  
 from .forms import StandardMessagingForm, AdvancedMessagingForm, ReminderMessagingForm,\
                     ReminderFormSet
 from .tables import DraftStandardMessagesTable, DraftAdvancedMessagesTable, ProcessedMessagesTable,\
-                    QueuedMessagesTable, DraftReminderMessagesTable, RunningMessagesTable
+                    QueuedMessagesTable, DraftReminderMessagesTable, RunningMessagesTable,\
+                    FailedEmailMessagesTable, FailedSMSMessagesTable, FailedKITMessagesTable
 from .filters import ProcessedMessagesFilter
+
+from .tasks import process_private_anniversary, process_onetime_event, process_public_anniversary,\
+                    process_reminder_event
 
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -431,3 +436,88 @@ def message_running_status_view(request):
         params["title"] = "Running Messages"
         params["table"] = r_msgs_table
         return render(request, 'messaging/running_messages.html', params)
+    
+    
+def failed_email_messages_view(request):
+    
+    if request.method == "GET":
+        
+        #qs = request.user.kituser.get_failed_email_messages()
+        qs = FailedEmailMessage.objects.filter(owned_by = request.user.kituser)
+        fem_table = FailedEmailMessagesTable(qs)
+        RequestConfig(request, paginate={'per_page': 25}).configure(fem_table)
+        params = {}
+        params["title"] = "Failed Email Messages"
+        params["table"] = fem_table
+        params["herpath"] = (request.path.split('/'))[3]
+
+        return render(request, 'messaging/failed/email_messages_failed.html', params)
+    
+def failed_kit_messages_view(request):
+    
+    if request.method == "GET":
+        
+        #qs = request.user.kituser.get_failed_email_messages()
+        qs = FailedKITMessage.objects.filter(owned_by = request.user.kituser)
+        fem_table = FailedKITMessagesTable(qs)
+        RequestConfig(request, paginate={'per_page': 25}).configure(fem_table)
+        params = {}
+        params["title"] = "Failed Messages"
+        params["table"] = fem_table
+        params["herpath"] = (request.path.split('/'))[3]
+        
+        return render(request, 'messaging/failed/kit_messages_failed.html', params)
+    
+def failed_sms_messages_view(request):
+    
+    if request.method == "GET":
+        
+        #qs = request.user.kituser.get_failed_email_messages()
+        qs = FailedSMSMessage.objects.filter(owned_by = request.user.kituser)
+        fem_table = FailedSMSMessagesTable(qs)
+        RequestConfig(request, paginate={'per_page': 25}).configure(fem_table)
+        params = {}
+        params["title"] = "Failed SMS"
+        params["table"] = fem_table
+        params["herpath"] = (request.path.split('/'))[3]
+
+        return render(request, 'messaging/failed/sms_messages_failed.html', params)
+    
+    
+def failed_messaging_retry(request, pk):
+    
+    if request.method == "POST":
+        
+        if request.POST.get('message_category') == 'queued_msg':
+            # run the task again...then remove from db
+            qm = FailedKITMessage.objects.get(pk=pk, owned_by = request.user.kituser)
+            data = qm.message_data[0]
+            
+            qm.delete()
+            
+            # Because qm is already stale, and I cannot use refresh_from_db(), since I already deleted QueuedMessage
+            # I have to recreate another QueuedMessage from the previous one.            
+            new_qm = QueuedMessages.objects.create(
+                    message_type = getattr(data, 'message_type'),
+                    message_id = getattr(data, 'message_id'),
+                    message = getattr(data, 'message'),
+                    delivery_time = getattr(data, 'delivery_time'),
+                    recurring = getattr(data, 'recurring'),
+                    created_by = getattr(data, 'created_by')
+                                          )
+            #process_onetime_event(queued_messages=qm.message_data)
+            #process_onetime_event(list(map(lambda x : x.refresh_from_db(), qm.message_data)))
+            ibd = []
+            tss = ibd.append(new_qm)
+            process_onetime_event(tss)
+            
+            
+        elif request.POST.get('message_category') == 'running_msg':
+            pass
+        elif request.POST.get('message_category') == 'private_anniv_msg':
+            pass
+        elif request.POST.get('message_category') == 'public_anniv_msg':
+            pass
+        
+        return HttpResponseRedirect(reverse('messaging:kit-messages-failed'))
+        
