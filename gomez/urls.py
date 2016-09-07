@@ -10,7 +10,7 @@ from .views import *
 
 urlpatterns = [
     url(r'^settings/', include([
-                url(r'^system/(?P<pk>\d+)/$', SystemSettingsUpdateView.as_view(), name='system-settings'),
+                url(r'^my/system/$', SystemSettingsUpdateView.as_view(), name='system-settings'),
                 
                 
     ])),
