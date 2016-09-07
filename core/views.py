@@ -76,7 +76,10 @@ def register_free_trial(request):
 
 def validate_user_details(request):
     form = VerifyAccountForm(user=request.user)
-    form_2 = OrganizationContactForm(instance=request.user.kituser.address or request.user.kituser.parent.address)
+    try:
+        form_2 = OrganizationContactForm(instance=request.user.kituser.address or request.user.kituser.parent.address)
+    except AttributeError:
+        form_2 = OrganizationContactForm()
     
     params = {}
     params['title'] = 'Validate User Details'
@@ -444,6 +447,13 @@ class MessageTemplateUpdateView(PermissionRequiredMixin, UpdateView):
         # user should not be able to view/edit only settings of her group/company
         return self.request.user.kituser.get_templates()
     
+    def get_form(self, form_class=form_class):
+        form = super(MessageTemplateUpdateView, self).get_form(form_class)
+        form.fields["cou_group"].queryset = self.request.user.kituser.get_user_groups()
+        form.fields["smtp_setting"].queryset = self.request.user.kituser.get_smtp_items()    
+        return form
+    
+    
 class MessageTemplateCreateView(PermissionRequiredMixin, CreateView):
     
     permission_required = 'core.add_messagetemplate'
@@ -456,6 +466,12 @@ class MessageTemplateCreateView(PermissionRequiredMixin, CreateView):
         form.instance.kit_admin = self.request.user.kituser
 
         return super(MessageTemplateCreateView, self).form_valid(form)
+
+    def get_form(self, form_class=form_class):
+        form = super(MessageTemplateCreateView, self).get_form(form_class)
+        form.fields["cou_group"].queryset = self.request.user.kituser.get_user_groups()
+        form.fields["smtp_setting"].queryset = self.request.user.kituser.get_smtp_items()    
+        return form
     
 class MessageTemplateDeleteView(PermissionRequiredMixin, DeleteView):
     
@@ -677,6 +693,12 @@ class SMTPUpdateView(UpdateView):
         params["smtpsettingid"] = self.object.pk
         params["messages"] = get_messages(self.request)
         return params
+    
+    def get_form(self, form_class=form_class):
+        form = super(SMTPUpdateView, self).get_form(form_class)
+        form.fields["cou_group"].queryset = self.request.user.kituser.get_user_groups() 
+        return form
+        
     
     
     def get_queryset(self, **kwargs):
