@@ -369,7 +369,13 @@ class FailedKITMessage(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return "{} Message Failed at {}".format(self.message_category, self.created)    
+        return "{} Message Failed at {}".format(self.message_category, self.created)
+    
+    def get_absolute_url(self):
+        return reverse('messaging:failed-kit-message-retry',args=[self.pk])
+    
+    class Meta:
+        verbose_name = "Message"
     
     
 
@@ -386,6 +392,9 @@ class FailedSMSMessage(models.Model):
     def __str__(self):
         return "SMS Failed at {}".format(self.created)
     
+    def get_absolute_url(self):
+        return None
+    
     
 
 class FailedEmailMessage(models.Model):
@@ -400,4 +409,7 @@ class FailedEmailMessage(models.Model):
     
     def __str__(self):
         return "Email Failed at {}".format(self.created)
+    
+    def get_absolute_url(self):
+        return None
     
