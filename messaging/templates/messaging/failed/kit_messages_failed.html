@@ -21,8 +21,8 @@
 					<tr>
 						<th>Message Category</th>
 						<th>Reason</th>
-						<th>Failed</th>
 						<th>Retries</th>
+						<th>Failed</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -33,8 +33,8 @@
 						{# for record in row #}
 							<td>{{ row.record.get_message_category_display }}</td>
 							<td>{{ row.record.reason }}</td>
-							<td>{{ row.record.created|date:"d/m/Y G:i" }}</td>
 							<td>{{ row.record.retries }}</td>
+							<td>{{ row.record.created|date:"d/m/Y G:i" }}</td>
 							<td>
 								<form class="requ-it-form" method="POST" action="{% url 'messaging:failed-kit-message-retry' row.record.pk %}">
 	                				{% csrf_token %}
