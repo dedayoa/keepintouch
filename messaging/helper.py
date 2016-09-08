@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.core.validators import validate_email
 
 #from gomez.models import KITBilling
+from .models import FailedEmailMessage, FailedSMSMessage
 from core.models import KITUser, SMTPSetting, KITUBalance
 from core.exceptions import *
 
@@ -25,7 +26,6 @@ from gomez.helper import temp_log_to_db, KITRateEngineA
 from messaging.sms_counter import SMSCounter
 from gomez.models import KITBilling
 import smtplib
-from messaging.models import FailedSMSMessage
 
 
 
@@ -45,14 +45,15 @@ class SMTPHelper():
     
     def __init__(self, smtp_server_profile):
         
-        self.id = getattr(smtp_server_profile, 'id', None)
+        self.ssp = smtp_server_profile
+        self.id = getattr(self.ssp, 'id', None)
         
-        self.smtp_server = getattr(smtp_server_profile,'smtp_server', None)
-        self.from_sender = getattr(smtp_server_profile,'from_user','')
-        self.smtp_port = getattr(smtp_server_profile,'smtp_port', 25)
-        self.connection_security = getattr(smtp_server_profile,'connection_security','')
-        self.smtp_user = getattr(smtp_server_profile,'smtp_user','')
-        self.smtp_password = getattr(smtp_server_profile,'smtp_password','')
+        self.smtp_server = getattr(self.ssp,'smtp_server', None)
+        self.from_sender = getattr(self.ssp,'from_user','')
+        self.smtp_port = getattr(self.ssp,'smtp_port', 25)
+        self.connection_security = getattr(self.ssp,'connection_security','')
+        self.smtp_user = getattr(self.ssp,'smtp_user','')
+        self.smtp_password = getattr(self.ssp,'smtp_password','')
     
     # will need to cache this later
     def get_connection(self):
@@ -146,22 +147,17 @@ class SMTPHelper():
                     owner = kwargs['owner']
                 )
         except smtplib.SMTPDataError:
-            return(sys.exc_info()[1])
-        except Exception:
-            temp_log_to_db(
-                'email',
-                email_msg = email_message,
-                gw_err_preamble = str(sys.exc_info()),
-                sender_mail = "{} <{}>".format(self.from_sender, self.smtp_user),
-                owner = kwargs['owner']
-            )
-            return(sys.exc_info())
+            FailedEmailMessage.objects.create(
+                        email_pickled_date = [email_message, self.ssp],
+                        reason = str(sys.exc_info()[1]),
+                        owned_by = kwargs['owner']
+                                              )
 
 #todo :
 
 class SMSHelper():
     
-    def __init__(self, message, kuser, msg_type, **kwargs):
+    def __init__(self, message, kuser, msg_type):
         
         self.message = message
         self.sender = self.message[0]
@@ -180,7 +176,7 @@ class SMSHelper():
         sb = self.kuser.kitubalance.sms_balance
         
         #get parent balance
-        
+        '''
         try:
             kuser_parent = self.kuser.get_parent()
             p_fsb = kuser_parent.kitubalance.free_sms_balance
@@ -188,13 +184,22 @@ class SMSHelper():
         except AttributeError:
             # some users don't have parents...like system
             print('This User Does Not Have A Parent')
+        '''
         
-        #get cost per sms unit for destination
+        #get sms units required to send to destination
         ppsms = KITRateEngineA().get_sms_cost_to_number(self.destination)
         
         #sms pages     
         smsct = SMSCounter().get_messages_count_only(self.sms_message)
         
+        # all messages are billed using the user's account balance
+        if fsb >= (ppsms * smsct):
+            return ['fsb', fsb-(ppsms * smsct)]
+        elif sb >= (ppsms * smsct):
+            return ['sb', sb-(ppsms * smsct)]
+        else:
+            raise NotEnoughBalanceError("Not enough units to send SMS")
+        '''
         if self.msg_type == 'system_msg':
             # Always bill system messages from the admin account, even if admin is self
             if fsb >= (ppsms * smsct):
@@ -203,7 +208,6 @@ class SMSHelper():
                 return ['sb', sb-(ppsms * smsct)]
             else:
                 raise NotEnoughBalanceError("System does not have enough units to send SMS")
-        
         elif is_company_wide(self.kuser):
             # public and private messages are billed on the admin (main) account; so they don't fail often
             
@@ -222,31 +226,24 @@ class SMSHelper():
                     return ['p_sb', p_sb-(ppsms * smsct)]
                 else:
                     raise NotEnoughBalanceError("Admin does not have enough units to send SMS")
-        else:
-            # all messages are billed using the user's account balance
-            if fsb >= (ppsms * smsct):
-                return ['fsb', fsb-(ppsms * smsct)]
-            elif sb >= (ppsms * smsct):
-                return ['sb', sb-(ppsms * smsct)]
-            else:
-                raise NotEnoughBalanceError("Not enough units to send SMS")
+        '''
         
 
         
         
     def _update_user_sms_balance(self, balance_acct_debited, amount):
         # save balance
-        
+        '''
         if is_company_wide(self.kuser) and self.msg_type == 'public_anniv_msg' or self.msg_type == 'private_anniv_msg':
             if balance_acct_debited == 'p_fsb':
                 KITUBalance.objects.filter(kit_user=self.kuser.parent).update(free_sms_balance=amount)
             elif balance_acct_debited == 'p_sb':
                 KITUBalance.objects.filter(kit_user=self.kuser.parent).update(sms_balance=amount)
-        else:
-            if balance_acct_debited == 'fsb':
-                KITUBalance.objects.filter(kit_user=self.kuser).update(free_sms_balance=amount)
-            elif balance_acct_debited == 'sb':
-                KITUBalance.objects.filter(kit_user=self.kuser).update(sms_balance=amount)
+        else:'''
+        if balance_acct_debited == 'fsb':
+            KITUBalance.objects.filter(kit_user=self.kuser).update(free_sms_balance=amount)
+        elif balance_acct_debited == 'sb':
+            KITUBalance.objects.filter(kit_user=self.kuser).update(sms_balance=amount)
     
     
     def _sms_success_logging_and_all(self, gw_id):        
@@ -274,6 +271,7 @@ class SMSHelper():
     def send_my_sms(self):        
         
         try:
+            
             result = self._check_sms_can_be_sent()
             # SMSLive247
             gw_reply = SMSLive247Helper().send_sms([self.sender, self.sms_message, self.destination])
@@ -285,7 +283,7 @@ class SMSHelper():
         except NotEnoughBalanceError as e:
             # saved message to failed table for user
             FailedSMSMessage.objects.create(
-                        email_pickled_data = self.message,
+                        sms_pickled_data = self.message,
                         reason = e.message,
                         owned_by = self.kuser
                                             )
