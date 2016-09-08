@@ -47,7 +47,9 @@ urlpatterns = [
             url(r'^messages/$', failed_kit_messages_view, name='kit-messages-failed'),
             url(r'^message/(?P<pk>\d+)/retry/$', failed_messaging_retry, name='failed-kit-message-retry'),
             url(r'^smss/$', failed_sms_messages_view, name='sms-messages-failed'),
+            url(r'^sms/(?P<pk>\d+)/retry/$', failed_sms_message_retry, name='failed-sms-message-retry'),
             url(r'^emails/$', failed_email_messages_view, name='email-messages-failed'),
+            url(r'^email/(?P<pk>\d+)/retry/$', failed_email_message_retry, name='failed-email-message-retry'),
             ])),
     
 ]
