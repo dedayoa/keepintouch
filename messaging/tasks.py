@@ -41,8 +41,8 @@ def _send_email(email_message, smtp_profile, **kwargs):
     es.send_email(email_message, **kwargs)
 
 @django_rq.job('sms')
-def _send_sms(sms_message, kuser, msg_type, **kwargs):
-    es = SMSHelper(sms_message, kuser, msg_type, **kwargs)
+def _send_sms(sms_message, kuser, msg_type):
+    es = SMSHelper(sms_message, kuser, msg_type)
     es.send_my_sms()
 
 
