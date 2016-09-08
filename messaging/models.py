@@ -229,7 +229,7 @@ class RunningMessage(models.Model):
     
     def set_is_completed(self):
         if self.reminders is None:
-            self.completed = True      
+            self.completed = True
     
     def get_events_due_within_the_next_day(self):
         # is date between now and next 1 hour?
@@ -247,6 +247,7 @@ class RunningMessage(models.Model):
         # check if there are any more events, if not, mark as completed            
         if self.last_event_on <= arrow.utcnow().ceil('day'):
             self.completed = True #setting completed shunts the entire function
+            self.save()
         
         return due_events
         
@@ -393,7 +394,7 @@ class FailedSMSMessage(models.Model):
         return "SMS Failed at {}".format(self.created)
     
     def get_absolute_url(self):
-        return None
+        return reverse('messaging:failed-sms-message-retry',args=[self.pk])
     
     
 
@@ -411,5 +412,5 @@ class FailedEmailMessage(models.Model):
         return "Email Failed at {}".format(self.created)
     
     def get_absolute_url(self):
-        return None
+        return reverse('messaging:failed-email-message-retry',args=[self.pk])
     
