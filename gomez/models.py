@@ -86,7 +86,7 @@ class KITSystem(models.Model):
     
 class SMSRateTable(models.Model):
     
-    dialcode = models.ForeignKey(Prefix, verbose_name=_("Destination"), help_text=_("Select Prefix"))
+    dialcode = models.OneToOneField(Prefix, verbose_name=_("Destination"), help_text=_("Select Prefix"))
     sms_units = models.PositiveIntegerField(default=0)
     
     def __str__(self):
