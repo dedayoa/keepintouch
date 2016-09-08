@@ -156,14 +156,7 @@ class RunningMessagesTable(tables.Table):
         
 
 class FailedKITMessagesTable(tables.Table):
-    record_action = tables.LinkColumn(verbose_name="", \
-                                       text=mark_safe('<span class="button small warning">Retry</span>'), \
-                                       args=[A('pk')])
     
-    created = tables.DateTimeColumn(verbose_name='Failed')
-    message_category = tables.Column(verbose_name='Message Category')
-    retries = tables.Column(verbose_name="Retries")
-    reason = tables.Column(verbose_name="Reason")
     #message_data = tables.Column(verbose_name="Message")
     
     #def render_record_action(self, record):
@@ -182,24 +175,52 @@ class FailedKITMessagesTable(tables.Table):
     
     class Meta:
         model = FailedKITMessage
-        fields = ('message_category','reason','created','retries','record_action')
+        fields = ('message_category','reason','created','retries',)
         
 class FailedSMSMessagesTable(tables.Table):
+    record_action = tables.LinkColumn(verbose_name="", \
+                                       text=mark_safe('<span class="button small">Retry</span>'), \
+                                       args=[A('pk')])
     
+    sms_pickled_data = tables.Column(verbose_name='Message')
+    retries = tables.Column(verbose_name="Retries")
+    reason = tables.Column(verbose_name="Reason")
+
+    def render_sms_pickled_data(self, record):
+        return format_html('<span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false"'+ 
+                            'tabindex=1 title="{}">SMS</span> from {} to {}',record.sms_pickled_data[1],\
+                            record.sms_pickled_data[0], record.sms_pickled_data[2]
+                           )
+        
+
     created = tables.DateTimeColumn(verbose_name='Failed')
     
     class Meta:
         model = FailedSMSMessage
-        fields = ('reason','retries','created')
+        fields = ('sms_pickled_data','reason','retries','created','record_action')
         
         
 class FailedEmailMessagesTable(tables.Table):
+
+    record_action = tables.LinkColumn(verbose_name="", \
+                                       text=mark_safe('<span class="button small">Retry</span>'), \
+                                       args=[A('pk')])
+        
+    email_pickled_data = tables.Column(verbose_name='Message')
+    retries = tables.Column(verbose_name="Retries")
+    reason = tables.Column(verbose_name="Reason")
     
     created = tables.DateTimeColumn(verbose_name='Failed')
     
+    def render_email_pickled_data(self, record):
+        return format_html('<span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false"'+ 
+                            'tabindex=1 title="{}">Email</span> from {} to {}',record.email_pickled_data[0][1],\
+                            record.email_pickled_data[1], record.sms_pickled_data[0][2]
+                           )
+        
     class Meta:
         model = FailedEmailMessage
-        fields = ('reason','retries','created')
+        fields = ('email_pickled_data','reason','retries','created')
         
         
       
