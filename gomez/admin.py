@@ -8,8 +8,20 @@ from country_dialcode.admin import PrefixAdmin
 from .models import KITBilling, KITServicePlan, KITSystem, EmailReport, SMSReport, \
                     SMSRateTable
 
+
+class SMSRateTableInline(admin.TabularInline):
+    
+    model = SMSRateTable
+
 class MyPrefixAdmin(ImportExportMixin, PrefixAdmin):
-    pass
+    inlines = [
+        SMSRateTableInline,
+    ]
+    list_display = ('prefix','destination','get_sms_rate')
+    
+    def get_sms_rate(self, obj):
+        return obj.smsratetable.sms_units
+    get_sms_rate.short_description = 'SMS Rate'
 
 class KITBillingAdmin(admin.ModelAdmin):
 
