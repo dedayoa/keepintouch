@@ -17,7 +17,7 @@ from .tables import DraftStandardMessagesTable, DraftAdvancedMessagesTable, Proc
 from .filters import ProcessedMessagesFilter
 
 from .tasks import process_private_anniversary, process_onetime_event, process_public_anniversary,\
-                    process_reminder_event
+                    process_reminder_event, _send_sms, _send_email
 
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -453,6 +453,17 @@ def failed_email_messages_view(request):
 
         return render(request, 'messaging/failed/email_messages_failed.html', params)
     
+def failed_email_message_retry(request, pk):
+    
+    if request.method == "GET":
+        f_email_m = FailedEmailMessage.objects.get(pk=pk, owned_by = request.user.kituser)
+        f_email_m.delete()
+        
+        # resend the email
+        _send_email(f_email_m.sms_pickled_data[0], f_email_m.sms_pickled_data[1], f_email_m.owned_by, None)
+        
+        return HttpResponseRedirect(reverse('messaging:email-messages-failed'))
+    
 def failed_kit_messages_view(request):
     
     if request.method == "GET":
@@ -482,6 +493,17 @@ def failed_sms_messages_view(request):
         params["herpath"] = (request.path.split('/'))[3]
 
         return render(request, 'messaging/failed/sms_messages_failed.html', params)
+
+def failed_sms_message_retry(request, pk):
+    
+    if request.method == "GET":
+        f_sms_m = FailedSMSMessage.objects.get(pk=pk, owned_by = request.user.kituser)
+        f_sms_m.delete()
+        
+        # resend the sms
+        _send_sms(f_sms_m.sms_pickled_data, f_sms_m.owned_by, None)
+        
+        return HttpResponseRedirect(reverse('messaging:sms-messages-failed'))
     
     
 def failed_messaging_retry(request, pk):
@@ -513,11 +535,21 @@ def failed_messaging_retry(request, pk):
             
             
         elif request.POST.get('message_category') == 'running_msg':
-            pass
+            f_runng_msg = FailedKITMessage.objects.get(pk=pk, owned_by = request.user.kituser)
+            
+            process_reminder_event(list(map(lambda x : x.refresh_from_db(), f_runng_msg.message_data)))
+        
+        
         elif request.POST.get('message_category') == 'private_anniv_msg':
-            pass
+            f_priv_annv = FailedKITMessage.objects.get(pk=pk, owned_by = request.user.kituser)
+            
+            process_private_anniversary(list(map(lambda x : x.refresh_from_db(), f_priv_annv.message_data)))
+            
+        
         elif request.POST.get('message_category') == 'public_anniv_msg':
-            pass
+            f_publ_annv = FailedKITMessage.objects.get(pk=pk, owned_by = request.user.kituser)
+            
+            process_public_anniversary(list(map(lambda x : x.refresh_from_db(), f_publ_annv.message_data)))
         
         return HttpResponseRedirect(reverse('messaging:kit-messages-failed'))
         
