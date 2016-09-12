@@ -35,17 +35,18 @@ class SMSDeliveryReport(models.Model):
     batch_id = models.UUIDField(db_index=True, editable=False, help_text="A.K.A Process ID or Bulk ID")
     origin = models.CharField(max_length=1, choices=MSG_ORIGIN)
     
-    to_phone = PhoneNumberField(blank=False)
+    sms_sender = models.CharField(max_length=11, blank=True, db_index=True) #report will be generated on this field
+    to_phone = PhoneNumberField(blank=False, db_index=True) #report will be generated on this field
     sms_message = JSONField()
     sms_gateway = JSONField()
     
     msg_status = models.CharField(max_length=20, choices=STATUS)
     msg_error = models.CharField(max_length=20, choices=ERROR)
     
-    kituser_id = models.IntegerField(db_index=True)
+    kituser_id = models.IntegerField(db_index=True) #report will be generated on this field
     
     last_modified = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True) #report will be generated on this field
     
     def __str__(self):
         return "SMS to {}".format(self.to_phone.as_international)
