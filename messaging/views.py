@@ -14,6 +14,11 @@ from .forms import StandardMessagingForm, AdvancedMessagingForm, ReminderMessagi
 from .tables import DraftStandardMessagesTable, DraftAdvancedMessagesTable, ProcessedMessagesTable,\
                     QueuedMessagesTable, DraftReminderMessagesTable, RunningMessagesTable,\
                     FailedEmailMessagesTable, FailedSMSMessagesTable, FailedKITMessagesTable
+
+### Admin Tables #####
+from .tables import FailedSMSMessagesTable_Admin, FailedEmailMessagesTable_Admin
+
+
 from .filters import ProcessedMessagesFilter
 
 from .tasks import process_private_anniversary, process_onetime_event, process_public_anniversary,\
@@ -441,10 +446,12 @@ def message_running_status_view(request):
 def failed_email_messages_view(request):
     
     if request.method == "GET":
+
+        if request.user.kituser.is_admin:
+            fem_table = FailedEmailMessagesTable_Admin(request.user.kituser.get_failed_email_messages())
+        else:
+            fem_table = FailedEmailMessagesTable(request.user.kituser.get_failed_email_messages())
         
-        #qs = request.user.kituser.get_failed_email_messages()
-        qs = FailedEmailMessage.objects.filter(owned_by = request.user.kituser)
-        fem_table = FailedEmailMessagesTable(qs)
         RequestConfig(request, paginate={'per_page': 25}).configure(fem_table)
         params = {}
         params["title"] = "Failed Email Messages"
@@ -483,9 +490,11 @@ def failed_sms_messages_view(request):
     
     if request.method == "GET":
         
-        #qs = request.user.kituser.get_failed_email_messages()
-        qs = FailedSMSMessage.objects.filter(owned_by = request.user.kituser)
-        fem_table = FailedSMSMessagesTable(qs)
+        if request.user.kituser.is_admin:
+            fem_table = FailedSMSMessagesTable_Admin(request.user.kituser.get_failed_sms_messages())
+        else:
+            fem_table = FailedSMSMessagesTable(request.user.kituser.get_failed_sms_messages())
+        
         RequestConfig(request, paginate={'per_page': 25}).configure(fem_table)
         params = {}
         params["title"] = "Failed SMS"
