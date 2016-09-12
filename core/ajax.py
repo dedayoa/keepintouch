@@ -466,7 +466,7 @@ def get_custom_data_ajax(request, pk):
     
     if request.method == "GET":
         result_dict = {}
-        custd = CustomData.objects.get(pk=pk)
+        custd = request.user.kituser.get_custom_data().get(pk=pk)
         result_dict["data_table"] = custd.data_table
         result_dict["headers"] = custd.headers
         result_dict["identity_field"] = custd.system_id_field
