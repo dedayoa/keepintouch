@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 from django.core.validators import validate_email
 
 #from gomez.models import KITBilling
-from .models import FailedEmailMessage, FailedSMSMessage
+from .models import FailedEmailMessage, FailedSMSMessage, FailedSMSSystemBacklog
 from core.models import KITUser, SMTPSetting, KITUBalance
 from core.exceptions import *
 
@@ -289,9 +289,17 @@ class SMSHelper():
                                             )
         except SMSGatewayError as e:
             # admin to handle SMSGW error...log this, alert...do something!!
-            return "SMSGWERR: %s"%e.message
+            FailedSMSSystemBacklog.objects.create(
+                        sms_pickled_data = self.message,
+                        reason = e.message,
+                        owned_by = self.kuser                         
+                        )
         except MissingSMSRateError as e:
-            return e.message
+            FailedSMSSystemBacklog.objects.create(
+                        sms_pickled_data = self.message,
+                        reason = e.message,
+                        owned_by = self.kuser                         
+                        )
         else:
             # sms successfully sent...no exception. Deduct balance
             print(result[0], result[1])
