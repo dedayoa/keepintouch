@@ -174,6 +174,8 @@ class ProcessedMessages(models.Model):
     created_by = models.ForeignKey('core.KITUser', models.PROTECT)
     processed_at = models.DateTimeField(auto_now_add=True)
     
+    #status = models.CharField(max_length=30)
+    
     def __str__(self):
         return "{} by {}".format(self.message_type, self.created_by)
     
@@ -413,4 +415,21 @@ class FailedEmailMessage(models.Model):
     
     def get_absolute_url(self):
         return reverse('messaging:failed-email-message-retry',args=[self.pk])
+
+
+########### System Model #################   
+    
+class FailedSMSSystemBacklog(models.Model):
+    sms_pickled_data = PickledObjectField()
+    reason = models.CharField(max_length=255)    
+    owned_by = models.ForeignKey('core.KITUser', on_delete=models.SET_NULL, null=True)
+    
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return "SMS Failed at {}".format(self.created)
+    
+    def get_absolute_url(self):
+        return None
     
