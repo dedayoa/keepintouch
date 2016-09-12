@@ -249,6 +249,14 @@ class KITUser(models.Model):
             return failedemailmessage.objects.filter(owned_by__parent = self.pk)
         else:
             return failedemailmessage.objects.filter(owned_by = self.pk).order_by('-created')
+        
+        
+    def get_failed_sms_messages(self):
+        failedsmsmessage = apps.get_model('messaging', 'FailedSMSMessage')
+        if self.is_admin:
+            return failedsmsmessage.objects.filter(owned_by__parent = self.pk)
+        else:
+            return failedsmsmessage.objects.filter(owned_by = self.pk).order_by('-created')
     #####Admin Things#######
     
     def get_kituser(self):
