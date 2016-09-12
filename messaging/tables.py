@@ -175,9 +175,12 @@ class FailedKITMessagesTable(tables.Table):
     
     class Meta:
         model = FailedKITMessage
-        fields = ('message_category','reason','created','retries',)
+        fields = ('message_category','reason','created','retries')
+        empty_text = "There are no Failed Messages to display"
         
 class FailedSMSMessagesTable(tables.Table):
+    
+    
     record_action = tables.LinkColumn(verbose_name="", \
                                        text=mark_safe('<span class="button small">Retry</span>'), \
                                        args=[A('pk')])
@@ -198,6 +201,29 @@ class FailedSMSMessagesTable(tables.Table):
     class Meta:
         model = FailedSMSMessage
         fields = ('sms_pickled_data','reason','retries','created','record_action')
+        empty_text = "There are no Failed SMS Messages to display"
+        
+class FailedSMSMessagesTable_Admin(tables.Table):
+    
+    sms_pickled_data = tables.Column(verbose_name='Message')
+    retries = tables.Column(verbose_name="Retries")
+    reason = tables.Column(verbose_name="Reason")
+    owned_by = tables.Column(verbose_name="Owner")
+
+    def render_sms_pickled_data(self, record):
+        return format_html('<span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false"'+ 
+                            'tabindex=1 title="{}">SMS</span> from {} to {}',record.sms_pickled_data[1],\
+                            record.sms_pickled_data[0], record.sms_pickled_data[2]
+                           )
+        
+
+    created = tables.DateTimeColumn(verbose_name='Failed')
+    
+    class Meta:
+        model = FailedSMSMessage
+        fields = ('sms_pickled_data','reason','retries','owned_by','created')
+        empty_text = "There are no Failed SMS Messages to display"
+    
         
         
 class FailedEmailMessagesTable(tables.Table):
@@ -220,7 +246,31 @@ class FailedEmailMessagesTable(tables.Table):
         
     class Meta:
         model = FailedEmailMessage
-        fields = ('email_pickled_data','reason','retries','created')
+        fields = ('email_pickled_data','reason','retries','created','record_action')
+        
+        
+class FailedEmailMessagesTable_Admin(tables.Table):
+
+    record_action = tables.LinkColumn(verbose_name="", \
+                                       text=mark_safe('<span class="button small">Retry</span>'), \
+                                       args=[A('pk')])
+        
+    email_pickled_data = tables.Column(verbose_name='Message')
+    retries = tables.Column(verbose_name="Retries")
+    reason = tables.Column(verbose_name="Reason")
+    
+    created = tables.DateTimeColumn(verbose_name='Failed')
+    owned_by = tables.Column(verbose_name="Owner")
+    
+    def render_email_pickled_data(self, record):
+        return format_html('<span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false"'+ 
+                            'tabindex=1 title="{}">Email</span> from {} to {}',record.email_pickled_data[0][1],\
+                            record.email_pickled_data[1], record.sms_pickled_data[0][2]
+                           )
+        
+    class Meta:
+        model = FailedEmailMessage
+        fields = ('email_pickled_data','reason','retries','owned_by','created')
         
         
       
