@@ -231,6 +231,8 @@ def process_reminder_event(running_messages=None):
         all_running_messages = running_messages
     else:
         all_running_messages = RunningMessage.objects.filter(completed=False)
+        
+    # create processedmessage
     
     for running_message in all_running_messages:        
         messages_due_today = running_message.get_events_due_within_the_next_day()
@@ -284,12 +286,12 @@ def process_reminder_event(running_messages=None):
                         owned_by = created_by
                                                 )
                 
-            # create entry in processed message
-            ProcessedMessages.objects.create(
-                message_type = 'REMINDER',
-                message = message,
-                created_by = created_by
-            )  
+        # create entry in processed message
+        ProcessedMessages.objects.create(
+            message_type = 'REMINDER',
+            message = message,
+            created_by = created_by
+        )  
                 
 
         
