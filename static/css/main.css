@@ -1,3 +1,24 @@
+body{
+	background-color: #c4d9e6;
+}
+
+
+div.kitapp-content > div.row{
+	box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
+    padding: 1rem;
+    background-color: #6078a2;
+}
+
+td.phone span{
+	font-size: 80%;
+    padding: 0.2rem;
+    background-color: #ddd;
+    -webkit-box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.84);
+	-moz-box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.84);
+	box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.84);
+	border-radius: 5%;
+}
+
 
 form.smtp-setting #div_id_cou_group{
 	margin-bottom: 1rem;
@@ -29,6 +50,10 @@ div#bug-report{
 
 div.off-canvas-wrapper{
 	margin-bottom: 50px;
+}
+
+div.off-canvas-content{
+	background-color: #c4d9e6;
 }
 
 
@@ -75,7 +100,7 @@ table.events-set-list-table select{
 .new-template-settings-fieldset, .new-message-settings-fieldset {
 	padding: 1rem;
 	margin: 1rem 0;
-	background-color: rgba(255, 153, 0, 0.47);
+	background-color: rgba(255, 153, 0, 0.87);
 }
 
 .new-template-settings-fieldset legend,
@@ -145,14 +170,14 @@ ul.kitapp-lsm li a:hover{
 }
 
 small.error{
-	display: block;
-    background-color: rgba(255,0,0,0.45);
+    display: block;
+    background-color: #ff0000;
     padding: 5px;
     margin-top: -1rem;
     margin-bottom: 1rem;
-    /* color: orange; */
-    font-weight: bold;    
-	border-top: 2px solid red;
+    color: #f5f5f5;
+    font-weight: bold;
+    border-top: 2px solid #ff7d3d;
 }
 
 .input-highlight-error{
