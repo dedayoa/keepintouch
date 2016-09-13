@@ -1,12 +1,24 @@
 body{
-	background-color: #c4d9e6;
+	background-color: #8db5d2;
 }
 
+form#reminder-message-form fieldset{
+	background-color: #fff;
+}
+
+div.footer{
+	margin-top: 2rem;
+}
+
+
+body.dashboard div.kitapp-content row{
+	background-color: #fff;
+}
 
 div.kitapp-content > div.row{
 	box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
     padding: 1rem;
-    background-color: #6078a2;
+    background-color: #c4e3ed;
 }
 
 td.phone span{
@@ -53,7 +65,7 @@ div.off-canvas-wrapper{
 }
 
 div.off-canvas-content{
-	background-color: #c4d9e6;
+	background-color: #8db5d2;
 }
 
 
