@@ -52,6 +52,7 @@ from gomez.models import KITBilling
 from stronghold.decorators import public
 from django.views.decorators.csrf import csrf_exempt
 from core.models import KITUBalance
+from django.db.utils import IntegrityError
 
 
 # Create your views here.
@@ -538,23 +539,26 @@ class UserCreateView(PermissionRequiredMixin, View):
         self.params["form_2"] = kituform = self.form_2(request.POST or None, prefix="kituform", instance=None)
         
         if userform.is_valid() and kituform.is_valid():
+            try:
+                with transaction.atomic():
+                    f1 = userform.save()
+                    
+                    # Assign this user to the standard kituser group
+                    group = Group.objects.get(id=settings.STANDARD_KITUSER_GROUP_PERMS_ID)
+                    f1.groups.add(group)
+                    
+                    f2 = kituform.save(commit=False)
+                    f2.user = f1
+                    f2.parent= request.user.kituser
+                    f2.save()
             
-            with transaction.atomic():
-                f1 = userform.save()
-                
-                # Assign this user to the standard kituser group
-                group = Group.objects.get(id=settings.STANDARD_KITUSER_GROUP_PERMS_ID)
-                f1.groups.add(group)
-                
-                f2 = kituform.save(commit=False)
-                f2.user = f1
-                f2.parent= request.user.kituser
-                f2.save()
-        
-        
             
                 
-            return HttpResponseRedirect(reverse('core:kituser-detail', args=[f2.pk]))
+                    
+                return HttpResponseRedirect(reverse('core:kituser-detail', args=[f2.pk]))
+            except IntegrityError:
+                flash_messages.add_message(request, flash_messages.INFO, "Username already exists" )
+                return render(request, self.template_name, self.params)
         
         return render(request, self.template_name, self.params)       
         #transaction.on_commit(
