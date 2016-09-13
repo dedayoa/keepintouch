@@ -702,7 +702,7 @@ class SMTPUpdateView(UpdateView):
         form = super(SMTPUpdateView, self).get_form(form_class)
         form.fields["cou_group"].queryset = self.request.user.kituser.get_user_groups() 
         return form
-        
+       
     
     
     def get_queryset(self, **kwargs):
@@ -719,6 +719,13 @@ class SMTPCreateView(CreateView):
         form.instance.kit_admin = self.request.user.kituser
 
         return super(SMTPCreateView, self).form_valid(form)
+    
+    def get_form(self, form_class=form_class):
+        form = super(SMTPCreateView, self).get_form(form_class)
+        form.fields['cou_group'].queryset = self.request.user.kituser.get_user_groups()
+        
+        return form
+        
     
 class SMTPDeleteView(DeleteView):
     
