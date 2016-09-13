@@ -393,7 +393,7 @@ class SMTPSetting(models.Model):
     active = models.BooleanField()
     
     kit_admin = models.ForeignKey('core.KITUser', models.CASCADE, blank=False, limit_choices_to={'is_admin':True})
-    cou_group = models.ManyToManyField(CoUserGroup, verbose_name="Group Availability")
+    cou_group = models.ManyToManyField(CoUserGroup, verbose_name="Group Availability", blank=True)
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
