@@ -23,6 +23,8 @@ from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, Exist
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable,\
                     SMSTransferHistoryTable, UploadedContactFileHistoryTable, CustomDataStoreTable
+                    
+from .tables import ContactTable_Admin
 from django.views.generic.edit import UpdateView, DeleteView, CreateView,\
     FormMixin
     
@@ -146,8 +148,10 @@ def contacts(request):
         #q_grps = user_q.group.all() #groups the user belongs to
         #user_s_group = CoUserGroup.objects.filter()
         #Contact.objects.filter()
-        
-        contactstable = ContactTable(user_q.get_contacts())
+        if request.user.kituser.is_admin:
+            contactstable = ContactTable_Admin(user_q.get_contacts())
+        else:
+            contactstable = ContactTable(user_q.get_contacts())
         RequestConfig(request, paginate={'per_page': 25}).configure(contactstable)
         params = {}
         params["title"] = "Contacts"
@@ -899,6 +903,11 @@ class ContactGroupCreateView(CreateView):
         kwargs.update({'kituser': self.request.user.kituser})
         return kwargs
     
+    def get_context_data(self, **kwargs):
+        params = super(ContactGroupCreateView, self).get_context_data(**kwargs)
+        params["title"] = "New Contact List"
+        return params
+    
     
 class SMSBalanceTransferView(PermissionRequiredMixin, TemplateView):
     
@@ -919,6 +928,7 @@ class SMSBalanceTransferView(PermissionRequiredMixin, TemplateView):
         
         self.params['transfer_form'] = transfer_form
         self.params['table'] = smshtable
+        self.params["title"] = "SMS Transfer & History"
         
         return render(request, self.template_name, self.params)
     
@@ -933,6 +943,7 @@ class AccountManagementView(TemplateView):
         self.params["sms_balance"] = request.user.kituser.kitubalance.sms_balance
         self.params["billing_info"] = request.user.kituser.kitbilling
         self.params["syssetid"] = request.user.kituser.kitsystem.id
+        self.params["title"] = "Manage Account"
         return render(request, self.template_name, self.params)
     
     
@@ -943,6 +954,7 @@ class ContactImportView(TemplateView):
     
     def get(self, request):
         import_form = ContactImportForm()
+        self.params["title"] = "Import Contacts"
         self.params['import_form'] = import_form
         self.params['file_max_size'] = settings.MAX_UPLOAD_FILE_SIZE
         self.params['allowed_extensions'] = (mimetypes.guess_extension(alwdt) for alwdt in settings.ALLOWED_CONTENT_TYPES)
