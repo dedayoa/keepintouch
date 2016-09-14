@@ -187,8 +187,8 @@ def dry_run_file(file, fext, kuserid):
         else:
             dataset = tablib.Dataset().load(open(file,'rb').read())
             
-            # convert to csv to get rid of all the strange binaries
-            dataset = tablib.Dataset().load(dataset.csv)
+        # convert to csv to get rid of all the strange binaries
+        dataset = tablib.Dataset().load(dataset.csv)
         #check that headers 
         fhdr = ['salutation','first_name','last_name','phone','email']
         if dataset.headers is None:
@@ -264,8 +264,9 @@ def wet_run_file(file, fext, kuserid):
         else:
             with open(file,'rb') as f:
                 dataset = tablib.Dataset().load(f.read(), format="xls")
-            # convert to csv to get rid of all the strange binaries
-            dataset = tablib.Dataset().load(dataset.csv)
+        
+        # convert to csv to get rid of all the strange stuffs
+        dataset = tablib.Dataset().load(dataset.csv)
             
         dataset_ut = dataset.dict
         dataset.append_col(lambda row: kuserid,'kit_user')
