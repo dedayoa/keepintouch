@@ -29,6 +29,24 @@ class ContactTable(tables.Table):
     first_name = tables.LinkColumn(verbose_name="First Name", text=lambda t: t.first_name, args=[A('pk')])
     last_name = tables.Column(verbose_name="Last Name")
     active = tables.BooleanColumn(verbose_name="Active?")
+    email = tables.EmailColumn(verbose_name="Email")
+    
+    def render_phone(self,record):
+        return mark_safe("<span>{}</span>".format(record.phone))
+
+    class Meta:
+        model = Contact
+        fields = ('select','first_name','last_name','email','phone','active')
+        attrs = {'style': 'width: 100%'}
+        
+        
+class ContactTable_Admin(tables.Table):
+    
+    select = tables.CheckBoxColumn(accessor='pk')
+    phone = tables.Column(verbose_name='Number')
+    first_name = tables.LinkColumn(verbose_name="First Name", text=lambda t: t.first_name, args=[A('pk')])
+    last_name = tables.Column(verbose_name="Last Name")
+    active = tables.BooleanColumn(verbose_name="Active?")
     kit_user = tables.Column(verbose_name="Created By")
     
     def render_phone(self,record):
@@ -37,6 +55,7 @@ class ContactTable(tables.Table):
     class Meta:
         model = Contact
         fields = ('select','first_name','last_name','kit_user','phone','active')
+        attrs = {'style': 'width: 100%'}
         
         
 class PrivateEventTable(tables.Table):
