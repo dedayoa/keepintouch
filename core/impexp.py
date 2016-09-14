@@ -8,6 +8,9 @@ from .models import Contact
 from core.models import KITUser
 from import_export.widgets import ForeignKeyWidget
 
+import phonenumbers
+from phonenumbers.phonenumberutil import NumberParseException
+
 
 class ContactResource(resources.ModelResource):
     #first_name = fields.Field(column_name='firstname')
@@ -22,6 +25,20 @@ class ContactResource(resources.ModelResource):
     class Meta:
         model = Contact
         skip_unchanged = True
-        report_skipped = False
+        report_skipped = True
         import_id_fields = ('email','phone','kit_user')
         exclude = ('slug','last_modified', 'created','active')
+    
+    def for_delete(self, row, instance):
+        
+        if not (self.fields['phone'].clean(row) or self.fields['email'].clean(row)):
+            return True
+        if not self.fields['first_name'].clean(row):
+            return True
+        try:
+            phonenumbers.parse(self.fields['phone'].clean(row), 'NG')
+        except NumberParseException:
+            return True
+        
+    
+        
