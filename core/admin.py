@@ -31,6 +31,8 @@ class KITActivationCodeAdmin(admin.ModelAdmin):
     
 class KITUBalanceAdmin(admin.ModelAdmin):
     
+    list_display = ('kit_user','sms_balance','free_sms_balance')
+    
     def get_queryset(self, request):
         qs = super(KITUBalanceAdmin, self).get_queryset(request)
         
