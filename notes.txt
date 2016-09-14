@@ -20,3 +20,7 @@ OrderedDict([('our_food', 'Egg'), ('contact_id', 'G0GYDVN6K')])
 
 
 {"GEP2LM9RD":{"our_food":"Rice}}
+
+
+
+newrelic-admin run-program 
