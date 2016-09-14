@@ -11,6 +11,14 @@ div.footer{
 }
 
 
+li.previous a, li.next a{
+	background-color: #ff7f50;
+}
+
+li.previous a:hover, li.next a:hover{
+	background-color: #ff8c00;
+}
+
 body.dashboard div.kitapp-content row{
 	background-color: #fff;
 }
