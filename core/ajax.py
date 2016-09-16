@@ -61,8 +61,8 @@ def get_qpc_stats(request):
         
         #q_user = KITUser.objects.get(user=request.user)
         result_dict = {}
-        result_dict['qmc'] = request.user.kituser.get_queued_messages().count()
-        result_dict['pmc'] = request.user.kituser.get_processed_messages().count()
+        result_dict['qmc'] = request.user.kituser.get_queued_messages().cache(timeout=120).count()
+        result_dict['pmc'] = request.user.kituser.get_processed_messages().cache(timeout=120).count()
         result_dict['total_sms_balance'] = request.user.kituser.kitubalance.sms_balance
         result_dict['free_sms_balance'] = request.user.kituser.kitubalance.free_sms_balance
         
