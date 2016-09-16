@@ -27,7 +27,8 @@ from messaging.sms_counter import SMSCounter
 from gomez.models import KITBilling
 import smtplib
 
-
+from .smsgw.smslive247 import SMSLive247Helper
+from .smsgw.infobip import InfobipSMS
 
 #@cached_as(KITBilling, KITUser, timeout=4*3600)        
 def is_company_wide(kuser):
@@ -157,7 +158,7 @@ class SMTPHelper():
 
 class SMSHelper():
     
-    def __init__(self, message, kuser, msg_type):
+    def __init__(self, message, kuser, msg_type, batch_id=None):
         
         self.message = message
         self.sender = self.message[0]
@@ -165,6 +166,7 @@ class SMSHelper():
         self.sms_message = self.message[1]
         self.kuser = kuser
         self.msg_type = msg_type
+        self.batch_id = batch_id #this is the id for messages with multi recipients, processed in batches
         
         self.error_code = ""
         self.success_message_id = ""
@@ -245,7 +247,7 @@ class SMSHelper():
         elif balance_acct_debited == 'sb':
             KITUBalance.objects.filter(kit_user=self.kuser).update(sms_balance=amount)
     
-    
+    '''
     def _sms_success_logging_and_all(self, gw_id):        
         # do all logging        
         temp_log_to_db(
@@ -264,7 +266,7 @@ class SMSHelper():
             message_err_code = self.error_code,
             owner = self.kuser
         )
-        
+    '''
     
     
         
@@ -274,10 +276,12 @@ class SMSHelper():
             
             result = self._check_sms_can_be_sent()
             # SMSLive247
-            gw_reply = SMSLive247Helper().send_sms([self.sender, self.sms_message, self.destination])
-                
-            self.success_message_id = (gw_reply.split(':')[1]).strip()
-            self._sms_success_logging_and_all("SMSLive247")
+            #gw_reply = SMSLive247Helper().send_sms([self.sender, self.sms_message, self.destination])
+            
+            
+            #send sms
+            InfobipSMS().send_single_advanced_sms([self.sender, self.sms_message, self.destination], \
+                                                  self.kuser, batchid=self.batch_id)
 
             
         except NotEnoughBalanceError as e:
@@ -285,20 +289,23 @@ class SMSHelper():
             FailedSMSMessage.objects.create(
                         sms_pickled_data = self.message,
                         reason = e.message,
-                        owned_by = self.kuser
+                        owned_by = self.kuser,
+                        batch_id = self.batch_id
                                             )
         except SMSGatewayError as e:
             # admin to handle SMSGW error...log this, alert...do something!!
             FailedSMSSystemBacklog.objects.create(
                         sms_pickled_data = self.message,
                         reason = e.message,
-                        owned_by = self.kuser                         
+                        owned_by = self.kuser,
+                        batch_id = self.batch_id                       
                         )
         except MissingSMSRateError as e:
             FailedSMSSystemBacklog.objects.create(
                         sms_pickled_data = self.message,
                         reason = e.message,
-                        owned_by = self.kuser                         
+                        owned_by = self.kuser,
+                        batch_id = self.batch_id                        
                         )
         else:
             # sms successfully sent...no exception. Deduct balance
@@ -307,53 +314,7 @@ class SMSHelper():
         
         
 
-class SMSLive247Helper():
-    
-    def __init__(self):
-        
-        self.owneremail=''
-        self.subacct = ''
-        self.subacctpwd = ''
-        self.sessid = 'aa1313a3-ac65-4aec-96a1-9e59a03ed134'
-        #http://www.smslive247.com/http/index.aspx?cmd=login&owneremail=xxx&subacct=xxx&subacctpwd=xxx
-    
-    def sms_login(self):
-        pass
-    
-    def send_sms(self, message_payload):
-        payload = {'cmd': 'sendmsg',
-                   'sessionid': self.sessid,
-                   'message' : message_payload[1],
-                   'sender' : message_payload[0],
-                   'sendto' : message_payload[2][1:], #remove leading +
-                   'msgtype' : 0
-                   }
-        r = requests.post("http://www.smslive247.com/http/index.aspx", data=payload)
-        
-        if (r.text).split(':')[0] == 'OK':
-        # was using is and it caused all sorts of problems. Identity is not equality
-        # http://stackoverflow.com/questions/1504717/why-does-comparing-strings-in-python-using-either-or-is-sometimes-produce
-            return r.text
-        else:                    
-            # raise ALERT!!! log this for admin
-            raise SMSGatewayError(r.text) #e.g ERR: 404: Insufficient credit to complete request
-        
-    
-    def get_sms_msg_status(self, messageid):
-        
-        try:
-            payload = {'cmd': 'querymsgstatus',
-                       'sessionid': self.sessid,
-                       'messageid' : messageid  
-                       }
-            r = requests.get("http://www.smslive247.com/http/index.aspx", data=payload)
-            return r.text
-        except:
-            pass
 
-
-
-    
 
 class OKToSend(object):
     # used in place of the initial ok_to_send to cater for Free Users
