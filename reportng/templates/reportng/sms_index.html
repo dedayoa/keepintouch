@@ -3,8 +3,6 @@
 {% load crispy_forms_tags %}
 {% load nvd3_tags %}
 
-{% load staticfiles %}
-
 {% block head_base_links %}
 	{{ block.super }}
 	<link href="{% static 'css/nv.d3.css' %}" rel="stylesheet">
@@ -33,7 +31,7 @@
 {% block foot_base_js %}
 	{{ block.super }}
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js"></script>
-	<script type="text/javascript" src="http://nvd3.org/assets/js/nv.d3.js"></script>
+	<script type="text/javascript" src="{% static 'js/nv.d3-1.1.11b.js' %}"></script>
 	{% load_chart data.charttype data.chartdata data.chartcontainer data.extra %}
 	<script>		
 		$(".sms-delivery-detail").click(function(e){
