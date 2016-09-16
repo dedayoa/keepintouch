@@ -15,14 +15,15 @@ def process_deliveryreport_transaction():
     
     for u_rt in all_unprocessed_rt:
         
-        message_id = u_rt.body['results']['messageId']
-        message_status = u_rt.body['results']['status']['groupId']
-        error_status = u_rt.body['results']['error']['groupId']
-        
-        SMSDeliveryReport.objects.filter(pk=message_id).update(msg_status=message_status,
-                                                               msg_error=error_status
-                                                               )
-        
+        for result in u_rt.body['results']:
+            message_id = result['messageId']
+            message_status = result['status']['groupId']
+            error_status = result['error']['groupId']
+            
+            SMSDeliveryReport.objects.filter(pk=message_id).update(msg_status=message_status,
+                                                                   msg_error=error_status
+                                                                   )
+            
         # now update the status of the SMS delivery report transaction.
         u_rt.status = '1'
         u_rt.save()
