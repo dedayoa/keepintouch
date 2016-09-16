@@ -6,8 +6,12 @@ from .models import SMSDeliveryReport, SMSDeliveryReportHistory, SMSDeliveryRepo
 
 class SMSDeliveryReportHistoryAdmin(admin.ModelAdmin):
     
-    list_display = ('id','created') 
+    list_display = ('id','created')
+    
+class SMSDeliveryReportTransactionAdmin(admin.ModelAdmin):
+    
+    list_display = ('body','date_received','status')
 
 admin.site.register(SMSDeliveryReport)
 admin.site.register(SMSDeliveryReportHistory, SMSDeliveryReportHistoryAdmin)
-admin.site.register(SMSDeliveryReportTransaction)
+admin.site.register(SMSDeliveryReportTransaction, SMSDeliveryReportTransactionAdmin)
