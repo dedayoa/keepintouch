@@ -31,6 +31,7 @@ django-import-export==0.4.5
 django-ipware==1.1.5
 django-jsonify==0.3.0
 django-model-utils==2.5
+django-nvd3==0.9.7
 django-password-reset==0.9
 django-phonenumber-field==1.1.0
 django-picklefield==0.3.2
@@ -75,6 +76,8 @@ psycopg2==2.6.2
 pyasn1==0.1.9
 pycparser==2.14
 python-dateutil==2.5.3
+python-nvd3==0.14.2
+python-slugify==1.1.4
 pytz==2016.4
 redis==2.10.5
 requests==2.10.0
