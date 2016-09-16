@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import SMSDeliveryReport, SMSDeliveryReportHistory
+from .models import SMSDeliveryReport, SMSDeliveryReportHistory, SMSDeliveryReportTransaction
 
 class SMSDeliveryReportHistoryAdmin(admin.ModelAdmin):
     
@@ -10,3 +10,4 @@ class SMSDeliveryReportHistoryAdmin(admin.ModelAdmin):
 
 admin.site.register(SMSDeliveryReport)
 admin.site.register(SMSDeliveryReportHistory, SMSDeliveryReportHistoryAdmin)
+admin.site.register(SMSDeliveryReportTransaction)
