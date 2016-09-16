@@ -440,7 +440,7 @@ class Contact(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.first_name
+        return "{} {}".format(self.first_name, self.last_name)
     
     @property
     def get_usergroup_contact_managed_by(self):
