@@ -19,10 +19,6 @@ li.previous a:hover, li.next a:hover{
 	background-color: #ff8c00;
 }
 
-body.dashboard div.kitapp-content row{
-	background-color: #fff;
-}
-
 div.kitapp-content > div.row{
 	box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
     padding: 1rem;
@@ -37,6 +33,11 @@ td.phone span{
 	-moz-box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.84);
 	box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.84);
 	border-radius: 5%;
+}
+
+body.sms-report-page .kitapp-content .row,
+body.dashboard div.kitapp-content .row{
+	background-color: #fff;
 }
 
 
