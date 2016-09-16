@@ -3,6 +3,8 @@
 {% load crispy_forms_tags %}
 {% load nvd3_tags %}
 
+{% load staticfiles %}
+
 {% block head_base_links %}
 	{{ block.super }}
 	<link href="{% static 'css/nv.d3.css' %}" rel="stylesheet">
