@@ -85,5 +85,5 @@ class SMSDeliveryReportTransaction(models.Model):
     status = models.CharField(max_length=20, choices=STATUS, default='0')
 
     def __str__(self):
-        return '{0}'.format(self.date_event_generated)    
+        return '{0}'.format(self.date_received)
     
