@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^account/password/', include('password_reset.urls')),
     url(r'^', include('core.urls', namespace='core', app_name='core')),
     url(r'^messaging/', include('messaging.urls', namespace='messaging', app_name='messaging')),
+    url(r'^reports/', include('reportng.urls', namespace='reports', app_name='reports')),
     url(r'^', include('gomez.urls', namespace='gomez', app_name='gomez')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)#+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
