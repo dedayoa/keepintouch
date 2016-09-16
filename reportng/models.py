@@ -10,29 +10,29 @@ import uuid
 class SMSDeliveryReport(models.Model):
     
     STATUS = (
-        (0, 'ACCEPTED'),
-        (1, 'PENDING'),
-        (2, 'UNDELIVERABLE'),
-        (3, 'DELIVERED'),
-        (4, 'EXPIRED'),
-        (5, 'REJECTED')
+        ('0', 'ACCEPTED'),
+        ('1', 'PENDING'),
+        ('2', 'UNDELIVERABLE'),
+        ('3', 'DELIVERED'),
+        ('4', 'EXPIRED'),
+        ('5', 'REJECTED')
               )
     
     ERROR = (
-        (0, 'OK'),
-        (1, 'HANDSET_ERROR'),
-        (2, 'USER_ERROR'),
-        (3, 'OPERATOR_ERROR')
+        ('0', 'OK'),
+        ('1', 'HANDSET_ERROR'),
+        ('2', 'USER_ERROR'),
+        ('3', 'OPERATOR_ERROR')
              )
 
     MSG_ORIGIN = (
-        (0, 'Transactional'),
-        (1, 'Bulk SMS'),
+        ('0', 'Transactional'),
+        ('1', 'Bulk SMS'),
                   )
 
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    batch_id = models.UUIDField(db_index=True, editable=False, help_text="A.K.A Process ID or Bulk ID")
+    batch_id = models.UUIDField(db_index=True, editable=False, null=True, help_text="A.K.A Process ID or Bulk ID")
     origin = models.CharField(max_length=1, choices=MSG_ORIGIN)
     
     sms_sender = models.CharField(max_length=11, blank=True, db_index=True) #report will be generated on this field
@@ -40,10 +40,11 @@ class SMSDeliveryReport(models.Model):
     sms_message = JSONField()
     sms_gateway = JSONField()
     
-    msg_status = models.CharField(max_length=20, choices=STATUS)
-    msg_error = models.CharField(max_length=20, choices=ERROR)
+    msg_status = models.CharField(max_length=20, choices=STATUS, default='')
+    msg_error = models.CharField(max_length=20, choices=ERROR, default='')
     
     kituser_id = models.IntegerField(db_index=True) #report will be generated on this field
+    kitu_parent_id = models.IntegerField(db_index=True)
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True) #report will be generated on this field
@@ -65,5 +66,24 @@ class SMSDeliveryReportHistory(models.Model):
     def __str__(self):
         return str(self.id)
     
+
+
+class SMSDeliveryReportTransaction(models.Model):
+
+    STATUS = (
+        ('0', 'Unprocessed'),
+        ('1', 'Processed'),
+        ('2', 'Error'),
+    )
+
+    #date_generated = models.DateTimeField()
+    date_received = models.DateTimeField(auto_now_add=True)
     
+    body = JSONField()
+    request_meta = JSONField()
+    
+    status = models.CharField(max_length=20, choices=STATUS, default='0')
+
+    def __str__(self):
+        return '{0}'.format(self.date_event_generated)    
     
