@@ -41,8 +41,8 @@ def _send_email(email_message, smtp_profile, **kwargs):
     es.send_email(email_message, **kwargs)
 
 @django_rq.job('sms')
-def _send_sms(sms_message, kuser, msg_type):
-    es = SMSHelper(sms_message, kuser, msg_type)
+def _send_sms(sms_message, kuser, msg_type, batch_id=None):
+    es = SMSHelper(sms_message, kuser, msg_type, batch_id)
     es.send_my_sms()
 
 
@@ -73,7 +73,7 @@ def process_private_anniversary(private_events=None):
                     sender = _compose(peven.message.sms_sender, peven.contact)
                     _send_sms.delay([sender,sms_msg,peven.contact.phone.as_e164],\
                                             peven.contact.kit_user,
-                                            'private_anniv_msg'
+                                            'private_anniv_msg',
                                             )
     
                 peven.update(last_run=timezone.now().date())
@@ -128,7 +128,7 @@ def process_public_anniversary(public_events=None):
                         s_sender = _compose(publicevent.message.sms_sender, recipient_d)
                         _send_sms.delay([s_sender,s_msg,recipient_d.phone.as_e164],\
                                         publicevent.kit_user,
-                                        'public_anniv_msg'
+                                        'public_anniv_msg',
                                         )
             except IsNotActiveError as e:
                 FailedKITMessage.objects.create(
@@ -164,6 +164,14 @@ def process_onetime_event(queued_messages=None):
     for queued_message in due_queued_messages:
         recipients_qs = Contact.objects.filter(pk__in = queued_message.message["recipients"])
         
+        # create entry in processed message
+        sprm = ProcessedMessages.objects.create(
+            message_type = queued_message.message_type,
+            message = queued_message.message,
+            created_by = queued_message.created_by
+        )
+        
+        
         for recipient_d in recipients_qs:
             try:
                 ok_to_send = OKToSend(queued_message.created_by)
@@ -180,9 +188,10 @@ def process_onetime_event(queued_messages=None):
                     if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
                         s_msg = _compose(queued_message.message["sms_template"], recipient_d)
                         s_sender = _compose(queued_message.message["sms_sender_id"], recipient_d)
-                        _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
+                        _send_sms([s_sender, s_msg, recipient_d.phone.as_e164],\
                                          queued_message.created_by,
-                                         'one_time_msg'
+                                         'one_time_msg',
+                                         batch_id = sprm.id
                                           )
                         
             except IsNotActiveError as e:
@@ -207,12 +216,7 @@ def process_onetime_event(queued_messages=None):
                         owned_by = queued_message.created_by
                                                 )
         
-        # create entry in processed message
-        ProcessedMessages.objects.create(
-            message_type = queued_message.message_type,
-            message = queued_message.message,
-            created_by = queued_message.created_by  
-        )
+
         
         # delete queued message from queuedmessage table if it does not reccur
         if queued_message.recurring == False:
@@ -260,8 +264,8 @@ def process_reminder_event(running_messages=None):
                         s_msg = _compose(message["sms_template"], recipient_d)
                         s_sender = _compose(message["title"], recipient_d)
                         _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
-                                         created_by,
-                                         'reminder_msg'
+                                        created_by,
+                                        'reminder_msg',
                                           )
                         
             except IsNotActiveError as e:
@@ -285,13 +289,7 @@ def process_reminder_event(running_messages=None):
                         reason = e.message,
                         owned_by = created_by
                                                 )
-                
-        # create entry in processed message
-        ProcessedMessages.objects.create(
-            message_type = 'REMINDER',
-            message = message,
-            created_by = created_by
-        )  
+ 
                 
 
         
