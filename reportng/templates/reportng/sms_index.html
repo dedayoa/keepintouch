@@ -20,7 +20,9 @@
 	{% include_container data.chartcontainer '400' '100%' %}
 	<hr></hr>
 	<h4>Report</h4>
-	{% render_table table %}
+	<div class="table-scroll">
+		{% render_table table %}
+	</div>
 </div>
 <div class="reveal" id="sms-delivery-detail-modal" data-reveal>
   <h3>Detail</h3>
