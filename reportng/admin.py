@@ -4,5 +4,9 @@ from django.contrib import admin
 
 from .models import SMSDeliveryReport, SMSDeliveryReportHistory
 
+class SMSDeliveryReportHistoryAdmin(admin.ModelAdmin):
+    
+    list_display = ('id','created') 
+
 admin.site.register(SMSDeliveryReport)
-admin.site.register(SMSDeliveryReportHistory)
+admin.site.register(SMSDeliveryReportHistory, SMSDeliveryReportHistoryAdmin)
