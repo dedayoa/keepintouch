@@ -155,7 +155,7 @@
 		$( document ).ready(function() {
 			console.log('Ready');
 			{% if not is_saas %}setTimeout(get_system_stat, 1000);{% endif %}
-			setTimeout(get_qpc_stat, 1000);
+			setTimeout(get_qpc_stat, 100);
 		});
 	
 		$('.grid').masonry({
