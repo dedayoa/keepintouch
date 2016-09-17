@@ -38,6 +38,7 @@ class ContactTable(tables.Table):
         model = Contact
         fields = ('select','first_name','last_name','email','phone','active')
         attrs = {'style': 'width: 100%'}
+        empty_text = "Sorry, No Contact Found"
         
         
 class ContactTable_Admin(tables.Table):
