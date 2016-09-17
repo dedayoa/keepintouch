@@ -1,5 +1,8 @@
 {% extends "core/base_generic.html" %}
 {% load render_table from django_tables2 %}
+
+{% load crispy_forms_tags %}
+
 {% block head_base_links %}
 	{{ block.super }}
 {% endblock %}
@@ -7,11 +10,22 @@
 
 {% block content %}
 <div class="row">
-	<h3>Contacts</h3>
+	<h3>{{page_title}}</h3>
 	<div class="table-scroll">
 		{{ block.super }}
-		<a class="small button" href="{% url 'core:contact-new' %}">New Contact</a>
+		<div>
+			<div><a class="small button" href="{% url 'core:contact-new' %}">New Contact</a></span></div>
+		  	{% crispy contacts_search_form %}
+		</div>
 		{% render_table table %}
 	</div>
 </div>
+{% endblock %}
+{% block foot_base_js %}
+	{{ block.super }}
+	<script>
+		$('a.button.search').click(function(){
+			$('form#contact-search-form').submit();
+		})
+	</script>
 {% endblock %}
