@@ -28,7 +28,7 @@ def run_schedules():
         func='reportng.tasks.process_deliveryreport_transaction',                   # Function to be queued
         #args=[arg1, arg2],             # Arguments passed into function when executed
         #kwargs={'foo': 'bar'},         # Keyword arguments passed into function when executed
-        interval=60,              # Call every 1 minute
+        interval=120,              # Call every 2 minutes
         repeat=None                    # Repeat forever
     )
     
