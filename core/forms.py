@@ -97,6 +97,36 @@ class ContactForm(forms.ModelForm):
         }
 
 
+class ContactSearchForm(forms.Form):
+    
+    search_query = forms.CharField(max_length=50, label="", widget=forms.TextInput(attrs={
+                                                                            'placeholder':'Search',
+                                                                            'class':'input-group-field',
+                                                                            'type':'search',
+                                                                            'pattern': ".{3,}",
+                                                                            'required title': "3 characters minimum"
+                                                                                                }))
+    
+    def __init__(self, *args, **kwargs):
+        
+        super(ContactSearchForm, self).__init__(*args, **kwargs)
+        
+        self.helper = FormHelper()        
+        self.helper.form_method = 'get'
+        self.helper.form_action = '.'
+        self.helper.form_id = 'contact-search-form'
+        self.helper.layout = Layout(
+                Div(
+                    'search_query',
+                    HTML('<a class="input-group-button button search">Search</a>'),
+                    css_class = 'input-group',
+                    style = 'border: 7px solid #ffaf5b;'
+                    )
+        )
+        
+        
+
+
 class EventForm(forms.ModelForm):
     
     date = forms.DateField(input_formats=settings.DATE_INPUT_FORMATS,\
