@@ -49,6 +49,7 @@ django-tables2==1.2.1
 django-timezone-utils==0.10
 django-tinymce==2.3.0
 -e git://github.com/dedayoa/django-ajax#egg=djangoajax
+django-watson==1.2.3
 djangorestframework==3.3.3
 easy-thumbnails==2.3
 et-xmlfile==1.0.1
