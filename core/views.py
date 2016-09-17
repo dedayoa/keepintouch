@@ -19,7 +19,7 @@ from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, Exist
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
                     UserGroupSettingForm, NewUserForm, ContactGroupForm, SMSTransferForm,\
                     ContactImportForm, PersonalProfileForm, CustomDataIngestForm, KITUBalanceForm,\
-                    VerifyAccountForm, OrganizationContactForm
+                    VerifyAccountForm, OrganizationContactForm, ContactSearchForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable,\
                     SMSTransferHistoryTable, UploadedContactFileHistoryTable, CustomDataStoreTable
@@ -55,6 +55,10 @@ from stronghold.decorators import public
 from django.views.decorators.csrf import csrf_exempt
 from core.models import KITUBalance
 from django.db.utils import IntegrityError
+
+
+from watson import search as watson
+from django.utils.safestring import mark_safe
 
 
 # Create your views here.
@@ -144,19 +148,47 @@ class DashboardView(TemplateView):
 def contacts(request):
     
     if request.method == "GET":
-        user_q = KITUser.objects.get(user=request.user)
-        #q_grps = user_q.group.all() #groups the user belongs to
-        #user_s_group = CoUserGroup.objects.filter()
-        #Contact.objects.filter()
-        if request.user.kituser.is_admin:
-            contactstable = ContactTable_Admin(user_q.get_contacts())
+        if not request.GET.get('search_query',''):
+            #q_grps = user_q.group.all() #groups the user belongs to
+            #user_s_group = CoUserGroup.objects.filter()
+            #Contact.objects.filter()
+            if request.user.kituser.is_admin:
+                contactstable = ContactTable_Admin(request.user.kituser.get_contacts())
+            else:
+                contactstable = ContactTable(request.user.kituser.get_contacts())
+            RequestConfig(request, paginate={'per_page': 25}).configure(contactstable)
+            params = {}
+            params["title"] = "Contacts"
+            params["page_title"] = "Contacts"
+            params["table"] = contactstable
+            params["contacts_search_form"] = ContactSearchForm
+            return render(request, 'core/contacts/index.html', params)
         else:
-            contactstable = ContactTable(user_q.get_contacts())
-        RequestConfig(request, paginate={'per_page': 25}).configure(contactstable)
-        params = {}
-        params["title"] = "Contacts"
-        params["table"] = contactstable
-        return render(request, 'core/contacts/index.html', params)
+            queryp = request.GET.get('search_query')
+            form = ContactSearchForm(request.GET)
+            if form.is_valid():
+                print(queryp)
+                
+                params = {}
+                params["title"] = "Search Result"
+                params["page_title"] = mark_safe("Search Result <small>{}</small>".format(queryp))
+                
+                #search_results = watson.filter(Contact, queryp)
+                #watson.search(queryp, models=(Contact.objects.filter(title="foo"),))
+                
+                if request.user.kituser.is_admin:
+                    search_results = watson.filter(request.user.kituser.get_contacts(), queryp)
+                    contactstable = ContactTable_Admin(search_results)
+                else:
+                    search_results = watson.filter(request.user.kituser.get_contacts(), queryp)
+                    contactstable = ContactTable(search_results)
+                RequestConfig(request, paginate={'per_page': 25}).configure(contactstable)
+                params["table"] = contactstable
+                params["contacts_search_form"] = ContactSearchForm(initial={'search_query': queryp})
+                return render(request, 'core/contacts/index.html', params)
+            
+            return render(request, 'core/contacts/index.html', params)
+        
 
 
 class ContactView(View):
