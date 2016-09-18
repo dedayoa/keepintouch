@@ -1,6 +1,7 @@
 /**
  * 
  */
+
 $(document).foundation();
 
 if ($('#id_all_contacts').prop('checked')){
@@ -9,15 +10,24 @@ if ($('#id_all_contacts').prop('checked')){
 	$('#div_id_recipients').show()
 }
 
+function sayconnectiondown(){
+	Offline.check();
+    if (Offline.state === 'down'){
+    	Offline.check();
+    }
+    else{    	
+    	return;
+    }
+}
 
-var $loading = $('#loadingDiv').hide();
+var loading = $('#loadingDiv').hide();
 
 $(document)
   .ajaxStart(function () {
-    $loading.show();
+    loading.show();
   })
   .ajaxStop(function () {
-    $loading.hide();
+    loading.hide();
   });
 
 jQuery.fn.highlight = function () {
