@@ -81,13 +81,6 @@
 			</div>
 		{% endblock %}
 	</div>
-	<div class="reveal" id="server-error-modal" data-reveal>
-		<h3>Server Appears to be Down</h3>
-		<p id="modal-rpt"></p>
-		<button class="close-button" data-close aria-label="Close modal" type="button">
-	    <span aria-hidden="true">&times;</span>
-	  </button>
-	</div>
 
 {% endblock %}
 
@@ -98,9 +91,7 @@
 	<script>
 		
 		/* ******** Runs the most frequently, so checks for server connection  */
-		function sayserverdown(){
-			$('#server-error-modal').foundation('open');
-		}
+
 		$.ajaxSetup({
 			crossDomain : false,
 			async : true,
@@ -122,7 +113,7 @@
 						$("#dsb-disk_usage p span").text(content.result.disk_usage);
 						$("#dsb-uptime p span").text(content.result.uptime);
 					}
-				}, {onError: sayserverdown});
+				},{"onError":sayconnectiondown});
 				
 				setTimeout(get_system_stat, 60*1000);
 			}
@@ -143,8 +134,8 @@
 						$("#dsb-sms_balance p span").text(Humanize.compactInteger(content.result.total_sms_balance));
 						$("#dsb-free_sms_balance p span").text(Humanize.compactInteger(content.result.free_sms_balance));
 					}
-				}, {onError: sayserverdown});				
-				setTimeout(get_qpc_stat, 240*1000);	
+				}, {"onError":sayconnectiondown});		
+				setTimeout(get_qpc_stat, 240*1000);
 			}
 			catch(err){
 				return;
