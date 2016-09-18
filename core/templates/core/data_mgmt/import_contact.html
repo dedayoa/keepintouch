@@ -138,7 +138,7 @@
 							*/
 		       				$('#table-message-modal').foundation('open');
 		   				} 	
-					},{"processData":false,"contentType":false,"cache":false});
+					},{"processData":false,"contentType":false,"cache":false,"onError":sayconnectiondown});
 				});
 			}catch(err){
 				console.log(err);
@@ -156,7 +156,7 @@
 					$('#import-success-modal').foundation('open');
 					//setTimeout(function(){ alert(content.reply); }, 1000);
 					setTimeout(function(){window.location.replace(window.location);}, 5000);						
-				},{"processData":false,"contentType":false,"cache":false});
+				},{"processData":false,"contentType":false,"cache":false,"onError":sayconnectiondown});
 			})
 		})();
 		
