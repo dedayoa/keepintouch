@@ -890,6 +890,8 @@ class ContactGroupUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         params = super(ContactGroupUpdateView, self).get_context_data(**kwargs)
         params["contactgroupid"] = self.object.pk
+        params["title"] = "Contact List"
+        params["objtitle"] = self.object.title
         return params
     
     
