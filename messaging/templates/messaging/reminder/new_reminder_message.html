@@ -57,6 +57,7 @@
 	</div>
 {% endblock %}
 {% block foot_base_js %}
+	{{block.super}}
 	{{ form.media.js }}
 		<script>
 		
@@ -80,7 +81,7 @@
 								$("#id_date_column").append($('<option />', { value: val, text: val }));
 						});
 	   				}
-	   	  		});
+	   	  		},{onError:sayconnectiondown});
 	   		});
 	   		
 	   		$("#reminder-run").click(function(){
@@ -110,10 +111,9 @@
 	   					$('#message-sent-modal h4').text(content.result);
 		    			$('#message-sent-modal').foundation('open');
 	   				}
-	   			});
+	   			},{"onError":sayconnectiondown});
 	   		});
 		});
 		
 	</script>
-	{{block.super}}
 {% endblock %}
