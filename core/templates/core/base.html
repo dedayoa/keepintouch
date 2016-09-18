@@ -8,6 +8,7 @@
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta name="google-site-verification" content="H3VLJGOuBuzxDGGUrtvu_ChfCb0vd_JgN11cyGssOrc" />
+	{% google_analytics %}
 	<title>In.Touch - {% block title %}{% endblock %}</title>
 	<link rel="shortcut icon" href="{%  static 'images/favicon.png' %}">
 	{% block head_base_links %}
@@ -82,7 +83,6 @@
 	    <span aria-hidden="true">&times;</span>
 	  </button>
 	</div>
-	{% google_analytics %}
 	<!--Start of Tawk.to Script-->
 		<script type="text/javascript">
 		var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
