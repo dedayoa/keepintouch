@@ -82,7 +82,7 @@ class InfobipSMS():
                         sms_message = {'text' : sms_message},
                         sms_gateway = {},
                         kituser_id = kuser.id,
-                        kitu_parent_id = kuser.parent.id
+                        kitu_parent_id = kuser.get_parent().id
                         )
         
         message = {
