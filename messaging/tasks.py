@@ -21,6 +21,9 @@ from .models import QueuedMessages, ProcessedMessages,RunningMessage, IssueFeedb
 
 from .templates import TemplateForIssueFeedbackMessages, TemplateForPhoneEmailVerification
 
+from gomez.models import KITSystem
+from core.googlext import GoogleURLShortener
+
 #SMTPSetting = apps.get_model('core','SMTPSetting')
 
 def _compose(template, convars):
@@ -41,7 +44,7 @@ def _send_email(email_message, smtp_profile, **kwargs):
     es.send_email(email_message, **kwargs)
 
 @django_rq.job('sms')
-def _send_sms(sms_message, kuser, msg_type, batch_id=None):
+def _send_sms(sms_message, kuser, msg_type, batch_id=''):
     es = SMSHelper(sms_message, kuser, msg_type, batch_id)
     es.send_my_sms()
 
@@ -161,6 +164,8 @@ def process_onetime_event(queued_messages=None):
     else:
         due_queued_messages = QueuedMessages.objects.filter(delivery_time__lte = timezone.now())
     
+    gurli = GoogleURLShortener()
+    
     for queued_message in due_queued_messages:
         recipients_qs = Contact.objects.filter(pk__in = queued_message.message["recipients"])
         
@@ -186,9 +191,21 @@ def process_onetime_event(queued_messages=None):
                                           )
                     #sms   
                     if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
-                        s_msg = _compose(queued_message.message["sms_template"], recipient_d)
+                        
                         s_sender = _compose(queued_message.message["sms_sender_id"], recipient_d)
-                        _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
+                        
+                        if queued_message.message["sms_insert_optout"] == True:
+                            # append the opt out text and link to each SMS
+                            full_tpl = '{} {}'.format(
+                                                queued_message.message["sms_template"],
+                                                gurli.get_short_url("https://cloud.inotuchng.com/sms/unsubscribe/?coid={}&ptid={}&prcmid={}".\
+                                                                    format(recipient_d.slug, queued_message.created_by.parent.id,sprm.id))
+                                                )
+                            s_msg = _compose(full_tpl, recipient_d)
+                        else:
+                            s_msg = _compose(queued_message.message["sms_template"], recipient_d)
+                            
+                        _send_sms([s_sender, s_msg, recipient_d.phone.as_e164],\
                                          queued_message.created_by,
                                          'one_time_msg',
                                          batch_id = sprm.id
