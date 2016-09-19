@@ -72,6 +72,10 @@ class KITSystem(models.Model):
     company_wide_contacts = models.BooleanField(verbose_name="Organisation-wide Contacts",\
                                                 help_text="Check if you want all users to see contacts from all groups",\
                                                 default=True)
+    sms_unsubscribe_message = models.TextField(max_length="300", verbose_name="SMS Opt-out Message", \
+                                               default="To Stop receiving SMS from us, click",
+                                               help_text = "We will automatically insert the opt-out link at the end\
+                                               of this message")
     
     last_modified = models.DateTimeField(auto_now=True)
     
@@ -80,7 +84,7 @@ class KITSystem(models.Model):
     
     
     def get_absolute_url(self):
-        return reverse('gomez:system-settings',args=[self.pk])
+        return reverse('gomez:system-settings')
 
     
     
