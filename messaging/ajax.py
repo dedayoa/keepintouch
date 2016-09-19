@@ -29,6 +29,8 @@ from .helper import get_next_delivery_time
 import base64
 from cryptography.fernet import Fernet
 
+from gomez.models import KITSystem
+
 
 def _compose(template, convars):
     
@@ -160,7 +162,7 @@ def prepare_to_send_message(request):
                     result_dict['nocwe'] = num_of_contacts_with_emails
                     result_dict['mail_server'] = '<a href="{}" target="_blank">{}</a>'.\
                                                 format(smtp_to_use.get_absolute_url(),smtp_to_use.smtp_server)
-                    ## get any contact
+                    ## get any contact, and add it back
                     elem = contacts.pop()
                     contacts.add(elem)
                     ##                 ##
@@ -237,6 +239,13 @@ def send_message(request):
             pkl_loc = _untokenize(token)
             with open(pkl_loc, 'rb') as f:
                 myform = pickle.load(f)
+                
+            if myform.cleaned_data.get('insert_optout') == True:
+                sms_t = '{}\n{}'.format(myform.cleaned_data.get('sms_message'),\
+                                        KITSystem.objects.get(kit_admin=request.user.kituser.parent).sms_unsubscribe_message,
+                                        )
+            else:
+                sms_t = myform.cleaned_data.get('sms_message','')
             
             QueuedMessages.objects.create(
                 message_type = request.POST.get("message_type"),
@@ -245,9 +254,10 @@ def send_message(request):
                     'message_id' : messageid,
                     'title' : myform.cleaned_data.get('title',''),
                     'email_template' : myform.cleaned_data.get('email_message',''),
-                    'sms_template' : myform.cleaned_data.get('sms_message',''),
+                    'sms_template' : sms_t,
                     'send_email' : myform.cleaned_data.get('send_email', False),
                     'send_sms' : myform.cleaned_data.get('send_sms', False),
+                    'sms_insert_optout' : myform.cleaned_data.get('insert_optout', False),
                     'sms_sender_id' : myform.cleaned_data.get('sms_sender',''),
                     'recipients' : request.POST.getlist('recipients',[]),
                     'smtp_setting_id': request.POST.get('smtp_setting',''),
@@ -300,6 +310,7 @@ def send_message(request):
                     'sms_template': my_adv_form[2].sms_template,
                     'send_email' : my_adv_form[2].send_email,
                     'send_sms' : my_adv_form[2].send_sms,
+                    'sms_insert_optout' : my_adv_form[2].insert_optout,
                     'sms_sender_id' : my_adv_form[2].sms_sender,
                     'recipients' : my_adv_form[1], #request.POST.getlist('recipients',[]),
                     'smtp_setting_id': getattr(my_adv_form[2], 'smtp_setting.id',''), #request.POST.get('smtp_setting','')
