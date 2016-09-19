@@ -251,16 +251,21 @@ class MessageTemplateForm(forms.ModelForm):
                 ),
             Row(Column('active')),                      
             Fieldset(
-                 ugettext('Delivery settings'),
-                 Row(Column('cou_group')),
-                 Row(Column('smtp_setting')),
-                 Row(
-                     Column('send_sms', css_class="float-left small-6"),
-                     Column('send_email', css_class="float-left small-6")
-                     ),
-                 Row(Column('sms_sender')),
-                 css_class = "new-template-settings-fieldset"
-                 ),                       
+                ugettext('Delivery settings'),
+                Row(Column('cou_group')),
+                Div(
+                    Row(
+                        Column('send_sms', css_class="float-left small-6"),
+                        Column('insert_optout', css_class="float-left small-6"),
+                        ),
+                    Row(Column('sms_sender')),
+                ),                
+                Row(
+                    Column('send_email', css_class="float-left small-6")
+                ),          
+                Row(Column('smtp_setting')),
+                css_class = "new-template-settings-fieldset"
+                ),                       
             )
     
     
@@ -306,7 +311,7 @@ class MessageTemplateForm(forms.ModelForm):
     class Meta:
         model = MessageTemplate
         fields = ['title', 'email_template', 'sms_template', 'active', 'cou_group', \
-                  'smtp_setting', 'sms_sender','send_sms','send_email']        
+                  'smtp_setting', 'sms_sender','send_sms','insert_optout', 'send_email']        
         widgets = {
             'cou_group': Select2Widget,
             'smtp_setting' : Select2Widget,
