@@ -2,6 +2,37 @@ body{
 	background-color: #8db5d2;
 }
 
+.contact-list-system-lists-ent{
+-webkit-box-shadow: 0px 0px 6px 1px rgba(0,0,0,0.30);
+-moz-box-shadow: 0px 0px 6px 1px rgba(0,0,0,0.30);
+box-shadow: 0px 0px 6px 1px rgba(0,0,0,0.30);
+	padding: 0.5rem;
+	background-color: #9cd0ec;
+	text-align: center;
+}
+
+.hint{
+    font-size: 75%;
+    font-style: italic;
+    display: inline-block;
+    color: #ff7800;
+}
+
+
+.contact-list-system-lists-h4{
+	text-align: center;
+    background-color: #ff8e53;
+    color: #fff;
+}
+
+.contact-list-system-lists-ent h5{
+	color: #e05500;
+}
+
+.contact-list-system-lists-ent table{
+	margin-bottom: 0;
+}
+
 form#reminder-message-form fieldset{
 	background-color: #fff;
 }
