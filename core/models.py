@@ -501,9 +501,12 @@ class MessageTemplate(models.Model):
     sms_template = models.TextField(blank=True)
     
     sms_sender = models.CharField(max_length=11, blank=True)
-    smtp_setting = models.ForeignKey('core.SMTPSetting', models.SET_NULL, null=True, blank=True)
+    smtp_setting = models.ForeignKey('core.SMTPSetting', models.SET_NULL, null=True, \
+                                     blank=True, verbose_name="SMTP Account")
     
     send_sms = models.BooleanField(verbose_name="Send SMS")
+    insert_optout = models.BooleanField(verbose_name = "Insert Unsubscribe")
+    
     send_email = models.BooleanField(verbose_name="Send Email")
     
     cou_group = models.ForeignKey('core.CoUserGroup', models.SET_NULL, null=True, verbose_name="Group Availability")
