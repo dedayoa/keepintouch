@@ -33,13 +33,16 @@ class StandardMessaging(models.Model):
     title = models.CharField(max_length=100, blank=False)
     email_message = models.TextField(blank=True)
     sms_message = models.TextField(blank=True)
+    
     send_sms = models.BooleanField(verbose_name="Send SMS")
+    insert_optout = models.BooleanField(verbose_name = "Insert Unsubscribe")
+    
     send_email = models.BooleanField(verbose_name="Send Email")
     recipients = models.ManyToManyField('core.Contact')
     delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
     
-    smtp_setting = models.ForeignKey('core.SMTPSetting', null=True, blank=True)
-    sms_sender = models.CharField(max_length=11, blank=True)
+    smtp_setting = models.ForeignKey('core.SMTPSetting', null=True, blank=True, verbose_name="SMTP Account")
+    sms_sender = models.CharField(max_length=11, blank=True, verbose_name="SMS Sender")
     
     
     created_by = models.ForeignKey('core.KITUser', models.PROTECT)
@@ -387,6 +390,7 @@ class FailedSMSMessage(models.Model):
     sms_pickled_data = PickledObjectField()
     reason = models.CharField(max_length=255)
     retries = models.PositiveSmallIntegerField(default=0)
+    batch_id = models.CharField(max_length=100, default='')
     
     owned_by = models.ForeignKey('core.KITUser', on_delete=models.SET_NULL, null=True)
     last_modified = models.DateTimeField(auto_now=True)
@@ -423,6 +427,7 @@ class FailedSMSSystemBacklog(models.Model):
     sms_pickled_data = PickledObjectField()
     reason = models.CharField(max_length=255)    
     owned_by = models.ForeignKey('core.KITUser', on_delete=models.SET_NULL, null=True)
+    batch_id = models.CharField(max_length=100, default='')
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
