@@ -158,7 +158,7 @@ class SMTPHelper():
 
 class SMSHelper():
     
-    def __init__(self, message, kuser, msg_type, batch_id=None):
+    def __init__(self, message, kuser, msg_type, batch_id=''):
         
         self.message = message
         self.sender = self.message[0]
@@ -177,23 +177,15 @@ class SMSHelper():
         fsb = self.kuser.kitubalance.free_sms_balance
         sb = self.kuser.kitubalance.sms_balance
         
-        #get parent balance
-        '''
-        try:
-            kuser_parent = self.kuser.get_parent()
-            p_fsb = kuser_parent.kitubalance.free_sms_balance
-            p_sb = kuser_parent.kitubalance.sms_balance
-        except AttributeError:
-            # some users don't have parents...like system
-            print('This User Does Not Have A Parent')
-        '''
-        
         #get sms units required to send to destination
         ppsms = KITRateEngineA().get_sms_cost_to_number(self.destination)
+        
+        
         
         #sms pages     
         smsct = SMSCounter().get_messages_count_only(self.sms_message)
         
+        print
         # all messages are billed using the user's account balance
         if fsb >= (ppsms * smsct):
             return ['fsb', fsb-(ppsms * smsct)]
@@ -201,34 +193,6 @@ class SMSHelper():
             return ['sb', sb-(ppsms * smsct)]
         else:
             raise NotEnoughBalanceError("Not enough units to send SMS")
-        '''
-        if self.msg_type == 'system_msg':
-            # Always bill system messages from the admin account, even if admin is self
-            if fsb >= (ppsms * smsct):
-                return ['fsb', fsb-(ppsms * smsct)]
-            elif sb >= (ppsms * smsct):
-                return ['sb', sb-(ppsms * smsct)]
-            else:
-                raise NotEnoughBalanceError("System does not have enough units to send SMS")
-        elif is_company_wide(self.kuser):
-            # public and private messages are billed on the admin (main) account; so they don't fail often
-            
-            # reminders and one-shot messages are billed on the users account            
-            if self.msg_type == 'reminder_msg' or self.msg_type == 'one_time_msg':
-                if fsb >= (ppsms * smsct):
-                    return ['fsb', fsb-(ppsms * smsct)]
-                elif sb >= (ppsms * smsct):
-                    return ['sb', sb-(ppsms * smsct)]
-                else:
-                    raise NotEnoughBalanceError("Not enough units to send SMS")
-            elif self.msg_type == 'public_anniv_msg' or self.msg_type == 'private_anniv_msg':
-                if p_fsb >= (ppsms * smsct):
-                    return ['p_fsb', p_fsb-(ppsms * smsct)]
-                elif p_sb >= (ppsms * smsct):
-                    return ['p_sb', p_sb-(ppsms * smsct)]
-                else:
-                    raise NotEnoughBalanceError("Admin does not have enough units to send SMS")
-        '''
         
 
         
