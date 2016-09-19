@@ -510,7 +510,7 @@ def failed_sms_message_retry(request, pk):
         f_sms_m.delete()
         
         # resend the sms
-        _send_sms(f_sms_m.sms_pickled_data, f_sms_m.owned_by, None)
+        _send_sms(f_sms_m.sms_pickled_data, f_sms_m.owned_by, None, batch_id=f_sms_m.batch_id)
         
         return HttpResponseRedirect(reverse('messaging:sms-messages-failed'))
     
