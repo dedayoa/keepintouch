@@ -55,24 +55,29 @@ class StandardMessagingForm(forms.ModelForm):
             Hidden('message_type', 'STANDARD'),
             Hidden('message_id', '{{messageid}}'),                  
             Fieldset(
-                 ugettext('Delivery Settings'),
-                 Row(Column('recipients'), css_class="ss-recipients"),
-                 Row(Column('delivery_time'), css_class="ss-deliver-at"),
-                 Row(
-                     Column('send_sms', css_class="float-left small-6"),
-                     Column('send_email', css_class="float-left small-6")
-                     ),
-                 Row(Column('sms_sender', css_class="ss-sms-sender")),
-                 Row(Column('smtp_setting'), css_class="ss-smtp-setting"),
-                 css_class = "new-message-settings-fieldset"
-                 ),                       
+                ugettext('Delivery Settings'),
+                Row(Column('recipients'), css_class="ss-recipients"),
+                Row(Column('delivery_time'), css_class="ss-deliver-at"),
+                Div(
+                     Row(
+                         Column('send_sms', css_class="float-left small-6"),
+                         Column('insert_optout', css_class="float-left small-6"),
+                         ),
+                     Row(Column('sms_sender', css_class="ss-sms-sender")),
+                ),
+                Row(
+                    Column('send_email', css_class="float-left small-6")
+                    ),
+                Row(Column('smtp_setting'), css_class="ss-smtp-setting"),
+                css_class = "new-message-settings-fieldset"
+                ),                       
             )    
     
     
     class Meta:
         model = StandardMessaging
         fields = ['title','email_message','sms_message','recipients','delivery_time','send_sms', 'send_email', \
-                  'sms_sender','smtp_setting']
+                  'sms_sender','smtp_setting','insert_optout']
         widgets = {
             'recipients': Select2MultipleWidget,
             'smtp_setting' : Select2Widget,
