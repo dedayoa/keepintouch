@@ -205,7 +205,7 @@ def process_onetime_event(queued_messages=None):
                         else:
                             s_msg = _compose(queued_message.message["sms_template"], recipient_d)
                             
-                        _send_sms([s_sender, s_msg, recipient_d.phone.as_e164],\
+                        _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
                                          queued_message.created_by,
                                          'one_time_msg',
                                          batch_id = sprm.id
