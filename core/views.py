@@ -1016,8 +1016,8 @@ class CustomDataView(PermissionRequiredMixin, TemplateView):
         self.params["ingest_form"] = self.ingest_form
         self.params['file_max_size'] = settings.MAX_UPLOAD_FILE_SIZE
         self.params["title"] = "Custom Data Management"
-                
-        custdatable = CustomDataStoreTable(CustomData.objects.filter(created_by = request.user.kituser).order_by('-created'))
+        
+        custdatable = CustomDataStoreTable(request.user.kituser.get_custom_data().order_by('-created'))
         RequestConfig(request, paginate={'per_page': 30}).configure(custdatable)
         self.params["table"] = custdatable
         
