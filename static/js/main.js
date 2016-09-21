@@ -10,6 +10,7 @@ if ($('#id_all_contacts').prop('checked')){
 	$('#div_id_recipients').show()
 }
 
+
 function sayconnectiondown(){
 	Offline.check();
     if (Offline.state === 'down'){
@@ -47,7 +48,18 @@ jQuery.fn.highlight = function () {
     });
 }
 
+$(document).click(function() {
+	$('div#k-dropdown-content').hide();
+});
+
 $(document).ready(function(){
+	
+	$('a#k-user-greeting').click(function(e){
+		e.stopPropagation();
+		$('div#k-dropdown-content').toggle(0);
+	})
+	
+	
 	$("a.isfb-link").click(function(e){
 		var brm = new Foundation.Reveal($("#bug-report-modal"));
 		brm.open();
