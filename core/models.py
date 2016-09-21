@@ -126,7 +126,7 @@ class KITUser(models.Model):
     def get_absolute_url(self):
         return reverse('core:kituser-detail',args=[self.pk])
     
-    #@cached_as(timeout=3600)    
+    @cached_as(timeout=600)    
     def get_parent(self):
         if self.is_admin:
             return self
