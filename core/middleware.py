@@ -14,7 +14,8 @@ class UserValidatedMiddleware(object):
     
     PIPTHRU_PATHS = (
         '/settings/account/user/send-verify-code/',
-        '/settings/account/user/verify/'
+        '/settings/account/user/verify/',
+        '/exit/'
                      )
     
     def process_view(self, request, view_func, view_args, view_kwargs):
