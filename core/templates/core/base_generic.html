@@ -20,9 +20,27 @@
 							<button class="menu-icon hide-for-large" type="button" data-toggle="offCanvas"></button>
 							<span class="title-bar-title"><img width="20px" src="{%  static 'images/favicon.png' %}" /> In.Touch</span>
 						</div>
-						<div class="title-bar-right">
-							<div>Hi {% if user.get_full_name %}{{user.get_full_name}}{% else %}{{user.get_username}}{% endif %}
-								<a href="{% url 'core:backdoor' %}" style="margin-left: 2rem;"><i class="fi-power" style="font-size: 22px; line-height: 1rem; color: red"></i></a>
+						<div class="title-bar-right" id="k-user-profile-nav">
+							<a href="#" id="k-user-greeting">Hi {% if user.get_full_name %}{{user.get_full_name}}{% else %}{{user.get_username}}{% endif %}</a>
+							<div id="k-dropdown-content">
+								<ul>
+									<li>
+										<div>
+											SMS Balance	
+											<h5 style="margin-bottom:0; color: #000;">Main: {{ user.kituser.kitubalance.sms_balance}}<span class="small"> units</span></h5>
+											<span style="font-size: 80%">Free: {{ user.kituser.kitubalance.free_sms_balance}}<span> units</span></span>										
+										</div>
+									</li>
+									<li>
+										<a href="{% url 'core:kituser-personal-profile' %}"><i class="fi-sheriff-badge"></i> My Profile</a>
+									</li>
+									<li>
+										<a href="#" target="_blank"><i class="fi-page-multiple"></i> Docs</a>
+									</li>
+									<li>
+										<a href="{% url 'core:backdoor' %}"><i class="fi-power" style="color: red"></i> Logout</a>
+									</li>
+								</ul>
 							</div>
 						</div>
 					</div>
