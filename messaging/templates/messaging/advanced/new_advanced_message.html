@@ -33,6 +33,46 @@
     		<span aria-hidden="true">&times;</span>
   		</button>
 	</div>
+	<div class="reveal large" id="template-preview-modal" data-reveal>
+  		<h3 id="msm-title"></h3>
+  		<div class="row">
+	  		<div class="column small-12 medium-9">
+	  			<label>Email Template</label>
+	  			<div>
+	  				<iframe id="msm-email-tpl" style="width: 100%; border-style: outset;"></iframe>
+	  			</div>
+	  			<div>
+	  				<ul>
+	  					<li><label>Send Email</label>: <span id="msm-send-email"></span></li>
+	  					<li><label>SMTP Name</label>: <span id="msm-smtp-name"></span></li>
+	  					<li><label>SMTP From</label>: <span id="msm-smtp-from"></span></li>
+	  				</ul>
+	  			</div>
+	  			<label>SMS Template</label>
+	  			<div>
+	  				<textarea rows=6 id="msm-sms-tpl" style="width: 100%; border-style: outset;" readonly></textarea>
+	  			</div>
+	  			<div>
+	  				<ul>
+	  					<li><label>Send SMS</label>: <span id="msm-send-sms"></span></li>
+	  					<li><label>Sender ID</label>: <span id="msm-sms-sender-id"></span></li>
+	  					<li><label>Insert Opt-out Link</label>: <span id="msm-sms-insert-optout"></span></li>
+	  				</ul>
+	  			</div>
+	  			
+	  		</div>
+	  		<div class="column medium-3">
+	  			<h4>Variables</h4>
+	  			<div id="msg-tpl-vars">
+	  				
+	  			</div>
+	  		</div>  		
+  		</div>
+  		<div></div>
+  		<button class="close-button" data-close aria-label="Close reveal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
+	</div>
 {% endblock %}
 {% block foot_base_js %}
 	{{ form.media.js }}
@@ -52,6 +92,84 @@
 					return date.valueOf() < now.valueOf() ? 'disabled' : '';
 				}
 			});
+		});
+		
+		function get_u_val(valu){
+			// returns 'Yes' or 'No', instead of Blank or true
+			if (valu == true){
+				return 'Yes';
+			}
+			else{
+				return 'No';
+			}
+		};
+		
+		function get_tpl_vars(text){
+			//returns an array of tpl vars 
+			var re = {% verbatim %}/{{\w+}}/g;{% endverbatim %}
+			var m;
+			var n = new Array();
+			do{
+				m = re.exec(text);
+				if (m){
+					n.push(m[0]);
+				}
+			}while(m);
+			
+			return n;
+		};
+		
+		function enset_tpl_vars(args){
+			// returns a set of the items in the arrays passed as args
+			var args_set = new Set();
+			for (idx1 in args){
+				for (item in args[idx1]){
+					args_set.add(args[idx1][item]);
+				}
+			}
+			return args_set;
+		}
+		
+		$("input.message-template-preview-btn").on('click', function(){
+			var tpl_id = $("#id_message_template").val();
+			var url = '/template/'+tpl_id+'/preview/';
+			if (tpl_id == ''){
+				alert('You must select a Template to Preview');
+			}
+			else{
+				ajaxGet(url, function(content){
+					console.log(content.result);
+					
+					var smtp_fromn = content.result.smtp_from_user;
+					var smtp_fromu = content.result.smtp_smtp_user;
+					res = enset_tpl_vars([get_tpl_vars(content.result.email_template),get_tpl_vars(content.result.sms_template)])
+					
+					result_v = function(v){
+						var myRes = '';
+						for (const x of v){
+							myRes += "<div>"+x+"</div>";
+						};
+						return myRes;
+					};
+					
+					$('#msm-title').text(content.result.title);
+					$('#msm-send-email').text(get_u_val(content.result.send_email));
+					$('#msm-smtp-name').text(content.result.smtp_name);
+					$('#msm-smtp-from').text(`${smtp_fromn} <${smtp_fromu}>`);
+					
+					$('#msm-send-sms').text(get_u_val(content.result.send_sms));
+					$('#msm-sms-sender-id').text(content.result.sms_sender);
+					$('#msm-sms-insert-optout').text(get_u_val(content.result.insert_optout));
+					
+					$('#template-preview-modal').foundation('open');
+					$('#msg-tpl-vars').html(result_v(res));
+					$('iframe#msm-email-tpl').contents().find('html').html(content.result.email_template);
+					$('iframe#msm-email-tpl').css({"overflow-y":"scroll","height":"500px"});
+					
+					$('textarea#msm-sms-tpl').text(content.result.sms_template);
+				})				
+			}
+			
 		});
 		
 		/*$('.email-template, #div_id_sms_message, .sms-textarea-status-bar,.ss-recipients, .ss-deliver-at, .ss-sms-sender,.ss-smtp-setting').hide()*/
