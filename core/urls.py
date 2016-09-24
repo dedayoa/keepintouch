@@ -98,4 +98,5 @@ urlpatterns = [
                 url(r'^new/$', MessageTemplateCreateView.as_view(), name='template-new'),
                 url(r'^(?P<pk>\d+)/delete/$', MessageTemplateDeleteView.as_view(), name='template-delete')
     ])),
+    url(r'template/(?P<pk>\d+)/preview/', fetch_message_template_preview, name='template-preview'),
 ]
