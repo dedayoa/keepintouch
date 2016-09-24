@@ -91,7 +91,10 @@ class AdvancedMessaging(models.Model):
     
     title = models.CharField(max_length=100, blank=False)
     message_template = models.ForeignKey('core.MessageTemplate', blank=False)
-    contact_group = models.ManyToManyField('core.ContactGroup')
+    
+    contact_group = models.ManyToManyField('core.ContactGroup', verbose_name = "Contact List")
+    custom_data_namespace = models.ForeignKey('core.CustomData', on_delete=models.PROTECT, null=True)
+    
     delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
     repeat_frequency = models.CharField(max_length=20, choices=REPEAT, default="norepeat")
     next_event = models.DateTimeField()
