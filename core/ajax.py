@@ -588,4 +588,29 @@ def verify_user_details(request):
                     else:
                         flash_messages.add_message(request, flash_messages.INFO, 'Invalid Phone Verification Code. Kindly re-check or generate a new set')
                 return HttpResponseRedirect('/')
+            
+            
+        
+@ajax
+@login_required
+def fetch_message_template_preview(request, pk):
+    
+    if request.method == "GET":
+        #mt = MessageTemplate.objects.select_related('smtpsetting').get(pk=pk, kit_admin=request.user.kituser.parent)
+        try:
+            mt = request.user.kituser.get_templates().select_related('smtp_setting').get(pk=pk)
+            return {'result':{
+                        'title' : mt.title,
+                        'email_template' : mt.email_template,
+                        'sms_template' : mt.sms_template,
+                        'sms_sender' : mt.sms_sender,
+                        'send_sms' : mt.send_sms,
+                        'send_email' : mt.send_email,
+                        'insert_optout' : mt.insert_optout,
+                        'smtp_name' : getattr(mt,'smtp_setting',''),
+                        'smtp_from_user' : getattr(mt.smtp_setting,'from_user',''),
+                        'smtp_smtp_user' : getattr(mt.smtp_setting,'smtp_user','')
+                              }}
+        except:
+            return {'errors':'Error Occured'}
     
