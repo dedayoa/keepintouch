@@ -157,7 +157,12 @@ class AdvancedMessagingForm(forms.ModelForm):
         self.helper.form_tag = False
         self.helper.layout = Layout(
             Row(Column('title'), css_class = "email-title"),
-            Row(Column('message_template'), css_class = "message-template"),
+            Row(
+                Column('message_template', css_class = "message-template small-9"),
+                Column(
+                    Button('preview-template', 'Preview', css_class="small button message-template-preview-btn"), css_class="small-3")
+                ),
+            Row(Column('custom_data_namespace'), css_class = "custom-data-select"),
             Row(Column('contact_group'), css_class = "contact-group"),
             Row(Column('delivery_time'), css_class = "deliver-at"),
             Hidden('message_type', 'ADVANCED'),
@@ -166,7 +171,7 @@ class AdvancedMessagingForm(forms.ModelForm):
     
     class Meta:
         model = AdvancedMessaging
-        fields = ['title','message_template', 'contact_group', 'delivery_time','repeat_frequency']
+        fields = ['title','message_template', 'custom_data_namespace', 'contact_group', 'delivery_time','repeat_frequency']
         widgets = {
             'contact_group': Select2MultipleWidget,
             'message_template' : Select2Widget
