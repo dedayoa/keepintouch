@@ -55,11 +55,54 @@
     		<span aria-hidden="true">&times;</span>
   		</button>
 	</div>
+	{% include "core/templates/template_preview_overlay.html" %}
 {% endblock %}
 {% block foot_base_js %}
 	{{block.super}}
 	{{ form.media.js }}
-		<script>
+	<script>
+	
+		$("input.message-template-preview-btn").on('click', function(){
+			var tpl_id = $("#id_message_template").val();
+			var url = '/template/'+tpl_id+'/preview/';
+			if (tpl_id == ''){
+				alert('You must select a Template to Preview');
+			}
+			else{
+				ajaxGet(url, function(content){
+					console.log(content.result);
+					
+					var smtp_fromn = content.result.smtp_from_user;
+					var smtp_fromu = content.result.smtp_smtp_user;
+					res = enset_tpl_vars([get_tpl_vars(content.result.email_template),get_tpl_vars(content.result.sms_template)])
+					
+					result_v = function(v){
+						var myRes = '';
+						for (const x of v){
+							myRes += "<div>"+x+"</div>";
+						};
+						return myRes;
+					};
+					
+					$('#msm-title').text(content.result.title);
+					$('#msm-send-email').text(get_u_val(content.result.send_email));
+					$('#msm-smtp-name').text(content.result.smtp_name);
+					$('#msm-smtp-from').text(`${smtp_fromn} <${smtp_fromu}>`);
+					
+					$('#msm-send-sms').text(get_u_val(content.result.send_sms));
+					$('#msm-sms-sender-id').text(content.result.sms_sender);
+					$('#msm-sms-insert-optout').text(get_u_val(content.result.insert_optout));
+					
+					$('#template-preview-modal').foundation('open');
+					$('#msg-tpl-vars').html(result_v(res));
+					$('iframe#msm-email-tpl').contents().find('html').html(content.result.email_template);
+					$('iframe#msm-email-tpl').css({"overflow-y":"scroll","height":"500px"});
+					
+					$('textarea#msm-sms-tpl').text(content.result.sms_template);
+				})				
+			}
+			
+		});
 		
 		$(document).ready(function(){
 			
