@@ -1,0 +1,40 @@
+<div class="reveal large" id="template-preview-modal" data-reveal>
+  		<h3 id="msm-title"></h3>
+  		<div class="row">
+	  		<div class="column small-12 medium-9">
+	  			<label>Email Template</label>
+	  			<div>
+	  				<iframe id="msm-email-tpl" style="width: 100%; border-style: outset;"></iframe>
+	  			</div>
+	  			<div>
+	  				<ul>
+	  					<li><label>Send Email</label>: <span id="msm-send-email"></span></li>
+	  					<li><label>SMTP Name</label>: <span id="msm-smtp-name"></span></li>
+	  					<li><label>SMTP From</label>: <span id="msm-smtp-from"></span></li>
+	  				</ul>
+	  			</div>
+	  			<label>SMS Template</label>
+	  			<div>
+	  				<textarea rows=6 id="msm-sms-tpl" style="width: 100%; border-style: outset;" readonly></textarea>
+	  			</div>
+	  			<div>
+	  				<ul>
+	  					<li><label>Send SMS</label>: <span id="msm-send-sms"></span></li>
+	  					<li><label>Sender ID</label>: <span id="msm-sms-sender-id"></span></li>
+	  					<li><label>Insert Opt-out Link</label>: <span id="msm-sms-insert-optout"></span></li>
+	  				</ul>
+	  			</div>
+	  			
+	  		</div>
+	  		<div class="column medium-3">
+	  			<h4>Variables</h4>
+	  			<div id="msg-tpl-vars">
+	  				
+	  			</div>
+	  		</div>  		
+  		</div>
+  		<div></div>
+  		<button class="close-button" data-close aria-label="Close reveal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
+	</div>
