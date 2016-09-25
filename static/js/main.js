@@ -2,12 +2,50 @@
  * 
  */
 
+
 $(document).foundation();
 
 if ($('#id_all_contacts').prop('checked')){
 	$('#div_id_recipients').hide()
 }else{
 	$('#div_id_recipients').show()
+}
+
+
+function get_u_val(valu){
+	// returns 'Yes' or 'No', instead of Blank or true
+	if (valu == true){
+		return 'Yes';
+	}
+	else{
+		return 'No';
+	}
+};
+
+function get_tpl_vars(text){
+	//returns an array of tpl vars 
+	var re = /{{\w+}}/g;
+	var m;
+	var n = new Array();
+	do{
+		m = re.exec(text);
+		if (m){
+			n.push(m[0]);
+		}
+	}while(m);
+	
+	return n;
+};
+
+function enset_tpl_vars(args){
+	// returns a set of the items in the arrays passed as args
+	var args_set = new Set();
+	for (idx1 in args){
+		for (item in args[idx1]){
+			args_set.add(args[idx1][item]);
+		}
+	}
+	return args_set;
 }
 
 
@@ -52,6 +90,14 @@ $(document).click(function() {
 	$('div#k-dropdown-content').hide();
 });
 
+// set margin as window is resized to take care of media queries reducing/increasing the size of headers
+// and therefore distorting the right edge of the divs
+$(window).resize(function() {
+	var kupn_width = $("#k-user-profile-nav").width()/parseFloat($("body").css("font-size")); //width in rem
+	var kdc_width = $("#k-dropdown-content").width()/parseFloat($("body").css("font-size"));
+	$("#k-dropdown-content").css("margin-left",kupn_width-kdc_width+"rem");
+});
+
 $(document).ready(function(){
 	
 	$('a#k-user-greeting').click(function(e){
@@ -64,6 +110,11 @@ $(document).ready(function(){
 		var brm = new Foundation.Reveal($("#bug-report-modal"));
 		brm.open();
 	})
+	
+	var kupn_width = $("#k-user-profile-nav").width()/parseFloat($("body").css("font-size")); //width in rem
+	var kdc_width = $("#k-dropdown-content").width()/parseFloat($("body").css("font-size"));
+	$("#k-dropdown-content").css("margin-left",kupn_width-kdc_width+"rem");
+	
 	
 	$("form#issue-submit-form").submit(function(e){
 		
