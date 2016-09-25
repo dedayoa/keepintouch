@@ -33,48 +33,11 @@
     		<span aria-hidden="true">&times;</span>
   		</button>
 	</div>
-	<div class="reveal large" id="template-preview-modal" data-reveal>
-  		<h3 id="msm-title"></h3>
-  		<div class="row">
-	  		<div class="column small-12 medium-9">
-	  			<label>Email Template</label>
-	  			<div>
-	  				<iframe id="msm-email-tpl" style="width: 100%; border-style: outset;"></iframe>
-	  			</div>
-	  			<div>
-	  				<ul>
-	  					<li><label>Send Email</label>: <span id="msm-send-email"></span></li>
-	  					<li><label>SMTP Name</label>: <span id="msm-smtp-name"></span></li>
-	  					<li><label>SMTP From</label>: <span id="msm-smtp-from"></span></li>
-	  				</ul>
-	  			</div>
-	  			<label>SMS Template</label>
-	  			<div>
-	  				<textarea rows=6 id="msm-sms-tpl" style="width: 100%; border-style: outset;" readonly></textarea>
-	  			</div>
-	  			<div>
-	  				<ul>
-	  					<li><label>Send SMS</label>: <span id="msm-send-sms"></span></li>
-	  					<li><label>Sender ID</label>: <span id="msm-sms-sender-id"></span></li>
-	  					<li><label>Insert Opt-out Link</label>: <span id="msm-sms-insert-optout"></span></li>
-	  				</ul>
-	  			</div>
-	  			
-	  		</div>
-	  		<div class="column medium-3">
-	  			<h4>Variables</h4>
-	  			<div id="msg-tpl-vars">
-	  				
-	  			</div>
-	  		</div>  		
-  		</div>
-  		<div></div>
-  		<button class="close-button" data-close aria-label="Close reveal" type="button">
-    		<span aria-hidden="true">&times;</span>
-  		</button>
-	</div>
+	<!-- template preview overlay goes here -->
+	{% include "core/templates/template_preview_overlay.html" %}
 {% endblock %}
 {% block foot_base_js %}
+	{{block.super}}
 	{{ form.media.js }}
 	<script src="{% static "js/sms_counter.js" %}"></script>
 	<script src="{% static "js/foundation-datepicker.js" %}"></script>
@@ -94,42 +57,7 @@
 			});
 		});
 		
-		function get_u_val(valu){
-			// returns 'Yes' or 'No', instead of Blank or true
-			if (valu == true){
-				return 'Yes';
-			}
-			else{
-				return 'No';
-			}
-		};
-		
-		function get_tpl_vars(text){
-			//returns an array of tpl vars 
-			var re = {% verbatim %}/{{\w+}}/g;{% endverbatim %}
-			var m;
-			var n = new Array();
-			do{
-				m = re.exec(text);
-				if (m){
-					n.push(m[0]);
-				}
-			}while(m);
-			
-			return n;
-		};
-		
-		function enset_tpl_vars(args){
-			// returns a set of the items in the arrays passed as args
-			var args_set = new Set();
-			for (idx1 in args){
-				for (item in args[idx1]){
-					args_set.add(args[idx1][item]);
-				}
-			}
-			return args_set;
-		}
-		
+
 		$("input.message-template-preview-btn").on('click', function(){
 			var tpl_id = $("#id_message_template").val();
 			var url = '/template/'+tpl_id+'/preview/';
@@ -231,5 +159,4 @@
 		})();
 		
 	</script>
-	{{block.super}}
 {% endblock %}
