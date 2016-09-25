@@ -210,7 +210,11 @@ class ReminderMessagingForm(forms.ModelForm):
         self.helper.form_tag = False
         self.helper.layout = Layout(
             Row(Column('title'), css_class = "reminder-title"),
-            Row(Column('message_template'), css_class = "message-template"),
+            Row(
+                Column('message_template', css_class = "message-template small-9"),
+                Column(
+                    Button('preview-template', 'Preview', css_class="small button message-template-preview-btn"), css_class="small-3")
+                ),
             Row(Column('contact_group'), css_class = "contact-group"),            
             Row(
                 Column('custom_data_namespace', css_class = "float-left small-6"),
