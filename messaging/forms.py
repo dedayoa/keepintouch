@@ -165,13 +165,17 @@ class AdvancedMessagingForm(forms.ModelForm):
             Row(Column('custom_data_namespace'), css_class = "custom-data-select"),
             Row(Column('contact_group'), css_class = "contact-group"),
             Row(Column('delivery_time'), css_class = "deliver-at"),
+            Row(
+                Column('repeat_frequency', css_class="small-6"),
+                Column('repeat_until', css_class="small-6")
+                ),
             Hidden('message_type', 'ADVANCED'),
             Hidden('message_id', '{{messageid}}')
         )
     
     class Meta:
         model = AdvancedMessaging
-        fields = ['title','message_template', 'custom_data_namespace', 'contact_group', 'delivery_time','repeat_frequency']
+        fields = ['title','message_template', 'custom_data_namespace', 'contact_group', 'delivery_time','repeat_frequency','repeat_until']
         widgets = {
             'contact_group': Select2MultipleWidget,
             'message_template' : Select2Widget
@@ -182,9 +186,23 @@ class AdvancedMessagingForm(forms.ModelForm):
         cleaned_data = super(AdvancedMessagingForm, self).clean(*args, **kwargs)
         
         send_at = cleaned_data.get("delivery_time")
+        rpt_frq = cleaned_data.get("repeat_frequency")
+        rpt_till = cleaned_data.get("repeat_until")
+        
         if send_at==None or send_at < timezone.now():
             #raise forms.ValidationError('Your Delivery Date Cannot be in the past')
             cleaned_data["delivery_time"] = datetime.now()
+        
+        if rpt_frq == 'norepeat':
+            rpt_till = None
+            
+        if rpt_till and rpt_till < send_at:
+            raise forms.ValidationError('"Repeat Until" cannot be less than "Deliver at"')
+        
+        if rpt_frq != 'norepeat' and rpt_till == None:
+            raise forms.ValidationError('You need to fill the "Repeat Until" field since you have selected to Repeat this Message')
+
+        
         
         
 class ReminderMessagingForm(forms.ModelForm):
