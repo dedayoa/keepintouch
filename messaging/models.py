@@ -24,6 +24,7 @@ from picklefield.fields import PickledObjectField
 
 
 def get_default_time():
+    # default delivery time
     return timezone.now()+datetime.timedelta(seconds=settings.MSG_WAIT_TIME)
 
 class StandardMessaging(models.Model):
@@ -93,10 +94,12 @@ class AdvancedMessaging(models.Model):
     message_template = models.ForeignKey('core.MessageTemplate', blank=False)
     
     contact_group = models.ManyToManyField('core.ContactGroup', verbose_name = "Contact List")
-    custom_data_namespace = models.ForeignKey('core.CustomData', on_delete=models.PROTECT, null=True)
+    custom_data_namespace = models.ForeignKey('core.CustomData', on_delete=models.PROTECT, null=True, blank=True)
     
     delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
     repeat_frequency = models.CharField(max_length=20, choices=REPEAT, default="norepeat")
+    repeat_until = models.DateTimeField(blank=True, null=True)
+    
     next_event = models.DateTimeField()
        
     created_by = models.ForeignKey('core.KITUser', models.PROTECT)
@@ -132,7 +135,8 @@ class AdvancedMessaging(models.Model):
         
     
     def save(self, *args, **kwargs):
-        self.next_event = self._next_event_time()
+        #self.next_event = self._next_event_time()
+        self.next_event = self.delivery_time
         super(AdvancedMessaging, self).save(*args, **kwargs)
     
     class Meta:
