@@ -6,6 +6,11 @@ Created on Aug 29, 2016
 
 from .views import validate_user_details
 
+from django.utils import timezone
+
+import pytz
+from pytz.exceptions import UnknownTimeZoneError
+
 class UserValidatedMiddleware(object):
     """
     Check if both phone and emails for user have been validated.
@@ -29,3 +34,16 @@ class UserValidatedMiddleware(object):
         except AttributeError:
             # for AnonymousUser
             return None
+        
+        
+class TimeZoneMiddleware(object):
+
+    def process_request(self, request):
+        try:
+            if request.user.is_authenticated() and not request.user.is_staff:
+                timezone.activate(pytz.timezone(str(request.user.kituser.timezone)))
+            else:
+                timezone.deactivate()
+        except UnknownTimeZoneError:
+            print("Error: Unknown Timezone")
+            timezone.deactivate()
