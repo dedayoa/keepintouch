@@ -8,7 +8,7 @@ import pickle
 import tablib
 import json
 import uuid
-import datetime, pytz, dateutil.parser
+import datetime, pytz, dateutil.parser, arrow
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django_ajax.decorators import ajax
@@ -213,7 +213,12 @@ def prepare_to_send_message(request):
                 #result_dict['idtdt'] = idondit = "{}{}".format(code_seg_1, code_seg_2)       
                 return {'result':result_dict} 
             
-                
+
+
+def time_to_utc(mytime):
+    # primarily for dates that will be stored as json
+    # django automatically converts between localtime and UTC for DB
+    return  (arrow.get(mytime).to('UTC')).datetime             
     
 
 @ajax
@@ -292,13 +297,17 @@ def send_message(request):
             
             if my_adv_form[0].cleaned_data.get('repeat_frequency') != "norepeat":
                 message_reoccurs = True
-                next_delivery_time = get_next_delivery_time(my_adv_form[0].cleaned_data.get('repeat_frequency'),\
-                                                            my_adv_form[0].cleaned_data.get('delivery_time'))
+                #next_delivery_time = get_next_delivery_time(my_adv_form[0].cleaned_data.get('repeat_frequency'),\
+                #                                            my_adv_form[0].cleaned_data.get('delivery_time'))
+                
+                # the first (next) delivery time is the start time                
+                next_delivery_time = my_adv_form[0].cleaned_data.get('delivery_time')
+                repeat_until = time_to_utc(my_adv_form[0].cleaned_data.get('repeat_until'))
             else:
                 message_reoccurs = False
                 next_delivery_time = my_adv_form[0].cleaned_data.get('delivery_time')
-            
-            fdt = (my_adv_form[0].cleaned_data.get('delivery_time')).strftime('%d-%m-%Y %H:%M')
+                
+            fdt = (time_to_utc(my_adv_form[0].cleaned_data.get('delivery_time'))).strftime('%d-%m-%Y %H:%M')
             
             QueuedMessages.objects.create(
                 message_type = request.POST.get("message_type"),
@@ -318,7 +327,8 @@ def send_message(request):
                                 'draft_title' : my_adv_form[0].cleaned_data.get('title'),
                                 'template_id' : my_adv_form[0].cleaned_data.get('message_template').id,
                                 'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None,
-                                'recurring' : my_adv_form[0].cleaned_data.get('repeat_frequency'),
+                                'repeat_frequency' : my_adv_form[0].cleaned_data.get('repeat_frequency'),
+                                'repeat_until' : repeat_until.strftime('%d-%m-%Y %H:%M') if repeat_until else None,
                                 'first_delivery_time' : fdt
                                 }
                            },
@@ -326,7 +336,6 @@ def send_message(request):
                 delivery_time = next_delivery_time,
                 created_by = request.user.kituser           
             )
-            
             return {'result':'Success! Message Queued for Sending'}
 
 def is_date_valid(date_text):
