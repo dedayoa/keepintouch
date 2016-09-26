@@ -55,6 +55,26 @@
 					return date.valueOf() < now.valueOf() ? 'disabled' : '';
 				}
 			});
+			$('#id_repeat_until').fdatepicker({
+				format: 'dd-mm-yyyy hh:ii',
+				disableDblClickSelection: true,
+				language: 'vi',
+				pickTime: true,
+				onRender: function(date){
+					return date.valueOf() < now.valueOf() ? 'disabled' : '';
+				}
+			});
+			
+			$('#id_repeat_frequency').on('change', function(){
+
+				if ($(this).val() == 'norepeat'){
+					$('#id_repeat_until').val('').prop('disabled', 'disabled');
+				}
+				else{
+					$('#id_repeat_until').prop('disabled', false);
+				}
+				
+			});
 		});
 		
 
