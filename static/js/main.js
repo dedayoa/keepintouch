@@ -105,6 +105,9 @@ $(document).ready(function(){
 		$('div#k-dropdown-content').toggle(0);
 	})
 	
+	if ($('#id_repeat_frequency').val() == 'norepeat'){
+		$('#id_repeat_until').prop('disabled', 'disabled');
+	}
 	
 	$("a.isfb-link").click(function(e){
 		var brm = new Foundation.Reveal($("#bug-report-modal"));
