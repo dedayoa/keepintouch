@@ -150,6 +150,11 @@ class DraftReminderMessagesTable(tables.Table):
         
 class RunningMessagesTable(tables.Table):
     
+    message = tables.Column(verbose_name="Message")
+    contact_dsoi = tables.Column(verbose_name="Dates of Interest")
+    reminders = tables.Column(verbose_name="Reminders")
+    started_at = tables.Column(verbose_name="Started")
+    
     class Meta:
         model = RunningMessage
         fields = ['message','contact_dsoi','reminders','started_at']
