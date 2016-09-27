@@ -39,7 +39,16 @@ class StandardMessaging(models.Model):
     insert_optout = models.BooleanField(verbose_name = "Insert Unsubscribe")
     
     send_email = models.BooleanField(verbose_name="Send Email")
-    recipients = models.ManyToManyField('core.Contact')
+    recipients = models.ManyToManyField('core.Contact', related_name="recipients")
+    
+    ###
+    copied_recipients = models.ManyToManyField('core.Contact', related_name="cc_recipients", blank=True,\
+                                               help_text = "Contacts selected in this field will receive a copy of the messages sent to Recipients")
+    
+    cc_recipients_send_sms = models.BooleanField(verbose_name="Send SMS", default=True)
+    cc_recipients_send_email = models.BooleanField(verbose_name="Send Email", default=True)
+    ###
+    
     delivery_time = models.DateTimeField(default=get_default_time, verbose_name = "Deliver at")
     
     smtp_setting = models.ForeignKey('core.SMTPSetting', null=True, blank=True, verbose_name="SMTP Account")
