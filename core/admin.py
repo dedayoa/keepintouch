@@ -9,6 +9,8 @@ from .models import Contact, KITUser, Event, PublicEvent, MessageTemplate, \
 
 
 class ContactAdmin(admin.ModelAdmin):
+    
+    search_fields = ['first_name','last_name','email','phone']
 
     list_display = ('first_name','last_name','active')
     
