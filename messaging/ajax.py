@@ -464,7 +464,7 @@ def run_reminder(request):
                     'send_email' : getattr(rmform.cleaned_data.get('message_template'), 'send_email', ''),
                     'send_sms' : getattr(rmform.cleaned_data.get('message_template'), 'send_sms', ''),
                     'sms_sender_id' : getattr(rmform.cleaned_data.get('message_template'), 'sms_sender', ''),
-                    'smtp_setting_id': getattr(rmform.cleaned_data.get('message_template'), 'smtp_setting.id',''),
+                    'smtp_setting_id': getattr(rmform.cleaned_data.get('message_template').smtp_setting, 'id',''),
                     'others' : {
                         'draft_title' : rmform.cleaned_data.get('title'),
                         'template_id' : rmform.cleaned_data.get('message_template').id,
