@@ -192,16 +192,18 @@ def process_onetime_event(queued_messages=None):
                 ok_to_send = OKToSend(queued_message.created_by)
                 if ok_to_send.check():
                     #custom data
-                    if due_queued_messages.message["others"]["custom_data_namespace"]:
-                        cd_data = (CustomData.objects.get(namespace=due_queued_messages.message["others"]["custom_data_namespace"])).data
-                        cdd = cd_data.get(recipient_d.slug)
+                    if queued_message.message["others"].get("custom_data_namespace", None):
+                        cd_data = (CustomData.objects.get(namespace=queued_message.message["others"]["custom_data_namespace"])).data
+                        cdd = cd_data.get(recipient_d.slug) #get the value of the contactid key/slug
+                    else:
+                        cdd = {}
                     
                     #email
                     if queued_message.message["send_email"] and recipient_d.email and queued_message.message["email_template"]:
                         smtp_setting_qsv = SMTPSetting.objects.get(pk = queued_message.message["smtp_setting_id"])
                         e_msg = _compose(queued_message.message["email_template"], recipient_d, cdd)
                         e_title = _compose(queued_message.message["title"], recipient_d, cdd)
-                        _send_email.delay([e_title, e_msg, recipient_d.email],\
+                        _send_email([e_title, e_msg, recipient_d.email],\
                                           smtp_setting_qsv, cc_recipients = cc_emails, owner = queued_message.created_by
                                           )
                     #sms   
