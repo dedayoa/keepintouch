@@ -34,6 +34,7 @@ class StandardMessagingForm(forms.ModelForm):
         super(StandardMessagingForm, self).__init__(*args, **kwargs)
         
         self.fields['recipients'].queryset = self.kuser.get_contacts()
+        self.fields['copied_recipients'].queryset = self.kuser.get_contacts()
         self.fields['smtp_setting'].queryset = self.kuser.get_smtp_items()
         #self.fields['cou_group'].label = "Group Availability"
         
