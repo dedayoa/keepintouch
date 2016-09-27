@@ -6,10 +6,14 @@ from .models import StandardMessaging, AdvancedMessaging, ProcessedMessages,\
                     FailedSMSSystemBacklog
 
 
+class ProcessedMessagesAdmin(admin.ModelAdmin):
+    
+    list_display = ['id','__str__','created_by','processed_at']
+
 
 admin.site.register(StandardMessaging)
 admin.site.register(AdvancedMessaging)
-admin.site.register(ProcessedMessages)
+admin.site.register(ProcessedMessages, ProcessedMessagesAdmin)
 admin.site.register(QueuedMessages)
 admin.site.register(ReminderMessaging)
 admin.site.register(Reminder)
