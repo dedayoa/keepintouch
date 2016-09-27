@@ -176,6 +176,8 @@ def process_onetime_event(queued_messages=None):
     
     for queued_message in due_queued_messages:
         recipients_qs = Contact.objects.filter(pk__in = queued_message.message["recipients"])
+        cc_recipients_qs = Contact.objects.filter(pk__in = queued_message.message["others"]["cc_recipients"])
+        cc_emails = [x[0] for x in cc_recipients_qs.values_list('email')] #get a list of emails
         
         # create entry in processed message
         sprm = ProcessedMessages.objects.create(
@@ -200,7 +202,7 @@ def process_onetime_event(queued_messages=None):
                         e_msg = _compose(queued_message.message["email_template"], recipient_d, cdd)
                         e_title = _compose(queued_message.message["title"], recipient_d, cdd)
                         _send_email.delay([e_title, e_msg, recipient_d.email],\
-                                          smtp_setting_qsv, owner = queued_message.created_by
+                                          smtp_setting_qsv, cc_recipients = cc_emails, owner = queued_message.created_by
                                           )
                     #sms   
                     if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
