@@ -14,7 +14,7 @@ from django.conf import settings
 
 from .helper import SMTPHelper, SMSHelper, get_next_delivery_time, OKToSend
 from core.exceptions import *
-from core.models import Contact, PublicEvent, KITUser, SMTPSetting, Event
+from core.models import Contact, PublicEvent, KITUser, SMTPSetting, Event, CustomData
 from dateutil.relativedelta import relativedelta
 
 from .models import QueuedMessages, ProcessedMessages,RunningMessage, IssueFeedback, FailedKITMessage
@@ -26,17 +26,25 @@ from core.googlext import GoogleURLShortener
 
 #SMTPSetting = apps.get_model('core','SMTPSetting')
 
-def _compose(template, convars):
+def _compose(template, convars, custom_convars = {}):
+    # This composes the message using the template and the context variables
+    # users cannot override the default_convars for contacts
     
     t = Template(template)
-    return t.render(Context({
-                            'firstname':getattr(convars,'first_name',''),
-                            'lastname':getattr(convars,'last_name',''),
-                            'salutation':getattr(convars,'salutation',''),
-                            'email':getattr(convars,'email',''),
-                            'phone':getattr(convars,'phone',''),                            
-                            })
-                    )
+    context_vars = custom_convars 
+    
+    default_convars = {
+                        'firstname':getattr(convars,'first_name',''),
+                        'lastname':getattr(convars,'last_name',''),
+                        'salutation':getattr(convars,'salutation',''),
+                        'email':getattr(convars,'email',''),
+                        'phone':getattr(convars,'phone',''),                            
+                        }
+    context_vars.update(default_convars)
+    
+    return t.render(Context(context_vars))
+
+
 
 @django_rq.job('email')
 def _send_email(email_message, smtp_profile, **kwargs):
@@ -181,11 +189,16 @@ def process_onetime_event(queued_messages=None):
             try:
                 ok_to_send = OKToSend(queued_message.created_by)
                 if ok_to_send.check():
+                    #custom data
+                    if due_queued_messages.message["others"]["custom_data_namespace"]:
+                        cd_data = (CustomData.objects.get(namespace=due_queued_messages.message["others"]["custom_data_namespace"])).data
+                        cdd = cd_data.get(recipient_d.slug)
+                    
                     #email
                     if queued_message.message["send_email"] and recipient_d.email and queued_message.message["email_template"]:
                         smtp_setting_qsv = SMTPSetting.objects.get(pk = queued_message.message["smtp_setting_id"])
-                        e_msg = _compose(queued_message.message["email_template"], recipient_d)
-                        e_title = _compose(queued_message.message["title"], recipient_d)
+                        e_msg = _compose(queued_message.message["email_template"], recipient_d, cdd)
+                        e_title = _compose(queued_message.message["title"], recipient_d, cdd)
                         _send_email.delay([e_title, e_msg, recipient_d.email],\
                                           smtp_setting_qsv, owner = queued_message.created_by
                                           )
@@ -201,9 +214,9 @@ def process_onetime_event(queued_messages=None):
                                                 gurli.get_short_url("https://cloud.inotuchng.com/sms/unsubscribe/?coid={}&ptid={}&prcmid={}".\
                                                                     format(recipient_d.slug, queued_message.created_by.parent.id,sprm.id))
                                                 )
-                            s_msg = _compose(full_tpl, recipient_d)
+                            s_msg = _compose(full_tpl, recipient_d, cdd)
                         else:
-                            s_msg = _compose(queued_message.message["sms_template"], recipient_d)
+                            s_msg = _compose(queued_message.message["sms_template"], recipient_d, cdd)
                             
                         _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
                                          queued_message.created_by,
@@ -230,6 +243,13 @@ def process_onetime_event(queued_messages=None):
                         message_data = [queued_message],
                         message_category = 'queued_msg',
                         reason = e.message,
+                        owned_by = queued_message.created_by
+                                                )
+            except CustomData.DoesNotExist:
+                FailedKITMessage.objects.create(
+                        message_data = [queued_message],
+                        message_category = 'queued_msg',
+                        reason = 'The Custom Data "%s" being referenced is no longer Available'%(due_queued_messages.message["custom_data_id"]),
                         owned_by = queued_message.created_by
                                                 )
         
@@ -271,18 +291,23 @@ def process_reminder_event(running_messages=None):
             try:
                 ok_to_send = OKToSend(created_by)
                 if ok_to_send.check():
+                    #custom data
+                    if message["others"]["custom_data_namespace"]:
+                        cd_data = (CustomData.objects.get(namespace=message["others"]["custom_data_namespace"])).data
+                        cdd = cd_data.get(recipient_d.slug)
+                        
                     #email
                     if message["send_email"] and recipient_d.email and message["email_template"]:
                         smtp_setting_qsv = SMTPSetting.objects.get(pk = message["smtp_setting_id"])
-                        e_msg = _compose(message["email_template"], recipient_d)
-                        e_title = _compose(message["title"], recipient_d)
+                        e_msg = _compose(message["email_template"], recipient_d, cdd)
+                        e_title = _compose(message["title"], recipient_d, cdd)
                         _send_email.delay([e_title, e_msg, recipient_d.email],\
                                           smtp_setting_qsv, owner = created_by
                                           )
                     #sms
                     if message["send_sms"] and recipient_d.phone and message["sms_template"]:
-                        s_msg = _compose(message["sms_template"], recipient_d)
-                        s_sender = _compose(message["title"], recipient_d)
+                        s_msg = _compose(message["sms_template"], recipient_d, cdd)
+                        s_sender = _compose(message["title"], recipient_d, cdd)
                         _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
                                         created_by,
                                         'reminder_msg',
@@ -307,6 +332,13 @@ def process_reminder_event(running_messages=None):
                         message_data = [running_message],
                         message_category = 'running_msg',
                         reason = e.message,
+                        owned_by = created_by
+                                                )
+            except CustomData.DoesNotExist:
+                FailedKITMessage.objects.create(
+                        message_data = [running_message],
+                        message_category = 'running_msg',
+                        reason = 'The Custom Data "%s" being referenced is no longer Available'%(message["others"]["custom_data_namespace"]),
                         owned_by = created_by
                                                 )
  
