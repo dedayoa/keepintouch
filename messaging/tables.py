@@ -101,9 +101,11 @@ class ProcessedMessagesTable(tables.Table):
     def render_message(self, record):
         
         serialized_m = json.dumps(record.message)
+        #rex = re.compile('\\r|\\n')
+        #re.sub(rex,'',aoi)
         
-        return mark_safe('<a href="#" data-kitmsg=\'{}\' class="show-message-modal">{}</a>'.\
-            format(serialized_m, (record.message)['title']))
+        return mark_safe('<a href="#" class="show-message-modal">{1} <span class="table-rowid-span">{2}</span><script type="application/json">{0}</script></a>'.\
+            format(serialized_m, (record.message)['title'],'- %s'%(record.message)['others'].get('draft_title') if (record.message)['others'].get('draft_title') else ''))
     
     class Meta:
         model = ProcessedMessages
