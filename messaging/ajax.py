@@ -336,6 +336,9 @@ def send_message(request):
                                 'repeat_until' :  None if not repeat_until else repeat_until.strftime('%d-%m-%Y %H:%M'),
                                 'first_delivery_time' : fdt,
                                 'custom_data_namespace' : getattr(my_adv_form[0].cleaned_data.get('custom_data_namespace'),'namespace', None),
+                                'cc_recipients' : [],
+                                'cc_recipients_send_sms' : False,
+                                'cc_recipients_send_email' : False, 
                                 }
                            },
                 recurring = message_reoccurs,
