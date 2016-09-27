@@ -323,7 +323,6 @@ def send_message(request):
                     'send_sms' : my_adv_form[2].send_sms,
                     'sms_insert_optout' : my_adv_form[2].insert_optout,
                     'sms_sender_id' : my_adv_form[2].sms_sender,
-                    'custom_data_id' : getattr(my_adv_form[0].cleaned_data.get('custom_data_namespace'),'namespace', None),
                     'recipients' : my_adv_form[1], #request.POST.getlist('recipients',[]),
                     'smtp_setting_id': getattr(my_adv_form[2], 'smtp_setting.id',''), #request.POST.get('smtp_setting','')
                     'others' : {
@@ -332,7 +331,8 @@ def send_message(request):
                                 'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None,
                                 'repeat_frequency' : my_adv_form[0].cleaned_data.get('repeat_frequency'),
                                 'repeat_until' :  None if not repeat_until else repeat_until.strftime('%d-%m-%Y %H:%M'),
-                                'first_delivery_time' : fdt
+                                'first_delivery_time' : fdt,
+                                'custom_data_namespace' : getattr(my_adv_form[0].cleaned_data.get('custom_data_namespace'),'namespace', None),
                                 }
                            },
                 recurring = message_reoccurs,
