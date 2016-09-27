@@ -135,7 +135,7 @@ class SMTPHelper():
                     from_email = '"{}" <{}>'.format(self.from_sender, self.smtp_user),
                     #from_email = self.smtp_user,
                     to = [email_message[2]], #recipient
-                    cc = kwargs['cc_recipients'],
+                    cc = kwargs.get('cc_recipients',[]),
                     connection=smtp_connection,
                     #headers={'Message-ID': 'foo'},
                 )
