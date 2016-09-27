@@ -327,7 +327,7 @@ def send_message(request):
                     'sms_insert_optout' : my_adv_form[2].insert_optout,
                     'sms_sender_id' : my_adv_form[2].sms_sender,
                     'recipients' : my_adv_form[1], #request.POST.getlist('recipients',[]),
-                    'smtp_setting_id': getattr(my_adv_form[2], 'smtp_setting.id',''), #request.POST.get('smtp_setting','')
+                    'smtp_setting_id': getattr(my_adv_form[2].smtp_setting, 'pk',''), #request.POST.get('smtp_setting','')
                     'others' : {
                                 'draft_title' : my_adv_form[0].cleaned_data.get('title'),
                                 'template_id' : my_adv_form[0].cleaned_data.get('message_template').id,
