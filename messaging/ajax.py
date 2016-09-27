@@ -268,7 +268,10 @@ def send_message(request):
                     'smtp_setting_id': request.POST.get('smtp_setting',''),
                     'others' : {
                             'draft_title' : myform.cleaned_data.get('title',''),
-                            'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None                                
+                            'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None,
+                            'cc_recipients' : request.POST.getlist('copied_recipients',[]),
+                            'cc_recipients_send_sms' : myform.cleaned_data.get('cc_recipients_send_sms', False),
+                            'cc_recipients_send_email' : myform.cleaned_data.get('cc_recipients_send_email', False),                         
                                 }
                             },
                 delivery_time = myform.cleaned_data.get('delivery_time'),
