@@ -76,6 +76,10 @@ class OrganizationContact(models.Model):
         ('RETAIL','Retail'),
         ('TRANSPORT_HAULAGE','Transportation & Haulage'),
         ('TRAVEL_TOURISM','Travel & Tourism'),
+        ('INSURANCE','Insurance'),
+        ('LEGAL','Legal Services'),
+        ('GOVERNMENT','Government'),
+        ('HOSPITALITY','Hotel & Recreation'),
         ('OTHER','Other')
     )
     
