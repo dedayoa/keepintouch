@@ -3,6 +3,21 @@ body{
 }
 
 
+#cc-recipients-channel-control{
+	margin-top: 1.5rem;
+}
+
+div#cc-recipients-select .select2-container{
+	margin-bottom: 0;
+}
+
+div#cc-recipients-select{
+	padding: 0.5rem 0;
+    background-color: #ffebcd;
+    margin: 0 0 1rem 0;
+    color: #aaa;
+}
+
 div#template-preview-modal li span{
 	font-family: monospace;
     display: inline-block;
@@ -93,7 +108,7 @@ div.title-bar-left{
     font-size: 75%;
     font-style: italic;
     display: inline-block;
-    color: #ff7800;
+    color: #653104;
 }
 
 
