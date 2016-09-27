@@ -30,7 +30,7 @@
 					{% block table.tbody.row %}
 					<tr {{ row.attrs.as_html }}>
 						{# for record in row #}
-							<td><a href="#" data-kitmsg="{{ row.record.message|tojson }}" class="show-message-modal">{{ row.record.message.title }}</a></td>
+							<td><a href="#" data-kitmsg="{{ row.record.message|tojson }}" class="show-message-modal">{{ row.record.message.title }} - <span style="font-size: 90%; color: #888; font-style: italic;">{{row.record.message.others.draft_title}}</span></a></td>
 							<td>{{ row.record.message_type|lower|title }}</td>
 							<td>{{ row.record.delivery_time|date:"d/m/Y G:i" }}</td>
 							<td>
