@@ -180,6 +180,8 @@ def process_onetime_event(queued_messages=None):
         if queued_message.message["others"].get("cc_recipients"):
             cc_recipients_qs = Contact.objects.filter(pk__in = queued_message.message["others"]["cc_recipients"])
             cc_emails = [x[0] for x in cc_recipients_qs.values_list('email')] #get a list of emails
+        else:
+            cc_emails = []
         
         
         # create entry in processed message
