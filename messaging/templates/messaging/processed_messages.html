@@ -17,27 +17,41 @@
     </div>
 	{% render_table table %}
 </div>
-<div class="reveal" id="message-modal" data-reveal>
-  <h3>Detail</h3>
-  <p id="modal-mdt" class="lead"></p>
-  <p id="modal-tle"></p>
-  <p id="modal-msg"></p>
-  <p id="modal-rpt"></p>
-  <button class="close-button" data-close aria-label="Close modal" type="button">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
+<!-- template preview overlay goes here -->
+{% include "core/templates/template_preview_overlay.html" %}
+
 {% endblock %}
 {% block foot_base_js %}
 	{{block.super}}
-	<script>		
-		$(".show-message-modal").click(function(e){
-			msg = jQuery.parseJSON($(this).attr('data-kitmsg'));
-			$('#message-modal p#modal-tle').text(msg.title);
-			$('#message-modal p#modal-msg').text(msg.message);
-			$('#message-modal p#modal-rpt').text(msg.recipients);
-			/*$('#message-modal p#modal-tle').text(msg.title);*/
-			$('#message-modal').foundation('open');
+	<script>
+		$(".show-message-modal").on('click', function(){
+			data = jQuery.parseJSON($("script", this).html());
+			
+			res = enset_tpl_vars([get_tpl_vars(data.email_template),get_tpl_vars(data.sms_template)])
+			
+			result_v = function(v){
+				var myRes = '';
+				for (let x of v){
+					myRes += "<div>"+x+"</div>";
+				};
+				return myRes;
+			};
+			
+			$('#msm-title').text(data.title);
+			$('#msm-send-email').text(get_u_val(data.send_email));
+			$('#msm-smtp-name').text(data.smtp_name);
+			
+			$('#msm-send-sms').text(get_u_val(data.send_sms));
+			$('#msm-sms-sender-id').text(data.sms_sender);
+			$('#msm-sms-insert-optout').text(get_u_val(data.insert_optout));
+			
+			$('#template-preview-modal').foundation('open');
+			$('#msg-tpl-vars').html(result_v(res));
+			$('iframe#msm-email-tpl').contents().find('html').html(data.email_template);
+			$('iframe#msm-email-tpl').css({"overflow-y":"scroll","height":"500px"});
+			
+			$('textarea#msm-sms-tpl').text(data.sms_template);
+			
 		});
 	</script>
 {% endblock %}
