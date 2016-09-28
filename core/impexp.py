@@ -30,12 +30,14 @@ class ContactResource(resources.ModelResource):
         exclude = ('slug','last_modified', 'created','active')
     
     def for_delete(self, row, instance):
-        
+        # ignore rows without both phone and email
         if not (self.fields['phone'].clean(row) or self.fields['email'].clean(row)):
             return True
+        # ignore rows without firstname
         if not self.fields['first_name'].clean(row):
             return True
         try:
+            # if when trying to parse a number, an exception occurs, ignore.
             phonenumbers.parse(self.fields['phone'].clean(row), 'NG')
         except NumberParseException:
             return True
