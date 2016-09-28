@@ -29,14 +29,16 @@ class ContactTable(tables.Table):
     first_name = tables.LinkColumn(verbose_name="First Name", text=lambda t: t.first_name, args=[A('pk')])
     last_name = tables.Column(verbose_name="Last Name")
     active = tables.BooleanColumn(verbose_name="Active?")
-    email = tables.EmailColumn(verbose_name="Email")
+    email = tables.EmailColumn(verbose_name="Email", text= lambda row: "%s..."%row.email[:10] if len(row.email) > 10 else row.email)
+    nickname = tables.Column(verbose_name="Nickname")
     
     def render_phone(self,record):
         return mark_safe("<span>{}</span>".format(record.phone))
+    
 
     class Meta:
         model = Contact
-        fields = ('select','first_name','last_name','email','phone','active')
+        fields = ('select','first_name','last_name','nickname','email','phone','active')
         attrs = {'style': 'width: 100%'}
         empty_text = "Sorry, No Contact Found"
         attrs = {'style': 'width: 100%'}
