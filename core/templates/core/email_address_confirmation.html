@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load sitegate %}
+{% load google_analytics %}
+<html class="no-js" lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="google-site-verification" content="H3VLJGOuBuzxDGGUrtvu_ChfCb0vd_JgN11cyGssOrc" />
+	{% google_analytics %}
+	<title>Intouch - {{title}}</title>
+	{% block head_base_links %}
+		<link rel="stylesheet" href="{% static "css/foundation.css" %}" />
+		<link rel="stylesheet" href="{% static "css/foundation-icons/foundation-icons.css" %}" />
+		<link href="{% static "css/main.css" %}" rel="stylesheet">
+		<script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+	{% endblock %}
+	<style>
+	label[for="id_signin_flow"]{
+		display: none;
+	}
+	body{
+		background: url({% static "images/background-app.png" %}) no-repeat center center fixed;
+		-webkit-background-size: cover;
+		-moz-background-size: cover;
+		-o-background-size: cover;
+		background-size: cover;
+	}
+	</style>
+</head>
+<body>
+	{% block body %}
+	<div class="row column large-12" style="margin-top: 1rem;">
+		<a href="#">
+			<img style="vertical-align: text-bottom;" width="50" src="{% static "images/logo-100x100.png" %}" alt="Intouch Enterprise Email & SMS Suite"/>
+			<h3 style="display: inline-block; line-height: 2rem">InTouch Communication Suite</h3>
+		</a>
+		<h4>All-in-One Enterprise Email and SMS</h4>		
+	</div>
+	
+	<div class="row">
+		<div class="column large-5 login-form">
+			{% sitegate_signin_form %}
+			<a href="{% url 'password_reset_recover' %}">Forgot Password</a>
+		</div>
+	</div>
+	<div class="row columns" style="margin-top: 1rem;">
+		<div class="row">Developed by <a href="http://tekartng.com" style="color: #3f3f3f; font-weight: bold;">Tekart Limited</a></div>
+	</div>
+	{% endblock %}
+	{% block foot_base_js %}
+		<script type="text/javascript" src="{% static "js/vendor/what-input.js" %}"></script>
+		<script type="text/javascript" src="{% static "js/vendor/foundation.js" %}"></script>
+		<script type="text/javascript" src="{% static "js/main.js" %}"></script>
+	{% endblock %}
+
+</body>
+</html>
