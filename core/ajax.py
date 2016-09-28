@@ -172,7 +172,7 @@ def _salutation_to_lower_case(ds):
     nu_r.headers = ds.headers
     while len(ds) > 0:
         r = ds.lpop()
-        nu_r.append((r[0].lower(), r[1], r[2], r[3], r[4]))
+        nu_r.append((r[0].lower(), r[1], r[2], r[3], r[4], r[5]))
     return nu_r
 
 def dry_run_file(file, fext, kuserid):
@@ -190,7 +190,7 @@ def dry_run_file(file, fext, kuserid):
         # convert to csv to get rid of all the strange binaries
         dataset = tablib.Dataset().load(dataset.csv)
         #check that headers 
-        fhdr = ['salutation','first_name','last_name','phone','email']
+        fhdr = ['salutation','first_name','last_name','nickname','phone','email']
         if dataset.headers is None:
             dataset.headers = fhdr
         if set(fhdr) != set(dataset.headers):
@@ -207,6 +207,7 @@ def dry_run_file(file, fext, kuserid):
             else:
                 #StateMaintainCache.objects.create(obj=read_file)
                 del clean_ds['kit_user']
+                print(clean_ds.json)
                 return [clean_ds.json, res_cr_dr.totals]
             
     except:
