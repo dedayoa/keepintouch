@@ -87,8 +87,9 @@ def process_private_anniversary(private_events=None):
                                             peven.contact.kit_user,
                                             'private_anniv_msg',
                                             )
-    
-                peven.update(last_run=timezone.now().date())
+                # update the last run date (year especially)
+                peven.last_run=timezone.now().date()
+                peven.save()
         # move messages to a paused queue pending when error is resolved
         # also, send user a message about the issue
         except IsNotActiveError as e:
@@ -164,7 +165,8 @@ def process_public_anniversary(public_events=None):
                         owned_by = publicevent.kit_user
                                                 )
             
-        publicevent.update(date = timezone.now().date()+relativedelta(years=1))
+        publicevent.date = timezone.now().date()+relativedelta(years=1)
+        publicevent.save()
     
 def process_onetime_event(queued_messages=None):
     
