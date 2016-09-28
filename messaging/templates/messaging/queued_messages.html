@@ -22,6 +22,7 @@
 						<th>Message</th>
 						<th>Message Type</th>
 						<th>Delivery Time</th>
+						<th>Recurring</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -33,6 +34,7 @@
 							<td><a href="#" data-kitmsg="{{ row.record.message|tojson }}" class="show-message-modal">{{ row.record.message.title }} - <span class="table-rowid-span">{{row.record.message.others.draft_title}}</span></a></td>
 							<td>{{ row.record.message_type|lower|title }}</td>
 							<td>{{ row.record.delivery_time|date:"d/m/Y G:i" }}</td>
+							<td>{% if row.record.recurring %}<span class="true">&#x2714</span>{% else %}<span class="false">&#x2718</span>{% endif %}</td>
 							<td>
 								<form class="qu-re-form" method="POST" action="{% url 'messaging:queued-message-dequeue' row.record.message_type row.record.message_id %}">
 	                				{% csrf_token %}
