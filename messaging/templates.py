@@ -57,11 +57,6 @@ class TemplateForPhoneEmailVerification(object):
         return t
         
     def template_sms(self):
-        t = '''
-        Dear {{fullname}}
-        Your Phone Verification code is {{phone_verification_code}}.
-        
-        In.Touch        
-        '''
+        t = 'Dear {{fullname}}\nYour Phone Verification code is {{phone_verification_code}}.\nIn.Touch'
         
         return t
