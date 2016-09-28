@@ -53,7 +53,7 @@ from gomez.models import KITBilling
 
 from stronghold.decorators import public
 from django.views.decorators.csrf import csrf_exempt
-from core.models import KITUBalance
+from core.models import KITUBalance, KITActivationCode
 from django.db.utils import IntegrityError
 
 
@@ -1027,3 +1027,26 @@ class CustomDataView(PermissionRequiredMixin, TemplateView):
     def get_queryset(self, **kwargs):
         qs = super(CustomDataView, self).get_queryset(**kwargs)
         return qs.filter(kit_user=self.request.user.kituser)
+    
+    
+    
+class ValidateEmail(View):
+    
+    template_name = 'core/email_address_confirmation.html'
+    params = {}
+    
+    def get(self, request):
+        umail = request.GET.get('email')
+        token = request.GET.get('t')
+        
+        if KITActivationCode.objects.filter(user__email=umail, email_activation_code=token, expired=True).exists():
+            pass # code has expired, generate another
+        elif KITActivationCode.objects.filter(user__email=umail, email_activation_code=token, expired=False).exists():
+            pass # code successfully validate
+        else:
+            pass # code does not exist. generate another
+        
+        return render(request,self.template_name, self.params)
+        
+    
+    
