@@ -39,6 +39,7 @@ class ContactTable(tables.Table):
         fields = ('select','first_name','last_name','email','phone','active')
         attrs = {'style': 'width: 100%'}
         empty_text = "Sorry, No Contact Found"
+        attrs = {'style': 'width: 100%'}
         
         
 class ContactTable_Admin(tables.Table):
@@ -55,7 +56,7 @@ class ContactTable_Admin(tables.Table):
 
     class Meta:
         model = Contact
-        fields = ('select','first_name','last_name','kit_user','phone','active')
+        fields = ('select','first_name','last_name','phone','active','kit_user')
         attrs = {'style': 'width: 100%'}
         
         
@@ -77,6 +78,7 @@ class PrivateEventTable(tables.Table):
     class Meta:
         model = Event
         fields = ('contact','date','title','message')
+        attrs = {'style': 'width: 100%'}
         
 class PublicEventTable(tables.Table):
     
@@ -89,6 +91,7 @@ class PublicEventTable(tables.Table):
     class Meta:
         model = PublicEvent
         fields = ('title','date', 'message', 'kit_user')
+        attrs = {'style': 'width: 100%'}
     
 class TemplateTable(tables.Table):
     
@@ -100,6 +103,7 @@ class TemplateTable(tables.Table):
     class Meta:
         model = MessageTemplate
         fields = ('title','smtp_setting', 'cou_group', 'send_sms')
+        attrs = {'style': 'width: 100%'}
         
         
 class KITUsersTable(tables.Table):
@@ -146,6 +150,7 @@ class SMTPSettingsTable(tables.Table):
     class Meta:
         model = SMTPSetting
         fields = ('description', 'smtp_server', 'smtp_user','active')
+        attrs = {'style': 'width: 100%'}
         
         
 class UserGroupsSettingsTable(tables.Table):
@@ -157,6 +162,7 @@ class UserGroupsSettingsTable(tables.Table):
     class Meta:
         model = CoUserGroup
         fields = ('title','description','active')
+        attrs = {'style': 'width: 100%'}
         
         
 class ContactGroupsSettingsTable(tables.Table):
@@ -184,6 +190,7 @@ class ContactGroupsSettingsTable(tables.Table):
     class Meta:
         model = ContactGroup
         fields = ('title','description','contacts','last_modified')
+        attrs = {'style': 'width: 100%'}
         
 
 class SMSTransferHistoryTable(tables.Table):
@@ -196,6 +203,7 @@ class SMSTransferHistoryTable(tables.Table):
     class Meta:
         model = SMSTransfer
         fields = ('from_user','to_user','sms_units','transaction_date')
+        attrs = {'style': 'width: 100%'}
         
         
 class UploadedContactFileHistoryTable(tables.Table):
@@ -218,6 +226,7 @@ class UploadedContactFileHistoryTable(tables.Table):
     class Meta:
         model = UploadedContact
         fields = ('name','file_json','import_status','upload_date')
+        attrs = {'style': 'width: 100%'}
         
 
 
@@ -234,4 +243,5 @@ class CustomDataStoreTable(tables.Table):
     class Meta:
         model = CustomData
         fields = ('namespace','system_id_field','identity_column_name','created')
+        attrs = {'style': 'width: 100%'}
         
