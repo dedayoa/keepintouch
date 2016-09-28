@@ -48,3 +48,4 @@ class SMSReportTable(tables.Table):
         model = SMSDeliveryReport
         fields = ('sms_message','sms_sender','to_phone','msg_status','msg_error','created')
         empty_text = 'There are no Reports to display.'
+        attrs = {'style': 'width: 100%'}
