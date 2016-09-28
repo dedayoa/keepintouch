@@ -4,7 +4,7 @@ Created on Jun 15, 2016
 @author: Dayo
 '''
 
-from django.template import Context, Template
+from django.template import Context, Template, loader
 from django.apps import apps
 import logging
 import django_rq
@@ -24,6 +24,7 @@ from .templates import TemplateForIssueFeedbackMessages, TemplateForPhoneEmailVe
 
 from gomez.models import KITSystem
 from core.googlext import GoogleURLShortener
+from django.core.urlresolvers import reverse
 
 #SMTPSetting = apps.get_model('core','SMTPSetting')
 
@@ -223,8 +224,8 @@ def process_onetime_event(queued_messages=None):
                             # append the opt out text and link to each SMS
                             full_tpl = '{} {}'.format(
                                                 queued_message.message["sms_template"],
-                                                gurli.get_short_url("https://cloud.inotuchng.com/sms/unsubscribe/?coid={}&ptid={}&prcmid={}".\
-                                                                    format(recipient_d.slug, queued_message.created_by.parent.id,sprm.id))
+                                                gurli.get_short_url("{}/sms/unsubscribe/?coid={}&ptid={}&prcmid={}".\
+                                                                    format(settings.WEBHOOK_BASE_URL, recipient_d.slug, queued_message.created_by.parent.id,sprm.id))
                                                 )
                             s_msg = _compose(full_tpl, recipient_d, cdd)
                         else:
@@ -407,15 +408,20 @@ def process_verification_messages(**kwargs):
     
     
     if not kwargs.get('email_is_validated'):
-        template_email = tmpl.template_email()
-        etmpl = Template(template_email)
-        email_to_user = etmpl.render(Context({
+        email_template = 'emails/user_email_address_verification.html'
+        
+        # create link in email
+        email_verification_link = "{}{}?email={}&t={}".format(settings.WEBHOOK_BASE_URL,\
+                                            reverse('core:register-validate-email'),kwargs.get('email'),\
+                                            kwargs.get('email_verification_link'))
+        
+        email_to_user = loader.get_template(email_template).render(Context({
                                 'fullname':kwargs.get('fullname',''),
-                                'email_verification_code': kwargs.get('email_verification_code','')
+                                'email_verification_link': email_verification_link
                                      })
                                  )
         smtp_settings = SMTPSetting(**settings.SUPPORT_EMAIL)
-        _send_email.delay(['Email Verification Code', email_to_user, kwargs.get('email','')],
+        _send_email(['Email Verification Code', email_to_user, kwargs.get('email','')],
                           smtp_settings,
                           owner = KITUser.objects.get(pk=settings.SYSTEM_KITUSER_ID),
                           )
