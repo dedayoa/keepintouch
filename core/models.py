@@ -430,6 +430,7 @@ class Contact(models.Model):
     salutation = models.CharField(max_length=10, choices=SALUTATION, blank=True)
     first_name = models.CharField(max_length=100, blank=False)
     last_name = models.CharField(max_length=100, blank=True)
+    nickname = models.CharField(max_length=100, blank=True, default='')
     email = models.EmailField(blank=True)
     phone = PhoneNumberField(blank=True)
     domain_id = models.CharField(max_length=255, null=True, blank=True, db_index=True)
