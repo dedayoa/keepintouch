@@ -413,7 +413,7 @@ def process_verification_messages(**kwargs):
         # create link in email
         email_verification_link = "{}{}?email={}&t={}".format(settings.WEBHOOK_BASE_URL,\
                                             reverse('core:register-validate-email'),kwargs.get('email'),\
-                                            kwargs.get('email_verification_link'))
+                                            kwargs.get('email_verification_code'))
         
         email_to_user = loader.get_template(email_template).render(Context({
                                 'fullname':kwargs.get('fullname',''),
