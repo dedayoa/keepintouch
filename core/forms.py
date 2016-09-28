@@ -35,7 +35,6 @@ from phonenumber_field.formfields import PhoneNumberField
 from timezone_utils.forms import TimeZoneField
 from timezone_utils.choices import PRETTY_COMMON_TIMEZONES_CHOICES
 
-from cities_light.forms import RegionForm, CityForm, CountryForm
 
 
 class ContactForm(forms.ModelForm):
@@ -91,7 +90,7 @@ class ContactForm(forms.ModelForm):
     
     class Meta:
         model = Contact
-        fields = ['salutation','first_name','last_name','email','phone','domain_id','active']
+        fields = ['salutation','first_name','last_name','nickname','email','phone','domain_id','active']
         labels = {
             #'user_group': _('User Group'),
         }
@@ -182,7 +181,7 @@ class NewContactForm(forms.ModelForm):
     
     class Meta:
         model = Contact
-        fields = ['salutation','first_name','last_name','email','phone','domain_id','active']
+        fields = ['salutation','first_name','last_name','nickname','email','phone','domain_id','active']
         labels = {
             #'user_group': _('Group'),
         }
@@ -548,8 +547,8 @@ class ContactImportForm(forms.Form):
                         % (filesizeformat(settings.MAX_UPLOAD_FILE_SIZE), filesizeformat(content._size))
                 raise forms.ValidationError(msg)
 
-            if not (content.name.endswith('.csv') or content.name.endswith('.xlsx') or content.name.endswith('.xls')) :
-                msg = 'Your file has to be either .csv, .xls or .xlsx'
+            if not (content.name.endswith('.csv') or content.name.endswith('.xls')) :
+                msg = 'Your file has to be either .csv or .xls'
                 raise forms.ValidationError(msg)
         else:
             raise forms.ValidationError('File not supported')
