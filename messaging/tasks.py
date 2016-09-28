@@ -16,6 +16,7 @@ from .helper import SMTPHelper, SMSHelper, get_next_delivery_time, OKToSend
 from core.exceptions import *
 from core.models import Contact, PublicEvent, KITUser, SMTPSetting, Event, CustomData
 from dateutil.relativedelta import relativedelta
+import arrow
 
 from .models import QueuedMessages, ProcessedMessages,RunningMessage, IssueFeedback, FailedKITMessage
 
@@ -267,12 +268,13 @@ def process_onetime_event(queued_messages=None):
         # delete queued message from queuedmessage table if it does not reccur
         if queued_message.recurring == False:
             queued_message.delete()
-        elif queued_message.recurring == True and (queued_message.message["others"]["repeat_until"] <= timezone.now()):
+        elif queued_message.recurring == True and (arrow.get(queued_message.message["others"]["repeat_until"],'DD-MM-YYYY HH:mm').datetime <= timezone.now()):
             # if it's a recurring message and repeat_until becomes less than now
             queued_message.delete()
         else:
-            queued_message.update(delivery_time=get_next_delivery_time(queued_message.message["others"]["repeat_frequency"],\
-                                                                       queued_message.delivery_time))
+            queued_message.delivery_time=get_next_delivery_time(queued_message.message["others"]["repeat_frequency"],\
+                                                                       queued_message.delivery_time)
+            queued_message.save()
 
         
 
