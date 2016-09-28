@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^exit/$', exitdoor , name='backdoor'),
     url(r'^$', entrance, name='frontdoor'),
     url(r'^register/free-trial/$', register_free_trial, name='freetrial-signup'),
+    url(r'^register/email-validate/$', ValidateEmail.as_view(), name='register-validate-email'),
     url(r'^gcrawler/$', crawler_entrance, name="gcrawler"),
     url(r'^dashboard/$', DashboardView.as_view(), name='dashboard-view'),
     url(r'^ping-stat/', include([
