@@ -417,7 +417,8 @@ def process_verification_messages(**kwargs):
         
         email_to_user = loader.get_template(email_template).render(Context({
                                 'fullname':kwargs.get('fullname',''),
-                                'email_verification_link': email_verification_link
+                                'email_verification_link': email_verification_link,
+                                'email_verification_code': kwargs.get('email_verification_code')
                                      })
                                  )
         smtp_settings = SMTPSetting(**settings.SUPPORT_EMAIL)
