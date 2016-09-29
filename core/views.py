@@ -1039,12 +1039,23 @@ class ValidateEmail(View):
         umail = request.GET.get('email')
         token = request.GET.get('t')
         
+        self.params["title"] = 'Email Validation'
+        
         if KITActivationCode.objects.filter(user__email=umail, email_activation_code=token, expired=True).exists():
-            pass # code has expired, generate another
+            # code has expired, generate another
+            self.params["validation_message"] = mark_safe('<h4>This link has expired.</h4> Please <a href="{}">login</a> to Resend a new validation link'.format(reverse_lazy('core:frontdoor')))
+            
         elif KITActivationCode.objects.filter(user__email=umail, email_activation_code=token, expired=False).exists():
-            pass # code successfully validate
+            # code successfully validate
+            self.params["validation_message"] = mark_safe('<h4>Email Validated Successfully</h4>')
+            KITActivationCode.objects.filter(user__email=umail, email_activation_code=token).update(expired=True)
+            KITUser.objects.filter(user__email=umail).update(
+                                                email_validated = True,
+                                                email_validated_date = timezone.now()
+                                                )
         else:
-            pass # code does not exist. generate another
+            # code does not exist. generate another
+            self.params["validation_message"] = mark_safe('<h4>This link does not exist.</h4> Please <a href="{}">login</a> to Resend a validation link'.format(reverse_lazy('core:frontdoor')))
         
         return render(request,self.template_name, self.params)
         
