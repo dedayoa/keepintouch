@@ -6,8 +6,11 @@ Created on Aug 7, 2016
 
 import re
 from django.conf import settings
+from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from core.exceptions import MissingSMSRateError
+from core.models import KITUBalance, SMSTransfer
+
 from .models import SMSRateTable, EmailReport, SMSReport
 
 from cacheops import cached_as
@@ -174,6 +177,62 @@ def temp_log_to_db(m_type, **kwargs):
         )
     
     
+
+class SMSTransferHelper(object):
     
+    def __init__(self, from_user, to_user):
+        self.from_user = from_user
+        self.to_user = to_user
+    
+    @transaction.atomic   
+    def credit(self, amount):
+        # reduce from_user, increase to_user
+
+        user = KITUBalance.objects.select_for_update().get(kit_user=self.to_user)
+        admin = KITUBalance.objects.select_for_update().get(kit_user=self.from_user)
+        
+        user.sms_balance = user.sms_balance + amount
+        admin.sms_balance = admin.sms_balance - amount
+        
+        user.save()
+        admin.save()
+        
+        SMSTransfer.objects.create(
+            from_user = admin.kit_user,
+            to_user = user.kit_user,
+            sms_units = amount,
+            transaction_detail = {
+                    'from_user_email' : admin.kit_user.user.email,
+                    'to_user_email' : user.kit_user.user.email
+                                  },
+            created_by = admin.kit_user
+        )
+        
+        return [admin.sms_balance, user.sms_balance]
+    
+    @transaction.atomic  
+    def debit(self, amount):
+        # reduce to_user, increase from_user
+        user = KITUBalance.objects.select_for_update().get(kit_user=self.from_user)
+        admin = KITUBalance.objects.select_for_update().get(kit_user=self.to_user)
+        
+        user.sms_balance = user.sms_balance - amount
+        admin.sms_balance = admin.sms_balance + amount
+        
+        user.save()
+        admin.save()
+        
+        SMSTransfer.objects.create(
+            from_user = user.kit_user,
+            to_user = admin.kit_user,
+            sms_units = amount,
+            transaction_detail = {
+                    'from_user_email' : user.kit_user.user.email,
+                    'to_user_email' : admin.kit_user.user.email
+                                  },
+            created_by = admin.kit_user
+        )
+        
+        return [user.sms_balance, admin.sms_balance]
    
     
