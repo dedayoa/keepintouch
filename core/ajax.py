@@ -32,6 +32,7 @@ from django.utils.text import slugify
 from tablib.core import UnsupportedFormat
 from django.http.response import HttpResponseRedirect
 from django.utils import timezone
+from gomez.helper import SMSTransferHelper
 
 from ipware.ip import get_real_ip
 
@@ -76,7 +77,6 @@ def return_all_level_err(message):
     
 @ajax
 @login_required
-@transaction.atomic
 def sms_credit_transfer(request):
     
     
@@ -93,60 +93,39 @@ def sms_credit_transfer(request):
                 #user = KITUser.objects.select_for_update().get(id=user.id)
                 #admin = KITUser.objects.select_for_update().get(id=request.user.kituser.id)
                 
-                user = KITUBalance.objects.select_for_update().get(kit_user=user.id)
-                admin = KITUBalance.objects.select_for_update().get(kit_user=request.user.kituser.id)
+                #user = KITUBalance.objects.select_for_update().get(kit_user=user.id)
+                #admin = KITUBalance.objects.select_for_update().get(kit_user=request.user.kituser.id)
                               
                 if request.POST.get("mdir") == 'credit': #give user units
                     #check before db entry that admin has sufficient balance to execute the transaction
                     
-                    rek = admin.sms_balance - amount
+                    rek = request.user.kituser.kitubalance.sms_balance - amount
                     if rek <= 0:
                         return {'errors': json.dumps(
                                                 {'__all__': [{'message' : 'Admin does not have enough balance to complete transaction'}]}
                                             )
                                     }
                     else:
+                        st = SMSTransferHelper(request.user.kituser, user)
+                        result = st.credit(amount)
                         
-                            user.sms_balance = user.sms_balance + amount
-                            admin.sms_balance = admin.sms_balance - amount
-                            user.save()
-                            admin.save()
-                            SMSTransfer.objects.create(
-                                from_user = admin.kit_user,
-                                to_user = user.kit_user,
-                                sms_units = amount,
-                                transaction_detail = {
-                                        'from_user_email' : admin.kit_user.user.email,
-                                        'to_user_email' : user.kit_user.user.email
-                                                      },
-                                created_by = admin.kit_user
-                            )
+                        result_dict['user_sms_bal'] = result[1]
+                        result_dict['admin_sms_bal'] = result[0]
+                        
                 elif request.POST.get("mdir") == 'debit':
                     
-                    uek = user.sms_balance - amount 
+                    uek = user.kitubalance.sms_balance - amount 
                     if uek <= 0:
                         return {'errors': json.dumps(
                                                 {'__all__': [{'message' : 'User does not have enough balance to complete transaction'}]}
                                             )
                                     }
-                    else:    
-                        user.sms_balance = user.sms_balance - amount
-                        admin.sms_balance = admin.sms_balance + amount
-                        user.save()
-                        admin.save()
-                        SMSTransfer.objects.create(
-                            from_user = user.kit_user,
-                            to_user = admin.kit_user,
-                            sms_units = amount,
-                            transaction_detail = {
-                                    'from_user_email' : user.kit_user.user.email,
-                                    'to_user_email' : admin.kit_user.user.email
-                                                  },
-                            created_by = admin.kit_user
-                        )
+                    else:
+                        st = SMSTransferHelper(user, request.user.kituser)
+                        result = st.debit(amount)
                     
-                result_dict['user_sms_bal'] = user.sms_balance
-                result_dict['admin_sms_bal'] = admin.sms_balance
+                        result_dict['user_sms_bal'] = result[0]
+                        result_dict['admin_sms_bal'] = result[1]
                 
             except IntegrityError:
                 print("Integrity Error Occured")
