@@ -16,32 +16,28 @@ default_scheduler = django_rq.get_scheduler('default')
 
 def run_schedules():
     # Delete any existing jobs in the scheduler when the app starts up
-    for job in default_scheduler.get_jobs():
-        job.delete()
+    #for job in default_scheduler.get_jobs():
+    #    job.delete()
     
     
     # User SMS Balance crediting
     # Run every month
-    job86p4k = default_scheduler.schedule(
-        scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
+    default_scheduler.schedule(
+        scheduled_time=arrow.utcnow().ceil('day').replace(seconds=+1).date(), # Time for first execution, in UTC timezone
         func='gomez.tasks.process_monthly_sms_crediting',                     # Function to be queued
-        args=[datetime.utcnow().date()],             # Arguments passed into function when executed
         #kwargs={'foo': 'bar'},         # Keyword arguments passed into function when executed
         interval=86400,              # Call once a day
-        repeat=None                 # Repeat forever
-    )
-    
-    
-    # Public Event Scheduler
-    # Run every 1 hour
-    job_36k = default_scheduler.schedule(
-        scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
-        func='gomez.tasks.process_reset_free_sms_weekly',
-        interval=3600, 
-        repeat=None
+        repeat=None                  # Repeat forever
     )
     
 
     
-    return (job86p4k, job_36k)
+    # expire verification codes that have been created over 24hours
+    default_scheduler.schedule(
+        scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
+        func='gomez.tasks.expire_validation_code',
+        interval=3600, 
+        repeat=None
+    )
+    
     
