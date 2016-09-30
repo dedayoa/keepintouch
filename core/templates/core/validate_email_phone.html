@@ -134,7 +134,13 @@
 						{% endif %}
 					</table>
 				</div>
-				<input type="submit" class="button send-verification-code" value="Send Code"></input>
+				{% if not request.user.kitactivationcode %}
+					<input type="submit" class="button send-verification-code" value="Send Code"></input>
+				{% elif request.user.kitactivationcode and request.user.kitactivationcode.can_resend_for_code %}
+					<input type="submit" class="button send-verification-code" value="Send Code"></input>
+				{% else %}
+					<div style="color: orangered; font-size: 75%;">Kindly Check your Phone and Email for the Verification Codes. If you still don't receive a code after 10 minutes, you can refresh this page to re-send another code.</div>
+				{% endif %}
 				<button class="button validate-verify">Verify</button>
 			</form>
 		{% endblock %}
