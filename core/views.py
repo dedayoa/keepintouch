@@ -1048,7 +1048,6 @@ class ValidateEmail(View):
         elif KITActivationCode.objects.filter(user__email=umail, email_activation_code=token, expired=False).exists():
             # code successfully validate
             self.params["validation_message"] = mark_safe('<h4>Email Validated Successfully</h4>')
-            KITActivationCode.objects.filter(user__email=umail, email_activation_code=token).update(expired=True)
             KITUser.objects.filter(user__email=umail).update(
                                                 email_validated = True,
                                                 email_validated_date = timezone.now()
