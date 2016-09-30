@@ -6,6 +6,7 @@ Created on Jul 9, 2016
 import sys, os
 import requests
 from dateutil.relativedelta import relativedelta
+from django.template import Context, Template, loader
 
 from django.utils import timezone
 from django.core import mail
@@ -333,3 +334,22 @@ def get_next_delivery_time(repeat_frequency, delivery_time):
         return delivery_time+relativedelta(years=1) 
 
 
+
+
+def assemble_message(template_file, convars, custom_convars = {}):
+    # This composes the message using the template and the context variables
+    # users cannot override the default_convars for contacts
+    
+    t = loader.get_template(template_file)
+    context_vars = custom_convars 
+    
+    default_convars = {
+                        'firstname':getattr(convars,'first_name',''),
+                        'lastname':getattr(convars,'last_name',''),
+                        'salutation':getattr(convars,'salutation',''),
+                        'email':getattr(convars,'email',''),
+                        'phone':getattr(convars,'phone',''),                            
+                        }
+    context_vars.update(default_convars)
+    
+    return t.render(Context(context_vars))
