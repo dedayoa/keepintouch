@@ -30,12 +30,13 @@
 	<div class="row">
 		<div class="column medium-3"><p /></div>
 		<div class="column small-12 medium-6">
-			<div class=" signup-form">
+			<div class="signup-form">
 				<a href="#">
 					<img style="vertical-align: text-bottom;" width="50" src="{% static "images/logo-100x100.png" %}" alt="Intouch Enterprise Email & SMS Suite"/>
 					<h4 style="display: inline-block; line-height: 2rem">In.Touch Communication Suite</h4>
 				</a>	
 				<div style="text-align: center; margin-top:2rem;">{{validation_message}}</div>
+				<div style="text-align: center; margin-top:2rem; font-size: 75%; color: orangered;">You will be redirected in <span id="countd">5</span> seconds...</div>
 			</div>
 		</div>
 		<div class="column medium-3"><p /></div>
@@ -45,6 +46,24 @@
 		<script type="text/javascript" src="{% static "js/vendor/what-input.js" %}"></script>
 		<script type="text/javascript" src="{% static "js/vendor/foundation.js" %}"></script>
 		<script type="text/javascript" src="{% static "js/main.js" %}"></script>
+		<script>
+		(function () {
+		    var timeLeft = 5,
+		        cinterval;
+
+		    var timeDec = function (){
+		    	$('#countd').text(timeLeft);
+		        if(timeLeft === 0){
+		            clearInterval(cinterval);
+		            window.location.replace("/");
+		        }
+		        timeLeft--;
+		    };
+
+		    cinterval = setInterval(timeDec, 1000);
+		})();
+		
+		</script>
 	{% endblock %}
 	{% google_analytics %}
 </body>
