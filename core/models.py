@@ -1,6 +1,7 @@
 import sys
 import datetime
 import uuid
+import arrow
 
 from django.db import models, transaction
 from cities_light.models import Country, Region, City
@@ -324,6 +325,15 @@ class KITActivationCode(models.Model):
     
     def __str__(self):
         return "{}".format(self.user)
+    
+    
+    def can_resend_for_code(self):
+        # user can resend for code only if 10 minutes have passed since the code was created
+        # or the code has expired.
+        if arrow.get(self.created).replace(minutes=+10) < arrow.utcnow():
+            return True
+        else:
+            return False        
     
 
 
