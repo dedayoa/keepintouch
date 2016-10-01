@@ -5,19 +5,16 @@ Created on Aug 18, 2016
 '''
 #from redis import Redis
 import django_rq
-from rq_scheduler import Scheduler
-#import arrow
 
 from datetime import datetime
 
 default_scheduler = django_rq.get_scheduler('default')
 
 
-
 def run_schedules():
     # Delete any existing jobs in the scheduler when the app starts up
-    #for job in default_scheduler.get_jobs():
-    #    job.delete()
+    for job in default_scheduler.get_jobs():
+        job.delete()
     # expire verification codes that have been created over 24hours
     
     default_scheduler.schedule(
@@ -25,7 +22,7 @@ def run_schedules():
         func='gomez.tasks.expire_validation_code',
         interval=3600, 
         repeat=None
-    )    
+    )
     
     # User SMS Balance crediting
     # Run every month
