@@ -179,92 +179,95 @@ def process_onetime_event(queued_messages=None):
     gurli = GoogleURLShortener()
     
     for queued_message in due_queued_messages:
-        recipients_qs = Contact.objects.filter(pk__in = queued_message.message["recipients"])
-        
-        if queued_message.message["others"].get("cc_recipients"):
-            cc_recipients_qs = Contact.objects.filter(pk__in = queued_message.message["others"]["cc_recipients"])
-            cc_emails = [x[0] for x in cc_recipients_qs.values_list('email')] #get a list of emails
-        else:
-            cc_emails = []
-        
-        
-        # create entry in processed message
-        sprm = ProcessedMessages.objects.create(
-            message_type = queued_message.message_type,
-            message = queued_message.message,
-            created_by = queued_message.created_by
-        )
-        
-        
-        for recipient_d in recipients_qs:
-            try:
-                ok_to_send = OKToSend(queued_message.created_by)
-                if ok_to_send.check():
-                    #custom data
-                    if queued_message.message["others"].get("custom_data_namespace"):
-                        cd_data = (CustomData.objects.get(namespace=queued_message.message["others"].get("custom_data_namespace", None))).data
-                        cdd = cd_data.get(recipient_d.slug) #get the value of the contactid key/slug
-                    else:
-                        cdd = {}
-                    
-                    #email
-                    if queued_message.message["send_email"] and recipient_d.email and queued_message.message["email_template"]:
-                        smtp_setting_qsv = SMTPSetting.objects.get(pk = queued_message.message["smtp_setting_id"])
-                        e_msg = _compose(queued_message.message["email_template"], recipient_d, cdd)
-                        e_title = _compose(queued_message.message["title"], recipient_d, cdd)
-                        _send_email.delay([e_title, e_msg, recipient_d.email],\
-                                          smtp_setting_qsv, cc_recipients = cc_emails, owner = queued_message.created_by
-                                          )
-                    #sms   
-                    if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
-                        
-                        s_sender = _compose(queued_message.message["sms_sender_id"], recipient_d)
-                        
-                        if queued_message.message["sms_insert_optout"] == True:
-                            # append the opt out text and link to each SMS
-                            full_tpl = '{} {}'.format(
-                                                queued_message.message["sms_template"],
-                                                gurli.get_short_url("{}/sms/unsubscribe/?coid={}&ptid={}&prcmid={}".\
-                                                                    format(settings.WEBHOOK_BASE_URL, recipient_d.slug, queued_message.created_by.parent.id,sprm.id))
-                                                )
-                            s_msg = _compose(full_tpl, recipient_d, cdd)
+        try:
+            
+            ok_to_send = OKToSend(queued_message.created_by)
+            
+            if ok_to_send.check():
+                
+                recipients_qs = Contact.objects.filter(pk__in = queued_message.message["recipients"])
+                
+                if queued_message.message["others"].get("cc_recipients"):
+                    cc_recipients_qs = Contact.objects.filter(pk__in = queued_message.message["others"]["cc_recipients"])
+                    cc_emails = [x[0] for x in cc_recipients_qs.values_list('email')] #get a list of emails
+                else:
+                    cc_emails = []
+                
+                
+                # create entry in processed message
+                sprm = ProcessedMessages.objects.create(
+                    message_type = queued_message.message_type,
+                    message = queued_message.message,
+                    created_by = queued_message.created_by
+                )                
+            
+            
+                for recipient_d in recipients_qs:
+                        #custom data
+                        if queued_message.message["others"].get("custom_data_namespace"):
+                            cd_data = (CustomData.objects.get(namespace=queued_message.message["others"].get("custom_data_namespace", None))).data
+                            cdd = cd_data.get(recipient_d.slug) #get the value of the contactid key/slug
                         else:
-                            s_msg = _compose(queued_message.message["sms_template"], recipient_d, cdd)
-                            
-                        _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
-                                         queued_message.created_by,
-                                         'one_time_msg',
-                                         batch_id = sprm.id
-                                          )
+                            cdd = {}
                         
-            except IsNotActiveError as e:
-                FailedKITMessage.objects.create(
-                        message_data = [queued_message],
-                        message_category = 'queued_msg',
-                        reason = e.message,
-                        owned_by = queued_message.created_by
-                                                )
-            except NoActiveSubscriptionError as e:
-                FailedKITMessage.objects.create(
-                        message_data = [queued_message],
-                        message_category = 'queued_msg',
-                        reason = e.message,
-                        owned_by = queued_message.created_by
-                                                )
-            except FailedSendingMessageError as e:
-                FailedKITMessage.objects.create(
-                        message_data = [queued_message],
-                        message_category = 'queued_msg',
-                        reason = e.message,
-                        owned_by = queued_message.created_by
-                                                )
-            except CustomData.DoesNotExist:
-                FailedKITMessage.objects.create(
-                        message_data = [queued_message],
-                        message_category = 'queued_msg',
-                        reason = 'The Custom Data "%s" being referenced is no longer Available'%(due_queued_messages.message["custom_data_id"]),
-                        owned_by = queued_message.created_by
-                                                )
+                        #email
+                        if queued_message.message["send_email"] and recipient_d.email and queued_message.message["email_template"]:
+                            smtp_setting_qsv = SMTPSetting.objects.get(pk = queued_message.message["smtp_setting_id"])
+                            e_msg = _compose(queued_message.message["email_template"], recipient_d, cdd)
+                            e_title = _compose(queued_message.message["title"], recipient_d, cdd)
+                            _send_email.delay([e_title, e_msg, recipient_d.email],\
+                                              smtp_setting_qsv, cc_recipients = cc_emails, owner = queued_message.created_by
+                                              )
+                        #sms   
+                        if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
+                            
+                            s_sender = _compose(queued_message.message["sms_sender_id"], recipient_d)
+                            
+                            if queued_message.message["sms_insert_optout"] == True:
+                                # append the opt out text and link to each SMS
+                                full_tpl = '{} {}'.format(
+                                                    queued_message.message["sms_template"],
+                                                    gurli.get_short_url("{}/sms/unsubscribe/?coid={}&ptid={}&prcmid={}".\
+                                                                        format(settings.WEBHOOK_BASE_URL, recipient_d.slug, queued_message.created_by.parent.id,sprm.id))
+                                                    )
+                                s_msg = _compose(full_tpl, recipient_d, cdd)
+                            else:
+                                s_msg = _compose(queued_message.message["sms_template"], recipient_d, cdd)
+                                
+                            _send_sms.delay([s_sender, s_msg, recipient_d.phone.as_e164],\
+                                             queued_message.created_by,
+                                             'one_time_msg',
+                                             batch_id = sprm.id
+                                              )
+                        
+        except IsNotActiveError as e:
+            FailedKITMessage.objects.create(
+                    message_data = [queued_message],
+                    message_category = 'queued_msg',
+                    reason = e.message,
+                    owned_by = queued_message.created_by
+                                            )
+        except NoActiveSubscriptionError as e:
+            FailedKITMessage.objects.create(
+                    message_data = [queued_message],
+                    message_category = 'queued_msg',
+                    reason = e.message,
+                    owned_by = queued_message.created_by
+                                            )
+        except FailedSendingMessageError as e:
+            FailedKITMessage.objects.create(
+                    message_data = [queued_message],
+                    message_category = 'queued_msg',
+                    reason = e.message,
+                    owned_by = queued_message.created_by
+                                            )
+        except CustomData.DoesNotExist:
+            FailedKITMessage.objects.create(
+                    message_data = [queued_message],
+                    message_category = 'queued_msg',
+                    reason = 'The Custom Data "%s" being referenced is no longer Available'%(due_queued_messages.message["custom_data_id"]),
+                    owned_by = queued_message.created_by
+                                            )
         
 
         
