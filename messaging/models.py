@@ -397,7 +397,7 @@ class FailedKITMessage(models.Model):
         return reverse('messaging:failed-kit-message-retry',args=[self.pk])
     
     class Meta:
-        verbose_name = "Message"
+        verbose_name = "Failed Message"
     
     
 
