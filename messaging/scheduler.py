@@ -15,8 +15,8 @@ default_scheduler = django_rq.get_scheduler('default')
 
 def run_schedules():
     # Delete any existing jobs in the scheduler when the app starts up
-    for job in default_scheduler.get_jobs():
-        job.delete()
+    #for job in default_scheduler.get_jobs():
+    #    job.delete()
     
     
     # Private Event Scheduler
