@@ -21,7 +21,7 @@ def run_schedules():
     
     # Private Event Scheduler
     # Run every 1 hour
-    job_36k = default_scheduler.schedule(
+    default_scheduler.schedule(
         scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
         func='messaging.tasks.process_private_anniversary',                     # Function to be queued
         #args=[arg1, arg2],             # Arguments passed into function when executed
@@ -33,7 +33,7 @@ def run_schedules():
     
     # Public Event Scheduler
     # Run every 4 hours
-    job_436k = default_scheduler.schedule(
+    default_scheduler.schedule(
         scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
         func='messaging.tasks.process_public_anniversary',                     # Function to be queued
         #args=[arg1, arg2],             # Arguments passed into function when executed
@@ -44,7 +44,7 @@ def run_schedules():
     
     # Public Event Scheduler
     # Run every 5 minutes
-    job_60 = default_scheduler.schedule(
+    default_scheduler.schedule(
         scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
         func='messaging.tasks.process_onetime_event',                     # Function to be queued
         #args=[arg1, arg2],             # Arguments passed into function when executed
@@ -55,7 +55,7 @@ def run_schedules():
     
     # Reminder Messages Scheduler
     # Run once a day
-    job_864k = default_scheduler.schedule(
+    default_scheduler.schedule(
         scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
         func='messaging.tasks.process_reminder_event',                     # Function to be queued
         #args=[arg1, arg2],             # Arguments passed into function when executed
@@ -64,5 +64,4 @@ def run_schedules():
         repeat=None                      # Repeat forever
     )
     
-    return (job_36k, job_436k, job_60, job_864k)
     

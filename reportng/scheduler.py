@@ -23,7 +23,7 @@ def run_schedules():
     
     
 
-    job_rtg_3h = default_scheduler.schedule(
+    default_scheduler.schedule(
         scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
         func='reportng.tasks.process_deliveryreport_transaction',                   # Function to be queued
         #args=[arg1, arg2],             # Arguments passed into function when executed
@@ -31,8 +31,5 @@ def run_schedules():
         interval=120,              # Call every 2 minutes
         repeat=None                    # Repeat forever
     )
-    
-    
- 
-    return (job_rtg_3h)
+
     
