@@ -23,7 +23,7 @@ def run_schedules():
     # User SMS Balance crediting
     # Run every month
     default_scheduler.schedule(
-        scheduled_time=arrow.utcnow().ceil('day').replace(seconds=+1).date(), # Time for first execution, in UTC timezone
+        scheduled_time=arrow.utcnow().ceil('day').replace(seconds=+1).datetime, # Time for first execution, in UTC timezone
         func='gomez.tasks.process_monthly_sms_crediting',                     # Function to be queued
         #kwargs={'foo': 'bar'},         # Keyword arguments passed into function when executed
         interval=86400,              # Call once a day
