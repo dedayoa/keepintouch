@@ -22,7 +22,7 @@ def run_schedules():
     
     # User SMS Balance crediting
     # Run every month
-    job_gomez_pmsc = default_scheduler.schedule(
+    default_scheduler.schedule(
         scheduled_time=arrow.utcnow().ceil('day').replace(seconds=+1).datetime, # Time for first execution, in UTC timezone
         func='gomez.tasks.process_monthly_sms_crediting',                     # Function to be queued
         #kwargs={'foo': 'bar'},         # Keyword arguments passed into function when executed
@@ -33,7 +33,7 @@ def run_schedules():
 
     
     # expire verification codes that have been created over 24hours
-    job_gomez_evc = default_scheduler.schedule(
+    default_scheduler.schedule(
         scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
         func='gomez.tasks.expire_validation_code',
         interval=3600, 
