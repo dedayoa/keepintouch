@@ -6,7 +6,7 @@ Created on Aug 18, 2016
 #from redis import Redis
 import django_rq
 from rq_scheduler import Scheduler
-import arrow
+#import arrow
 
 from datetime import datetime
 
@@ -23,7 +23,8 @@ def run_schedules():
     # User SMS Balance crediting
     # Run every month
     default_scheduler.schedule(
-        scheduled_time=arrow.utcnow().ceil('day').replace(seconds=+1).datetime, # Time for first execution, in UTC timezone
+        #scheduled_time=arrow.utcnow().ceil('day').replace(seconds=+1).datetime, # Time for first execution, in UTC timezone
+        scheduled_time=datetime.utcnow().replace(day=datetime.utcnow().day+1, hour=0, minute=0, second=0),
         func='gomez.tasks.process_monthly_sms_crediting',                     # Function to be queued
         #kwargs={'foo': 'bar'},         # Keyword arguments passed into function when executed
         interval=86400,              # Call once a day
