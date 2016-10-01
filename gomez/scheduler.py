@@ -18,7 +18,14 @@ def run_schedules():
     # Delete any existing jobs in the scheduler when the app starts up
     #for job in default_scheduler.get_jobs():
     #    job.delete()
+    # expire verification codes that have been created over 24hours
     
+    default_scheduler.schedule(
+        scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
+        func='gomez.tasks.expire_validation_code',
+        interval=3600, 
+        repeat=None
+    )    
     
     # User SMS Balance crediting
     # Run every month
@@ -30,15 +37,3 @@ def run_schedules():
         interval=86400,              # Call once a day
         repeat=None                  # Repeat forever
     )
-    
-
-    
-    # expire verification codes that have been created over 24hours
-    default_scheduler.schedule(
-        scheduled_time=datetime.utcnow(), # Time for first execution, in UTC timezone
-        func='gomez.tasks.expire_validation_code',
-        interval=3600, 
-        repeat=None
-    )
-    
-    
