@@ -133,17 +133,19 @@ class EventForm(forms.ModelForm):
                                                          'class':'event-form-date'}))
     
     def __init__(self, *args, **kwargs):
-        
+
+        self.kuser = kwargs.pop('kituser')
         super(EventForm, self).__init__(*args, **kwargs)        
         self.helper = FormHelper(self)        
         self.helper.attrs = {'data_abide': ''}
+        self.fields['message'].queryset = self.kuser.get_templates()
         
     
     class Meta:
         model = Event
         fields = ['contact','date','title','message']
         
-EventFormSet = inlineformset_factory(Contact, Event, fields=('date','title','message'), form = EventForm, extra=2)        
+EventFormSet = inlineformset_factory(Contact, Event, fields=('date','title','message'), form = EventForm, extra=2)       
 
 
 
