@@ -31,6 +31,8 @@ import smtplib
 from .smsgw.smslive247 import SMSLive247Helper
 from .smsgw.infobip import InfobipSMS
 
+import phonenumbers
+
 #@cached_as(KITBilling, KITUser, timeout=4*3600)        
 def is_company_wide(kuser):
     try:
@@ -174,7 +176,12 @@ class SMSHelper():
         self.success_message_id = ""
         
     def _check_sms_can_be_sent(self):
-        # load us
+        
+        # check that phone number is valid
+        if not phonenumbers.is_valid_number(self.destination):
+            raise InvalidPhoneNumberError("%s is Not a Valid Phone Number"%str(self.destination))
+        
+        # check that user has enough SMS balance to send message
         #get_user_balance        
         fsb = self.kuser.kitubalance.free_sms_balance
         sb = self.kuser.kitubalance.sms_balance
@@ -182,12 +189,9 @@ class SMSHelper():
         #get sms units required to send to destination
         ppsms = KITRateEngineA().get_sms_cost_to_number(self.destination)
         
-        
-        
         #sms pages     
         smsct = SMSCounter().get_messages_count_only(self.sms_message)
         
-        print
         # all messages are billed using the user's account balance
         if fsb >= (ppsms * smsct):
             return ['fsb', fsb-(ppsms * smsct)]
@@ -248,7 +252,15 @@ class SMSHelper():
             #send sms
             InfobipSMS().send_single_advanced_sms([self.sender, self.sms_message, self.destination], \
                                                   self.kuser, batchid=self.batch_id)
-
+        
+        
+        except InvalidPhoneNumberError as e:
+            FailedSMSMessage.objects.create(
+                        sms_pickled_data = self.message,
+                        reason = e.message,
+                        owned_by = self.kuser,
+                        batch_id = self.batch_id
+                                            )
             
         except NotEnoughBalanceError as e:
             # saved message to failed table for user
