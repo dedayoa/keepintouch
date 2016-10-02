@@ -622,13 +622,11 @@ class KITUserUpdateView(PermissionRequiredMixin, View):
     
     
     def get(self, request, pk):
-        
-        q_admin = KITUser.objects.get(user=request.user)
-        
-        if q_admin:
-            k_user = get_object_or_404(KITUser, pk=pk,parent=q_admin)
+            
+        if request.user.kituser.is_admin:
+            k_user = get_object_or_404(KITUser, pk=pk,parent=request.user.kituser)
             uzr = k_user.user
-            k_user_balance = request.user.kituser.kitubalance 
+            k_user_balance = k_user.kitubalance
         
         self.params["title"] = "Edit User"
         self.params["uzrname"] = uzr.username
