@@ -194,7 +194,7 @@ def contacts(request):
 class ContactView(View):
     
     form_class = ContactForm
-    event_formset = EventFormSet()
+    event_formset = EventFormSet
     template_name = 'core/contacts/contact_detail.html'
     params = {}
     
@@ -241,7 +241,7 @@ class ContactViewView(UpdateView):
     model = Contact
     form_class = ContactForm
     template_name = 'core/contacts/contact_detail.html'
-    event_formset = EventFormSet()
+    event_formset = EventFormSet
     params = {}
     #event_formset_helper = EventFormSetHelper()
     
@@ -255,7 +255,7 @@ class ContactViewView(UpdateView):
         #self.object = self.get_object() #can pass queryset
         #form_class = self.get_form_class()
         #form = self.get_form(form_class)
-        event_line_item_form = EventFormSet(instance=self.object)
+        event_line_item_form = EventFormSet(instance=self.object,form_kwargs={'kituser': request.user.kituser})
         
         
         self.params["form"] = self.form_class(instance=self.object)
@@ -297,8 +297,10 @@ class ContactViewView(UpdateView):
         #return HttpResponseRedirect(self.object.get_absolute_url())
     
     def form_invalid(self, form, event_line_item_form):
-        
-        flash_messages.add_message(self.request, flash_messages.INFO, 'The last action failed due to error in submission.')
+        if not form.is_valid():
+            flash_messages.add_message(self.request, flash_messages.INFO, 'There is an Error in the Contact Detail Submitted.')
+        elif not event_line_item_form.is_valid():
+            flash_messages.add_message(self.request, flash_messages.INFO, 'There is an Error with the Anniversaries Submitted.')
         return HttpResponseRedirect(reverse('core:contact-detail', args=[self.object.pk]))
         '''
         return self.render_to_response(
@@ -318,6 +320,7 @@ class ContactViewView(UpdateView):
         # user should not be able to view/edit only settings of her group/company
         return self.request.user.kituser.get_contacts()
 
+
 class ContactDeleteView(DeleteView):
     
     model = Contact
@@ -326,7 +329,7 @@ class ContactDeleteView(DeleteView):
     params = {}
     
     def get_context_data(self, **kwargs):
-        params = super(ContactViewView, self).get_context_data(**kwargs)
+        params = super(ContactDeleteView, self).get_context_data(**kwargs)
         params["title"] = "Deleting Contact ".format(self.object.pk)
         params["contactid"] = self.object.pk
         return params
