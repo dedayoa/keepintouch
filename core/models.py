@@ -29,6 +29,7 @@ from timezone_utils.choices import PRETTY_ALL_TIMEZONES_CHOICES, PRETTY_COMMON_T
 from django.apps import apps
 from cacheops.query import cached_as
 from cryptography.fernet import InvalidToken
+from gomez.models import KITSystem
 
 
 ### Managers
@@ -262,6 +263,13 @@ class KITUser(models.Model):
             return failedsmsmessage.objects.filter(owned_by__parent = self.pk)
         else:
             return failedsmsmessage.objects.filter(owned_by = self.pk).order_by('-created')
+        
+        
+    def get_default_sms_sender(self):
+        if self.is_admin:
+            return KITSystem.objects.get(kit_admin=self).default_sms_sender
+        else:
+            return KITSystem.objects.get(kit_admin=self.parent).default_sms_sender
     #####Admin Things#######
     
     def get_kituser(self):
