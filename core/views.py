@@ -404,7 +404,8 @@ class PublicEventCreateView(CreateView):
     
     def get_form(self, form_class=form_class):
         form = super(PublicEventCreateView, self).get_form(form_class)
-        form.fields["recipients"].queryset = self.request.user.kituser.get_contacts()       
+        form.fields["recipient_list"].queryset = self.request.user.kituser.get_contact_groups()
+        form.fields["message"].queryset = self.request.user.kituser.get_templates()     
         return form
 
    
@@ -429,7 +430,8 @@ class PublicEventUpdateView(UpdateView):
     
     def get_form(self, form_class=form_class):
         form = super(PublicEventUpdateView, self).get_form(form_class)
-        form.fields["recipients"].queryset = self.request.user.kituser.get_contacts()       
+        form.fields["recipient_list"].queryset = self.request.user.kituser.get_contact_groups()
+        form.fields["message"].queryset = self.request.user.kituser.get_templates()      
         return form
     
     def get_queryset(self, **kwargs):
