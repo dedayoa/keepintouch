@@ -2,6 +2,9 @@ body{
 	background-color: #8db5d2;
 }
 
+th.msg_info{
+	width: 23%;
+}
 
 .table-rowid-span{
 	font-size: 90%;
