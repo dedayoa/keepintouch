@@ -36,6 +36,7 @@ class StandardMessagingForm(forms.ModelForm):
         self.fields['recipients'].queryset = self.kuser.get_contacts()
         self.fields['copied_recipients'].queryset = self.kuser.get_contacts()
         self.fields['smtp_setting'].queryset = self.kuser.get_smtp_items()
+        self.fields['sms_sender'].initial = self.kuser.get_default_sms_sender()
         #self.fields['cou_group'].label = "Group Availability"
         
         self.helper = FormHelper()
