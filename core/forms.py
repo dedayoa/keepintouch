@@ -199,7 +199,7 @@ class PublicEventForm(forms.ModelForm):
         
         self.helper = FormHelper()
         self.helper.form_action = '.'
-        self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
+        self.helper.add_input(Submit('submit', _('Save'), css_class="success float-right"))
         self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
         
         
@@ -218,9 +218,9 @@ class PublicEventForm(forms.ModelForm):
     
     class Meta:
         model = PublicEvent    
-        fields = ['title','date','message','all_contacts','recipients']
+        fields = ['title','date','message','all_contacts','recipient_list']
         widgets = {
-            'recipients': Select2MultipleWidget,
+            'recipient_list': Select2MultipleWidget,
             'message' : Select2Widget
         }  
         
