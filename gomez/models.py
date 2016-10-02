@@ -76,6 +76,8 @@ class KITSystem(models.Model):
                                                default="To Stop receiving SMS from us, click",
                                                help_text = "We will automatically insert the opt-out link at the end\
                                                of this message")
+    default_sms_sender = models.CharField(max_length=11, blank=True, verbose_name="Default SMS Sender",\
+                                             help_text="Set a Default SMS Sender that will be Pre-filled where necessary")
     
     last_modified = models.DateTimeField(auto_now=True)
     
