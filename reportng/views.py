@@ -71,9 +71,9 @@ class SMSReport(View):
         }
         
         if request.user.kituser.is_admin:
-            reporttable = SMSReportTable(SMSDeliveryReport.objects.filter(kitu_parent_id=request.user.kituser.id))
+            reporttable = SMSReportTable(SMSDeliveryReport.objects.filter(kitu_parent_id=request.user.kituser.id).order_by('-created'))
         else:
-            reporttable = SMSReportTable(SMSDeliveryReport.objects.filter(kituser_id=request.user.kituser.id))
+            reporttable = SMSReportTable(SMSDeliveryReport.objects.filter(kituser_id=request.user.kituser.id).order_by('-created'))
         RequestConfig(request, paginate={'per_page': 25}).configure(reporttable)
         self.params["table"] = reporttable        
         
