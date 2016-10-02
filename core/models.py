@@ -107,7 +107,7 @@ class KITUser(models.Model):
     
     user = models.OneToOneField(User)
     dob = models.DateField(blank=False, null=True)
-    timezone = TimeZoneField(choices=PRETTY_COMMON_TIMEZONES_CHOICES)
+    timezone = TimeZoneField(choices=PRETTY_COMMON_TIMEZONES_CHOICES, default="Africa/Lagos")
     
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, limit_choices_to={'is_admin':True})
     phone_number = PhoneNumberField(blank=True, null=True)
