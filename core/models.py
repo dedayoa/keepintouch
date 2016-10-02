@@ -589,7 +589,8 @@ class PublicEvent(models.Model):
     date = models.DateField(blank=False)
     message = models.ForeignKey('core.MessageTemplate')
     #applies_to = models.CharField(max_length=3, choices=APPLIESTO, default='ALL')
-    recipients = models.ManyToManyField('core.Contact', blank=True)
+    # recipients = models.ManyToManyField('core.Contact', blank=True)
+    recipient_list = models.ManyToManyField('core.ContactGroup', blank=True)
     all_contacts = models.BooleanField(default=False)
     #event_group = models.ForeignKey(CoUserGroup,models.SET_NULL, null=True)
     kit_user = models.ForeignKey('core.KITUser', models.PROTECT, blank=True)
@@ -610,7 +611,14 @@ class PublicEvent(models.Model):
         if self.all_contacts == True:
             return self.kit_user.get_contacts()
         else:
-            return self.recipients.all()
+            # get a unique set of all contacts
+            grps = ContactGroup.objects.filter(pk__in = self.recipient_list.all()).prefetch_related('contacts')
+            contacts = set()
+            for grp in grps:
+                for contacts_per_group in grp.contacts.all():
+                    contacts.add(contacts_per_group)
+            del grps
+            return list(contacts)
     
     
     def get_absolute_url(self):
