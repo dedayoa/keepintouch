@@ -123,6 +123,7 @@ class AdvancedMessageCreateView(CreateView):
         form = super(AdvancedMessageCreateView, self).get_form(form_class)
         form.fields["message_template"].queryset = self.request.user.kituser.get_templates().filter(active=True)
         form.fields['contact_group'].queryset = self.request.user.kituser.get_contact_groups()
+        form.fields['custom_data_namespace'].queryset = self.request.user.kituser.get_custom_data()
         
         return form
     
@@ -140,7 +141,8 @@ class AdvancedMessageUpdateDraftView(UpdateView):
     def get_form(self, form_class=form_class):
         form = super(AdvancedMessageUpdateDraftView, self).get_form(form_class)
         form.fields["message_template"].queryset = self.request.user.kituser.get_templates().filter(active=True)
-        form.fields['contact_group'].queryset = self.request.user.kituser.get_contact_groups()     
+        form.fields['contact_group'].queryset = self.request.user.kituser.get_contact_groups()
+        form.fields['custom_data_namespace'].queryset = self.request.user.kituser.get_custom_data()    
         return form
         
     
