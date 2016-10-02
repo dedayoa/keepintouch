@@ -492,7 +492,8 @@ class MessageTemplateUpdateView(PermissionRequiredMixin, UpdateView):
     def get_form(self, form_class=form_class):
         form = super(MessageTemplateUpdateView, self).get_form(form_class)
         form.fields["cou_group"].queryset = self.request.user.kituser.get_user_groups()
-        form.fields["smtp_setting"].queryset = self.request.user.kituser.get_smtp_items()    
+        form.fields["smtp_setting"].queryset = self.request.user.kituser.get_smtp_items()
+        form.fields['sms_sender'].initial = self.request.user.kituser.get_default_sms_sender()
         return form
     
     
@@ -512,7 +513,8 @@ class MessageTemplateCreateView(PermissionRequiredMixin, CreateView):
     def get_form(self, form_class=form_class):
         form = super(MessageTemplateCreateView, self).get_form(form_class)
         form.fields["cou_group"].queryset = self.request.user.kituser.get_user_groups()
-        form.fields["smtp_setting"].queryset = self.request.user.kituser.get_smtp_items()    
+        form.fields["smtp_setting"].queryset = self.request.user.kituser.get_smtp_items()
+        form.fields['sms_sender'].initial = self.request.user.kituser.get_default_sms_sender() 
         return form
     
 class MessageTemplateDeleteView(PermissionRequiredMixin, DeleteView):
