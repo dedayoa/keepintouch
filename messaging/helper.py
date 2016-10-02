@@ -177,8 +177,8 @@ class SMSHelper():
         
     def _check_sms_can_be_sent(self):
         
-        # check that phone number is valid
-        if not phonenumbers.is_valid_number(self.destination):
+        # check that phone number is valid        
+        if not phonenumbers.is_valid_number(phonenumbers.parse(self.destination)):
             raise InvalidPhoneNumberError("%s is Not a Valid Phone Number"%str(self.destination))
         
         # check that user has enough SMS balance to send message
