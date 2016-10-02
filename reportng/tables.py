@@ -19,11 +19,10 @@ from django.core.urlresolvers import reverse, reverse_lazy
 
 class SMSReportTable(tables.Table):
     
-    sms_message = tables.Column(verbose_name='Message')
+    sms_message = tables.Column(verbose_name='Message', orderable=False)
     sms_sender = tables.Column(verbose_name='Sender')
     to_phone = tables.Column(verbose_name='Recipient')
-    msg_status = tables.Column(verbose_name='Status')
-    msg_error = tables.Column(verbose_name='Error')
+    msg_info = tables.Column(verbose_name='Delivery Info', accessor='pk', orderable=False)
     created = tables.Column(verbose_name='Sent')
     
     
@@ -44,8 +43,13 @@ class SMSReportTable(tables.Table):
         return mark_safe('<a href="#" class="sms-delivery-detail" data-sms=\'{}\' data-sms-history=\'{}\'>{}</a>'.format(sms_message, sms_history,smsm_text))
         
     
+    def render_msg_info(self, record):
+        return format_html('<div style="font-size: 80%"><div>Status: <strong>{}</strong></div><div>Error: <strong>{}</strong></div></div>',record.get_msg_status_display(), record.get_msg_error_display())
+        
+
+    
     class Meta:
         model = SMSDeliveryReport
-        fields = ('sms_message','sms_sender','to_phone','msg_status','msg_error','created')
+        fields = ('sms_message','sms_sender','to_phone','msg_info','created')
         empty_text = 'There are no Reports to display.'
         attrs = {'style': 'width: 100%'}
