@@ -17,7 +17,7 @@ from cacheops import cached_as
 from country_dialcode.models import Prefix
 
 
-# Courtsey Star2Billing #
+# Courtesy Star2Billing #
 
 class KITRateEngineA(object):
 
