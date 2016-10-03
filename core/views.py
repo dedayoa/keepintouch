@@ -59,6 +59,8 @@ from django.db.utils import IntegrityError
 
 from watson import search as watson
 from django.utils.safestring import mark_safe
+from django.db.models.deletion import ProtectedError
+from gomez.helper import SMSTransferHelper
 
 
 # Create your views here.
@@ -642,10 +644,12 @@ class KITUserUpdateView(PermissionRequiredMixin, View):
         self.params["uzrname"] = uzr.username
         self.params["last_login"] = uzr.last_login
         self.params["date_joined"] = uzr.date_joined
-        self.params["form_1"] = self.form_1(instance=uzr, prefix="userform")
+        self.params["form_1"] = self.form_1(instance=uzr, prefix="userform", kituser=self.request.user.kituser)
         self.params["form_2"] = self.form_2(instance=k_user, prefix="kituform")        
         self.params["form_3"] = self.form_3(instance=k_user_balance, prefix="kitubalanceform")
-        self.params["form_4"] = self.form_4(instance=k_user_org_address, prefix = "kituaddr")
+        self.params["form_4"] = self.form_4(instance=k_user_org_address, prefix = "kituaddr", \
+                                            initial=OrganizationContact.objects.filter(kituser = request.user.kituser).values()[0])
+        self.params["kuserid"] = pk
         self.params["can_delete"] = True
         
         return render(request, self.template_name, self.params)
@@ -658,7 +662,7 @@ class KITUserUpdateView(PermissionRequiredMixin, View):
         k_user_balance = k_user.kitubalance
         k_user_org_address = k_user.address
         
-        self.params["form_1"] = userform = self.form_1(request.POST, prefix="userform", instance=uzr)
+        self.params["form_1"] = userform = self.form_1(request.POST, prefix="userform", instance=uzr, kituser=self.request.user.kituser)
         self.params["form_2"] = kituform = self.form_2(request.POST, prefix="kituform", instance=k_user)
         self.params["form_4"] = kituaddressform = self.form_4(request.POST, prefix = "kituaddr", instance=k_user_org_address)
         
@@ -742,6 +746,30 @@ class KITUserPersonalProfileView(View):
         return render(request, self.template_name, self.params)
 
 
+class KITUserDeleteView(View):
+    
+    def post(self, request, pk):
+        try:
+            kuser = KITUser.objects.get(pk=pk, parent=self.request.user.kituser)
+            
+            # transfer user SMS balance to admin. Note that if the user had once been credited i.e sms_balance >0
+            # this will lead to delete() failing as there will be an sms transfer log recorded.
+            if kuser.kitubalance.sms_balance > 0:
+                sth = SMSTransferHelper(kuser, self.request.user.kituser)
+                sth.credit(kuser.kitubalance.sms_balance)
+               
+            kuser.user.delete()   
+            
+            flash_messages.add_message(request, flash_messages.INFO, mark_safe("User <strong>%s</strong> Deleted Successfully"%kuser.user.get_username()))
+            return HttpResponseRedirect(reverse('core:kituser-settings-list'))
+        except ProtectedError:
+            flash_messages.add_message(request, \
+                                       flash_messages.INFO, mark_safe(
+            "You cannot delete this User until You delete all Anniversaries, Messages etc. that the user has created."+
+            "<br /><i>If You simply want to Create a New Account, Deactivate any of the Existing accounts.</i>"))
+            
+            return HttpResponseRedirect(reverse('core:kituser-detail', args=[pk]))
+    
    
 def smtp_settings(request):
     
