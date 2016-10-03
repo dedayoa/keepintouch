@@ -11,7 +11,7 @@ from django.apps import apps
 from django.utils import timezone
 
 from .models import IssueFeedback
-from .tasks import process_system_notification, process_verification_messages
+from .tasks import process_issue_submission_notification, process_verification_messages
 
 from core.models import KITActivationCode
 
@@ -30,7 +30,7 @@ def send_email_to_sender_and_dev_channel(sender, instance, **kwargs):
         def on_commit():
             fullname = instance.submitter.user.get_full_name()
             print(fullname)
-            process_system_notification(
+            process_issue_submission_notification(
                     fullname = fullname,
                     submitter_email = instance.submitter.user.email,
                     title = instance.title,
