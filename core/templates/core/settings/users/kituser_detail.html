@@ -6,6 +6,11 @@
 {% block head_base_links %}
 	{{ block.super }}
 	<link href="{% static "css/foundation-datepicker.css" %}" rel="stylesheet">
+	<style>
+		span.select2-container{
+			margin-bottom: 1rem;
+		}
+	</style>
 	{{ form_2.media.css }}
 {% endblock %}
 {% block content %}
@@ -16,21 +21,32 @@
 			{% crispy form_1 %}
 			{% crispy form_3 %}
 			{% crispy form_2 %}
+			<ul class="accordion" data-accordion role="tablist">
+			  <li class="accordion-item is-active">
+			    <a href="#panel1d" role="tab" class="accordion-title" id="panel1d-heading" aria-controls="panel1d">Organization Details</a>
+			    <!-- The content pane needs an ID that matches the above href, role="tabpanel", data-tab-content, and aria-labelledby. -->
+			    <div id="panel1d" class="accordion-content" role="tabpanel" data-tab-content aria-labelledby="panel1d-heading">
+			      {% crispy form_4 %}
+			    </div>
+			  </li>
+			</ul>
 			<div class="row column" style="margin-bottom: 1rem;">
 				<div><b>Last Login:</b> {{last_login}}</div>
 				<div><b>Date Registered:</b> {{date_joined}}</div>
 			</div>
 			<div class="button-holder">
-				<input type="submit" name="submit" value="Submit" class="submit button success float-right" id="submit-id-submit">
+				<input type="submit" name="submit" value="Update" class="submit button success float-right" id="submit-id-submit">
 				<input type="reset" name="reset" value="Reset" class="reset button float-right" id="reset-id-reset">
 			</div>
 		</form>
-		<input type="submit" value="Reset Password" class="button warning float-right reset-user-button">	
+		<input type="submit" value="Reset Password" class="button warning float-right reset-user-button">
+		{% if can_delete %}
 		<form method="POST" action="">
 		   {% csrf_token %}
 		   <input type="submit" value="Delete" class="button alert float-left" 
-		   onclick="return confirm('Are you sure you want to delete this Public Event?');">
+		   onclick="return confirm('Are you sure you want to delete this User?');">
 		</form>
+		{% endif %}
 	</div>
 {% endblock %}
 {% block foot_base_js %}
