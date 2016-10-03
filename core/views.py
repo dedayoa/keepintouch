@@ -620,12 +620,14 @@ class KITUserUpdateView(PermissionRequiredMixin, View):
     model_1 = User
     model_2 = KITUser
     model_3 = KITUBalance
+    model_4 = OrganizationContact
     template_name = 'core/settings/users/kituser_detail.html'
     params = {}
     
     form_1 = ExistingUserForm
     form_2 = KITUserForm
     form_3 = KITUBalanceForm
+    form_4 = OrganizationContactForm
     
     
     def get(self, request, pk):
@@ -634,6 +636,7 @@ class KITUserUpdateView(PermissionRequiredMixin, View):
             k_user = get_object_or_404(KITUser, pk=pk,parent=request.user.kituser)
             uzr = k_user.user
             k_user_balance = k_user.kitubalance
+            k_user_org_address = k_user.address
         
         self.params["title"] = "Edit User"
         self.params["uzrname"] = uzr.username
@@ -642,6 +645,8 @@ class KITUserUpdateView(PermissionRequiredMixin, View):
         self.params["form_1"] = self.form_1(instance=uzr, prefix="userform")
         self.params["form_2"] = self.form_2(instance=k_user, prefix="kituform")        
         self.params["form_3"] = self.form_3(instance=k_user_balance, prefix="kitubalanceform")
+        self.params["form_4"] = self.form_4(instance=k_user_org_address, prefix = "kituaddr")
+        self.params["can_delete"] = True
         
         return render(request, self.template_name, self.params)
     
@@ -650,39 +655,52 @@ class KITUserUpdateView(PermissionRequiredMixin, View):
 
         k_user = get_object_or_404(KITUser, pk=pk,parent=request.user.kituser)
         uzr = k_user.user
+        k_user_balance = k_user.kitubalance
+        k_user_org_address = k_user.address
         
-        userform = self.form_1(request.POST, prefix="userform", instance=uzr)
-        kituform = self.form_2(request.POST, prefix="kituform", instance=k_user)
+        self.params["form_1"] = userform = self.form_1(request.POST, prefix="userform", instance=uzr)
+        self.params["form_2"] = kituform = self.form_2(request.POST, prefix="kituform", instance=k_user)
+        self.params["form_4"] = kituaddressform = self.form_4(request.POST, prefix = "kituaddr", instance=k_user_org_address)
         
-        if userform.is_valid() and kituform.is_valid():
+        self.params["form_3"] = self.form_3(instance=k_user_balance, prefix="kitubalanceform")
+        
+        if userform.is_valid() and kituform.is_valid() and kituaddressform.is_valid():
             
             f1 = userform.save()
+            f4 = kituaddressform.save()
             f2 = kituform.save(commit=False)
             f2.user = f1
+            f2.address = f4
             f2.save()
+            
+            return HttpResponseRedirect(reverse('core:kituser-detail', args=[pk]))  
+        
+        return render(request, self.template_name, self.params)
                 
             
-        return HttpResponseRedirect(reverse('core:kituser-detail', args=[pk]))   
+         
 
 class KITUserPersonalProfileView(View):
     
     model_1 = User
     model_2 = KITUser
     model_3 = KITUBalance
+    model_4 = OrganizationContact
     template_name = 'core/settings/users/kituser_detail.html'
     params = {}
     
     form_1 = PersonalProfileForm
     form_2 = KITUserForm
     form_3 = KITUBalanceForm
-
+    form_4 = OrganizationContactForm
     
     def get(self, request):
         
         
         k_user = request.user.kituser
         uzr = request.user
-        k_user_balance = request.user.kituser.kitubalance 
+        k_user_balance = request.user.kituser.kitubalance
+        k_user_org_address = k_user.address
         
         self.params["title"] = "Edit User"
         self.params["uzrname"] = uzr.username
@@ -691,6 +709,7 @@ class KITUserPersonalProfileView(View):
         self.params["form_1"] = self.form_1(instance=uzr, prefix="userform")
         self.params["form_2"] = self.form_2(instance=k_user, prefix="kituform")
         self.params["form_3"] = self.form_3(instance=k_user_balance, prefix="kitubalanceform")
+        self.params["form_4"] = self.form_4(instance=k_user_org_address, prefix = "kituaddr")
         
         return render(request, self.template_name, self.params)
     
@@ -698,20 +717,29 @@ class KITUserPersonalProfileView(View):
     def post(self, request):
 
         k_user = request.user.kituser
+        k_user_balance = k_user.kitubalance
         uzr = k_user.user
+        k_user_org_address = k_user.address
         
-        userform = self.form_1(request.POST, prefix="userform", instance=uzr)
-        kituform = self.form_2(request.POST, prefix="kituform", instance=k_user)
+        self.params["form_1"] = userform = self.form_1(request.POST, prefix="userform", instance=uzr)
+        self.params["form_2"] = kituform = self.form_2(request.POST, prefix="kituform", instance=k_user)
+        self.params["form_4"] = kituaddressform = self.form_4(request.POST, prefix = "kituaddr", instance=k_user_org_address)
         
-        if userform.is_valid() and kituform.is_valid():
+        self.params["form_3"] = self.form_3(instance=k_user_balance, prefix="kitubalanceform")
+        
+        if userform.is_valid() and kituform.is_valid() and kituaddressform.is_valid():
             
             f1 = userform.save()
+            f4 = kituaddressform.save()
             f2 = kituform.save(commit=False)
             f2.user = f1
+            f2.address = f4
             f2.save()
                 
             
-        return HttpResponseRedirect(reverse('core:kituser-personal-profile'))    
+            return HttpResponseRedirect(reverse('core:kituser-personal-profile'))
+        
+        return render(request, self.template_name, self.params)
 
 
    
