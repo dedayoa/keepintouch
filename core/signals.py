@@ -4,20 +4,22 @@ Created on Aug 29, 2016
 @author: Dayo
 '''
 import sys
+import arrow
 
 from django.db import transaction
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.apps import apps
 from django.utils import timezone
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 from django.conf import settings
 
 from .models import KITUser, KITUBalance, CoUserGroup
 
 from sitegate.signals import sig_user_signup_success
 from gomez.models import KITServicePlan
-import arrow
+from messaging.tasks import process_system_email_notification
+
 
 
 @receiver(post_save, sender=KITUser)
@@ -95,4 +97,45 @@ def free_trial_user_signup_callback(signup_result, flow, request, **kwargs):
         #set free user permissions
         group = Group.objects.get(id=settings.FREE_TRIAL_GROUP_PERMS_ID)
         signup_result.groups.add(group)
-  
+
+
+@receiver(post_save, sender=KITUser)
+def send_new_user_created_by_kitadmin_welcome_email(sender, instance, created, *args, **kwargs):
+    
+    if created:
+        if not instance.is_admin:
+            '''
+            Dear Adedayo,
+            You have been signed up as a user of In.Touch by Tope Martins of Corp Global.
+            In.Touch is a Business Messaging Automation Solution that organizes, manages and energizes your communication
+            with the people that matter.
+            To login, visit http://cloud.intouchng.com/
+            Find Your Login Details Below:
+            Username: dahzle
+            Password: wiebe893
+            We highly recommend that you change this password to something only you would know - and make sure it is also hard to guess.
+            
+            '''
+            password = User.objects.make_random_password() #http://stackoverflow.com/a/9481049
+            
+            user = instance.user
+            user.set_password(password)
+            user.save()
+            
+            kadmin = instance.parent
+            
+            etemplate = 'core/email/new_kituser_account_created_email_with_default_password.html'
+            et_context = {
+                    'user_fullname' : user.get_full_name(),
+                    'admin_fullname' : kadmin.user.get_full_name(),
+                    'admin_organization' : kadmin.address.organization,
+                    'user_username' : user.get_username(),
+                    'user_password' : password                
+                          }
+            
+            process_system_email_notification(
+                        etemplate,
+                        context_kwargs=et_context,
+                        title='You Have Been Signed Up',
+                        recipients=[user.email]
+                                              )
