@@ -4,27 +4,28 @@ Created on Jun 15, 2016
 @author: Dayo
 '''
 
-from django.template import Context, Template, loader
-from django.apps import apps
-import logging
-import django_rq
-
-from django.utils import timezone
-from django.conf import settings
-
-from .helper import SMTPHelper, SMSHelper, get_next_delivery_time, OKToSend
-from core.exceptions import *
-from core.models import Contact, PublicEvent, KITUser, SMTPSetting, Event, CustomData
 from dateutil.relativedelta import relativedelta
 import arrow
+import logging
 
-from .models import QueuedMessages, ProcessedMessages,RunningMessage, IssueFeedback, FailedKITMessage
+import django_rq
 
-from .templates import TemplateForIssueFeedbackMessages, TemplateForPhoneEmailVerification
-
-from gomez.models import KITSystem
-from core.googlext import GoogleURLShortener
+from django.template import Context, Template, loader
+from django.apps import apps
+from django.utils import timezone
+from django.conf import settings
 from django.core.urlresolvers import reverse
+
+from .models import QueuedMessages, ProcessedMessages,RunningMessage, FailedKITMessage
+from .helper import SMTPHelper, SMSHelper, get_next_delivery_time, OKToSend
+
+from core.exceptions import *
+from core.models import Contact, PublicEvent, KITUser, SMTPSetting, Event, CustomData
+from core.googlext import GoogleURLShortener
+
+
+
+
 
 #SMTPSetting = apps.get_model('core','SMTPSetting')
 
@@ -362,22 +363,19 @@ def process_reminder_event(running_messages=None):
                 
 
         
-def process_system_notification(**kwargs):
+def process_issue_submission_notification(**kwargs):
     
-    tmpl = TemplateForIssueFeedbackMessages()
+    template_to_user = 'core/email/issue_submission/email_to_user.html' #tmpl.template_to_user()
+    template_to_dev_chan = 'core/email/issue_submission/email_to_developers.html' #tmpl.template_to_dev_chan()
     
-    template_to_user = tmpl.template_to_user()
-    template_to_dev_chan = tmpl.template_to_dev_chan()
-    
-    t = Template(template_to_user)
-    email_to_user = t.render(Context(
+    email_to_user = loader.get_template(template_to_user).render(Context(
                                 {
                             'fullname':kwargs.get('fullname',''),
                                  }
                                      )
                              )
-    u = Template(template_to_dev_chan)
-    email_to_support = u.render(Context(
+    
+    email_to_support = loader.get_template(template_to_dev_chan).render(Context(
                                 {
                             'fullname': kwargs.get('fullname',''),
                             'email': kwargs.get('submitter_email',''),
@@ -405,14 +403,12 @@ def process_system_notification(**kwargs):
                       )
 
 
-def process_verification_messages(**kwargs):
-    
-    tmpl = TemplateForPhoneEmailVerification()
+def process_verification_messages(**kwargs):    
+   
     
     
     if not kwargs.get('email_is_validated'):
-        email_template = 'emails/user_email_address_verification.html'
-        
+        email_template = 'core/email/user_email_address_verification.html'
         # create link in email
         email_verification_link = "{}{}?email={}&t={}".format(settings.WEBHOOK_BASE_URL,\
                                             reverse('core:register-validate-email'),kwargs.get('email'),\
@@ -425,15 +421,15 @@ def process_verification_messages(**kwargs):
                                      })
                                  )
         smtp_settings = SMTPSetting(**settings.SUPPORT_EMAIL)
-        _send_email(['Email Verification Code', email_to_user, kwargs.get('email','')],
+        _send_email.delay(['Email Verification Code', email_to_user, kwargs.get('email','')],
                           smtp_settings,
                           owner = KITUser.objects.get(pk=settings.SYSTEM_KITUSER_ID),
                           )
         
-    if not kwargs.get('phone_is_validated'):    
-        template_sms = tmpl.template_sms()   
-        stmpl = Template(template_sms)
-        sms_to_user = stmpl.render(Context({
+    if not kwargs.get('phone_is_validated'):
+        
+        sms_template = 'core/sms/user_phone_number_verification.html'
+        sms_to_user = loader.get_template(sms_template).render(Context({
                                 'fullname':kwargs.get('fullname',''),
                                 'phone_verification_code': kwargs.get('phone_verification_code','')
                                      })
@@ -443,3 +439,17 @@ def process_verification_messages(**kwargs):
                         KITUser.objects.get(pk=settings.SYSTEM_KITUSER_ID),
                         'system_msg',                     
                         )
+        
+
+
+def process_system_email_notification(template, title='', context_kwargs={}, recipients=[]):
+    emailt = loader.get_template(template)
+    emailtbs = emailt.render(Context(context_kwargs))
+    smtp_settings = SMTPSetting(**settings.SUPPORT_EMAIL)
+    
+    for recipient in recipients:
+        _send_email.delay([title, emailtbs, recipient],
+                              smtp_settings,
+                              owner = KITUser.objects.get(pk=settings.SYSTEM_KITUSER_ID),
+                              )
+    
