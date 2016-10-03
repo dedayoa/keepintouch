@@ -1,0 +1,16 @@
+{% extends "core/email/base.html" %}
+
+
+{% block content %}
+
+Dear Support
+<p>You have received a new submission from {{fullname}}<{{email}}>.</p>
+See Detail Below:
+<p><strong>Title</strong>: {{title}}</p>
+<strong>Detail</strong>:
+<p>{{detail}}</p>
+
+Attachment can be found here <a href="{{screenshot_link}}">{{screenshot_link}}</a>
+<p>Over & Out...</p>
+
+{% endblock %}
