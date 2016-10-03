@@ -1,15 +1,8 @@
-from django.shortcuts import render
-from django.views.generic import UpdateView, CreateView, TemplateView
-from django.conf import settings
-
-from django_tables2 import RequestConfig
+from django.views.generic import UpdateView
 
 from .models import KITSystem
 from .forms import SystemSettingsForm
 
-
-def smslive247_callback():
-    pass
     
     
 class SystemSettingsUpdateView(UpdateView):
