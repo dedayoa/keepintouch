@@ -34,6 +34,7 @@ from django.template.defaultfilters import filesizeformat
 from phonenumber_field.formfields import PhoneNumberField
 from timezone_utils.forms import TimeZoneField
 from timezone_utils.choices import PRETTY_COMMON_TIMEZONES_CHOICES
+from django.utils.safestring import mark_safe
 
 
 
@@ -321,6 +322,10 @@ class MessageTemplateForm(forms.ModelForm):
         }
 
 
+user_account_exceeded_msg = "Your Plan Allows a Maximum of {} Active Users.<br />"+\
+                            "Consider Deactivating An Existing Account or better, Upgrade Your Account Now."
+
+
 class ExistingUserForm(forms.ModelForm):
     
     username = forms.CharField(disabled=True)
@@ -328,6 +333,8 @@ class ExistingUserForm(forms.ModelForm):
     first_name = forms.CharField(required=True)
     
     def __init__(self, *args, **kwargs):
+        self.kuser = kwargs.pop('kituser') or None
+        
         super(ExistingUserForm, self).__init__(*args, **kwargs)
         
         self.helper = FormHelper()
@@ -335,6 +342,18 @@ class ExistingUserForm(forms.ModelForm):
         self.helper.form_tag = False
         #self.helper.add_input(Submit('submit', _('Save'), css_class="success float-right"))
         #self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+        
+    def clean(self):
+        
+        cleaned_data = super(ExistingUserForm, self).clean()
+        if cleaned_data.get('is_active') == True:
+            if self.kuser.get_kitusers().filter(user__is_active = True).count() + 1 > self.kuser.kitbilling.service_plan.user_accounts_allowed:
+                raise forms.ValidationError(mark_safe(user_account_exceeded_msg.\
+                                                      format(self.kuser.kitbilling.service_plan.user_accounts_allowed)))
+        else:
+            if self.kuser.get_kitusers().filter(user__is_active = True).count() > self.kuser.kitbilling.service_plan.user_accounts_allowed:
+                raise forms.ValidationError(mark_safe(user_account_exceeded_msg.\
+                                                      format(self.kuser.kitbilling.service_plan.user_accounts_allowed)))
     
     class Meta:
         model = User
@@ -378,15 +397,13 @@ class NewUserForm(forms.ModelForm):
         self.helper.form_tag = False
         
     def clean(self):
-        if self.kuser.get_kitusers().count() >= self.kuser.kitbilling.service_plan.user_accounts_allowed:
-            raise forms.ValidationError("Your plan allows a maximum of {} Users. Consider Upgrading".\
-                                        format(self.kuser.kitbilling.service_plan.user_accounts_allowed)) 
+        if self.kuser.get_kitusers().filter(user__is_active = True).count() >= self.kuser.kitbilling.service_plan.user_accounts_allowed:
+            raise forms.ValidationError(mark_safe(user_account_exceeded_msg.\
+                                                  format(self.kuser.kitbilling.service_plan.user_accounts_allowed)))
     
     class Meta:
         model = User
-        fields = ['username','email','first_name','last_name',\
-                  'is_active'
-                  ]       
+        fields = ['username','email','first_name','last_name','is_active']       
         
 class KITUserForm(forms.ModelForm):
     
