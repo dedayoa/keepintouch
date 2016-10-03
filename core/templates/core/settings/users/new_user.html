@@ -6,7 +6,7 @@
 {% block head_base_links %}
 	<link href="//cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css" rel="stylesheet">
 	<link href="{% static "css/foundation-datepicker.css" %}" rel="stylesheet">
-	{{ form.media.css }}
+	{{ form_2.media.css }}
 	{{ block.super }}
 {% endblock %}
 {% block content %}
@@ -16,7 +16,7 @@
 			{% crispy form_1 %}
 			{% crispy form_2 %}
 			<div class="button-holder">
-				<input type="submit" name="submit" value="Submit" class="submit button success float-right" id="submit-id-submit">
+				<input type="submit" name="submit" value="Create" class="submit button success float-right" id="submit-id-submit">
 				<input type="reset" name="reset" value="Reset" class="reset button float-right" id="reset-id-reset">
 			</div>
 		</form>
@@ -24,6 +24,7 @@
 {% endblock %}
 {% block foot_base_js %}
 	{{block.super}}
+	{{ form_2.media.js }}
 	<script src="{% static "js/foundation-datepicker.js" %}"></script>
 	<script>
 		$(document).ready(function() {
@@ -33,5 +34,4 @@
 			});
 		});
 	</script>
-	{{ form.media.js }}
 {% endblock %}
