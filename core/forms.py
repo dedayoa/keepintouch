@@ -324,6 +324,8 @@ class MessageTemplateForm(forms.ModelForm):
 class ExistingUserForm(forms.ModelForm):
     
     username = forms.CharField(disabled=True)
+    email = forms.EmailField(required=True)
+    first_name = forms.CharField(required=True)
     
     def __init__(self, *args, **kwargs):
         super(ExistingUserForm, self).__init__(*args, **kwargs)
@@ -343,6 +345,8 @@ class ExistingUserForm(forms.ModelForm):
 class PersonalProfileForm(forms.ModelForm):
     
     username = forms.CharField(disabled=True)
+    email = forms.EmailField(required=True)
+    first_name = forms.CharField(required=True)
     
     def __init__(self, *args, **kwargs):
         super(PersonalProfileForm, self).__init__(*args, **kwargs)
@@ -575,6 +579,13 @@ class CustomDataIngestForm(forms.Form):
     
 
 class OrganizationContactForm(forms.ModelForm):
+    
+    
+    def __init__(self, *args, **kwargs):
+        super(OrganizationContactForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        
     
     class Meta:
         model = OrganizationContact
