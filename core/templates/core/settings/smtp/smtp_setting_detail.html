@@ -23,7 +23,7 @@
 		<form method="POST" action="{% url 'core:smtp-delete' smtpsettingid %}">
 		   {% csrf_token %}
 		   <input type="submit" value="Delete" class="button alert float-left" 
-		   onclick="return confirm('Are you sure you want to delete this Public Event?');">
+		   onclick="return confirm('Are you sure you want to delete this SMTP Configuration?');">
 		</form>
 	</div>
 {% endblock %}
