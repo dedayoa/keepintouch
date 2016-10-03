@@ -1,16 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-</head>
-<body>
-<table style="width: 447px; height: 473px;" border="0" cellspacing="0" cellpadding="0" align="center">
-<tbody>
-<tr style="height: 18px;">
-<td style="width: 443px; height: 18px;"><img src="http://intouchng.com/wp-content/uploads/2016/07/logo-improved.png" alt="logo" width="25" height="25" /> <font color="#FF6600"><b><font size="5" face="verdana,geneva,sans-serif">In.Touch</font></b></font> <font face="tahoma,arial,helvetica,sans-serif">Messaging Automation</font></td>
-</tr>
-<tr style="height: 279px;">
-<td style="width: 443px; height: 279px;">
-<p>&nbsp;</p>
+{% extends "core/email/base.html" %}
+
+
+{% block content %}
+
 <p>Dear {{fullname}}</p>
 <p>You're almost set!</p>
 <p>Let us confirm your email address. Click on the link below to confirm.</p>
@@ -18,16 +10,7 @@
 <p>You can also copy and paste this code in the Email Verification Field: <strong>{{email_verification_code}}</strong></p>
 <p>&nbsp;</p>
 <p>Need Immediate Support, contact us via chat or:<br /> Phone: +2348028443225<br /> Email: support@intouchng.com</p>
-Regards<br /> In.Touch Support</td>
-</tr>
-<tr style="height: 74px;">
-<td style="width: 443px; height: 74px; background-color: #5571ed; vertical-align: middle;" align="center">
-<p><font size="1" color="#FFFFFF" face="arial black,sans-serif">&copy; Tekart Limited. 12, Omirin Cr., Iju-Ishaga, Agege, Lagos, Nigeria.</font></p>
-<p><font size="1" color="#FFFFFF" face="arial black,sans-serif">Tel: +2348028443225</font></p>
-</td>
-</tr>
-</tbody>
-</table>
-<p>&nbsp;</p>
-</body>
-</html>
+Regards<br />
+In.Touch Support
+
+{% endblock %}
