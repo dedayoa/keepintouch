@@ -87,3 +87,52 @@ class SMSDeliveryReportTransaction(models.Model):
     def __str__(self):
         return '{0}'.format(self.date_received)
     
+    
+class EmailDeliveryReport(models.Model):
+    
+    STATUS = (
+        ('0', 'SENT'), #DR
+        ('1', 'PROCESSED'), #this information will be visible to us only
+        ('2', 'DROPPED'),
+        ('3', 'DEFERRED'),
+        ('4', 'DELIVERED'),
+        ('5', 'BOUNCED'),
+        
+        #('1', 'OPENED'), #ER
+        #('2', 'CLICKED'), #ER
+        #('7', 'SPAM REPORT'), #ER
+        #('8', 'UNSUBSCRIBE'), #does not apply. will be handled by In.Touch
+             )
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    batch_id = models.UUIDField(db_index=True, editable=False, null=True, help_text="A.K.A Process ID or Bulk ID")
+    
+    to_email = models.EmailField()
+    from_email = models.EmailField()
+    
+    email_message = JSONField()
+    email_gateway = JSONField()
+    
+    msg_status = models.CharField(max_length=20, choices=STATUS, default='')
+    
+    kituser_id = models.IntegerField(db_index=True) #report will be generated on this field
+    kitu_parent_id = models.IntegerField(db_index=True)
+    
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True) #report will be generated on this field
+    
+    
+    def __str__(self):
+        return "Email from {} to {}".format(self.from_email,self.to_email)
+
+class EmailEventHistory(models.Model):
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    message_id = models.ForeignKey(EmailDeliveryReport, on_delete=models.CASCADE)
+    data = JSONField()
+    
+    created = models.DateTimeField(auto_now_add=True)
+    last_modified = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return str(self.id)
