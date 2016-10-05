@@ -50,9 +50,9 @@ def _compose(template, convars, custom_convars = {}):
 
 
 @django_rq.job('email')
-def _send_email(email_message, smtp_profile, **kwargs):
-    es = SMTPHelper(smtp_profile)
-    es.send_email(email_message, **kwargs)
+def _send_email(email_message, smtp_profile, batch_id='', **kwargs):
+    es = SMTPHelper(smtp_profile, email_message, batch_id, **kwargs)
+    es.send_email()
 
 @django_rq.job('sms')
 def _send_sms(sms_message, kuser, msg_type, batch_id=''):
@@ -217,7 +217,10 @@ def process_onetime_event(queued_messages=None):
                             e_msg = _compose(queued_message.message["email_template"], recipient_d, cdd)
                             e_title = _compose(queued_message.message["title"], recipient_d, cdd)
                             _send_email.delay([e_title, e_msg, recipient_d.email],\
-                                              smtp_setting_qsv, cc_recipients = cc_emails, owner = queued_message.created_by
+                                              smtp_setting_qsv,
+                                              cc_recipients = cc_emails,
+                                              owner = queued_message.created_by,
+                                              batch_id = sprm.id
                                               )
                         #sms   
                         if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
