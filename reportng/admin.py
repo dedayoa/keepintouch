@@ -2,7 +2,8 @@ from django.contrib import admin
 
 # Register your models here.
 
-from .models import SMSDeliveryReport, SMSDeliveryReportHistory, SMSDeliveryReportTransaction
+from .models import SMSDeliveryReport, SMSDeliveryReportHistory, SMSDeliveryReportTransaction,\
+                    EmailDeliveryReport, EmailEventHistory
 
 class SMSDeliveryReportHistoryAdmin(admin.ModelAdmin):
     
@@ -15,3 +16,5 @@ class SMSDeliveryReportTransactionAdmin(admin.ModelAdmin):
 admin.site.register(SMSDeliveryReport)
 admin.site.register(SMSDeliveryReportHistory, SMSDeliveryReportHistoryAdmin)
 admin.site.register(SMSDeliveryReportTransaction, SMSDeliveryReportTransactionAdmin)
+admin.site.register(EmailDeliveryReport)
+
