@@ -22,6 +22,7 @@ from .helper import SMTPHelper, SMSHelper, get_next_delivery_time, OKToSend
 from core.exceptions import *
 from core.models import Contact, PublicEvent, KITUser, SMTPSetting, Event, CustomData
 from core.googlext import GoogleURLShortener
+import uuid
 
 
 
@@ -51,11 +52,15 @@ def _compose(template, convars, custom_convars = {}):
 
 @django_rq.job('email')
 def _send_email(email_message, smtp_profile, batch_id='', **kwargs):
+    if batch_id == '':
+        batch_id = uuid.uuid4()
     es = SMTPHelper(smtp_profile, email_message, batch_id, **kwargs)
     es.send_email()
 
 @django_rq.job('sms')
 def _send_sms(sms_message, kuser, msg_type, batch_id=''):
+    if batch_id == '':
+        batch_id = uuid.uuid4()
     es = SMSHelper(sms_message, kuser, msg_type, batch_id)
     es.send_my_sms()
 
