@@ -32,6 +32,7 @@ from .smsgw.smslive247 import SMSLive247Helper
 from .smsgw.infobip import InfobipSMS
 
 import phonenumbers
+from reportng.models import EmailDeliveryReport
 
 #@cached_as(KITBilling, KITUser, timeout=4*3600)        
 def is_company_wide(kuser):
@@ -47,7 +48,7 @@ def is_company_wide(kuser):
 
 class SMTPHelper():
     
-    def __init__(self, smtp_server_profile):
+    def __init__(self, smtp_server_profile, email_message, batch_id, **kwargs):
         
         self.ssp = smtp_server_profile
         self.id = getattr(self.ssp, 'id', None)
@@ -58,6 +59,16 @@ class SMTPHelper():
         self.connection_security = getattr(self.ssp,'connection_security','')
         self.smtp_user = getattr(self.ssp,'smtp_user','')
         self.smtp_password = getattr(self.ssp,'smtp_password','')
+        
+        self.email_title = email_message[0]
+        self.email_msg = email_message[1]
+        self.email_recipient = email_message[2]
+        self.email_cc_recipients = kwargs.get('cc_recipients')
+        
+        self.kuser = kwargs.get('owner')
+        
+        self.batch_id = batch_id
+        
     
     # will need to cache this later
     def get_connection(self):
@@ -126,36 +137,62 @@ class SMTPHelper():
             return(sys.exc_info())
 
     
-    def send_email(self, email_message, **kwargs):
+    def send_email(self):
         
         try:
             conn = self.get_connection() 
             
             with conn as smtp_connection:    
                 msg = EmailMessage(
-                    subject = email_message[0], #title
-                    body = email_message[1], #body
+                    subject = self.email_title, #title
+                    body = self.email_msg, #body
                     from_email = '"{}" <{}>'.format(self.from_sender, self.smtp_user),
                     #from_email = self.smtp_user,
-                    to = [email_message[2]], #recipient
-                    cc = kwargs.get('cc_recipients',[]),
+                    to = [self.email_recipient], #recipient
+                    cc = self.email_cc_recipients,
                     connection=smtp_connection,
-                    #headers={'Message-ID': 'foo'},
+                    headers={
+                             'X-Mailer': 'In.Touch Business Messaging Automation',
+                             'X-Twitter-ID': '@intouchng',
+                             'X-Facebook-ID' : 'https://www.facebook.com/intouchng'
+                             },
                 )
                 msg.content_subtype = "html"
                 msg.send()
                 
+                EmailDeliveryReport.objects.create(
+                        batch_id = self.batch_id,
+                        to_email = self.email_recipient,
+                        from_email = self.smtp_user,
+                        email_message = {
+                                         'title':self.email_title,
+                                         'from' : self.smtp_user,
+                                         'to' : self.email_recipient,
+                                         'cc' : self.email_cc_recipients,
+                                         'message' : self.email_msg
+                                         },
+                        email_gateway = {
+                                'server' :self.smtp_server,
+                                'port': self.smtp_port,
+                                'security': self.connection_security,
+                                'username' : self.smtp_user
+                                         },
+                        msg_status = '0',
+                        kituser_id = self.kuser.id,
+                        kitu_parent_id = self.kuser.get_parent().id
+                )
+                '''
                 temp_log_to_db(
                     'email',
                     email_msg = email_message,
                     sender_mail = "{} <{}>".format(self.from_sender, self.smtp_user),
                     owner = kwargs['owner']
-                )
+                )'''
         except smtplib.SMTPDataError:
             FailedEmailMessage.objects.create(
-                        email_pickled_date = [email_message, self.ssp],
+                        email_pickled_date = [self.email_msg, self.ssp],
                         reason = str(sys.exc_info()[1]),
-                        owned_by = kwargs['owner']
+                        owned_by = self.kuser
                                               )
 
 #todo :
@@ -216,27 +253,6 @@ class SMSHelper():
             KITUBalance.objects.filter(kit_user=self.kuser).update(free_sms_balance=amount)
         elif balance_acct_debited == 'sb':
             KITUBalance.objects.filter(kit_user=self.kuser).update(sms_balance=amount)
-    
-    '''
-    def _sms_success_logging_and_all(self, gw_id):        
-        # do all logging        
-        temp_log_to_db(
-            'sms',
-            sms_msg = [self.sender,self.sms_message,self.destination],
-            message_id = self.success_message_id,
-            owner = self.kuser,
-            gateway_id = gw_id
-        )
-    
-    def _sms_failure_logging_and_all(self):        
-        # do all logging        
-        temp_log_to_db(
-            'sms',
-            sms_msg = [self.sender,self.sms_message,self.destination],
-            message_err_code = self.error_code,
-            owner = self.kuser
-        )
-    '''
     
     
         
