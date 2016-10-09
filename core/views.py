@@ -281,7 +281,7 @@ class ContactViewView(UpdateView):
         form = self.get_form(self.form_class)
         
         #form = self.form_class(instance=self.object)
-        event_formset = EventFormSet(request.POST, instance=self.object)
+        event_formset = EventFormSet(request.POST, instance=self.object,form_kwargs={'kituser': request.user.kituser})
         
         
         if form.is_valid() and event_formset.is_valid():
@@ -316,6 +316,7 @@ class ContactViewView(UpdateView):
         self.params = super(ContactViewView, self).get_context_data(**kwargs)
         self.params["title"] = "Contact {}".format(self.object.pk)
         self.params["contactid"] = self.object.pk
+        self.params["body_class"] = 'contact-page'
         return self.params
     
     def get_queryset(self, **kwargs):
@@ -485,6 +486,7 @@ class MessageTemplateUpdateView(PermissionRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         params = super(MessageTemplateUpdateView, self).get_context_data(**kwargs)
         params["msgtemplateid"] = self.object.pk
+        params["title"] = 'Template - %s'%self.object.title
         return params
     
     def get_queryset(self, **kwargs):
@@ -506,6 +508,11 @@ class MessageTemplateCreateView(PermissionRequiredMixin, CreateView):
     model = MessageTemplate
     form_class = MessageTemplateForm
     template_name = 'core/templates/new_template.html'
+    
+    def get_context_data(self, **kwargs):
+        params = super(MessageTemplateCreateView, self).get_context_data(**kwargs)
+        params["title"] = 'Template - New'
+        return params
     
     def form_valid(self, form):
         form.instance.kit_admin = self.request.user.kituser
