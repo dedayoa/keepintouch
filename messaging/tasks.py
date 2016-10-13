@@ -72,7 +72,7 @@ def process_private_anniversary(private_events=None):
     else:
         due_private_events = Event.objects.select_related('contact','message').filter(date__day = timezone.now().day,
                                                                       date__month = timezone.now().month,
-                                                                      last_run__year__lte = timezone.now().year)
+                                                                      next_run__year__lte = timezone.now().year)
     # For each due private anniversary, prepare email and sms
     
     for peven in due_private_events:
@@ -94,8 +94,8 @@ def process_private_anniversary(private_events=None):
                                             peven.contact.kit_user,
                                             'private_anniv_msg',
                                             )
-                # update the last run date (year especially)
-                peven.last_run=timezone.now().date()
+                # update the next run date (year especially)
+                peven.next_run=timezone.now().date()+relativedelta(years=1)
                 peven.save()
         # move messages to a paused queue pending when error is resolved
         # also, send user a message about the issue
