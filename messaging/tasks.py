@@ -40,9 +40,9 @@ def _compose(template, convars, custom_convars = {}):
     default_convars = {
                         'firstname':getattr(convars,'first_name',''),
                         'lastname':getattr(convars,'last_name',''),
-                        'salutation':getattr(convars,'salutation',''),
+                        'salutation':getattr(convars,'get_salutation_display',''),
                         'email':getattr(convars,'email',''),
-                        'phone':getattr(convars,'phone',''),                            
+                        'phone':getattr(convars,'phone',''),     
                         }
     context_vars.update(default_convars)
     
@@ -83,7 +83,7 @@ def process_private_anniversary(private_events=None):
                     etempl = _compose(peven.message.email_template, peven.contact) #compose title
                     rttempl = _compose(peven.message.title, peven.contact) #compose message
                     _send_email.delay([rttempl,etempl,peven.contact.email],\
-                                              peven.message.smtp_setting.values(),\
+                                              peven.message.smtp_setting,\
                                               owner = peven.contact.kit_user
                                               )
                     
@@ -139,7 +139,7 @@ def process_public_anniversary(public_events=None):
                         e_msg = _compose(publicevent.message.email_template, recipient_d)
                         e_title = _compose(publicevent.message.title, recipient_d)
                         _send_email.delay([e_title,e_msg,recipient_d.email],\
-                                          publicevent.message.smtp_setting.values(),\
+                                          publicevent.message.smtp_setting,\
                                           owner = publicevent.kit_user
                                           )
                         
