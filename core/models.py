@@ -29,7 +29,6 @@ from timezone_utils.choices import PRETTY_ALL_TIMEZONES_CHOICES, PRETTY_COMMON_T
 from django.apps import apps
 from cacheops.query import cached_as
 from cryptography.fernet import InvalidToken
-from gomez.models import KITSystem
 
 
 ### Managers
@@ -266,10 +265,11 @@ class KITUser(models.Model):
         
         
     def get_default_sms_sender(self):
+        kitsystem = apps.get_model('gomez', 'KITSystem')
         if self.is_admin:
-            return KITSystem.objects.get(kit_admin=self).default_sms_sender
+            return kitsystem.objects.get(kit_admin=self).default_sms_sender
         else:
-            return KITSystem.objects.get(kit_admin=self.parent).default_sms_sender
+            return kitsystem.objects.get(kit_admin=self.parent).default_sms_sender
     #####Admin Things#######
     
     def get_kituser(self):
@@ -572,7 +572,7 @@ class Event(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     
-    last_run = models.DateField(blank=True, default=timezone.now) #date message based on event was last sent
+    next_run = models.DateField(blank=True, default=timezone.now) #date message will be next sent
 
     
     def __str__(self):
@@ -586,7 +586,14 @@ class Event(models.Model):
         return reverse('core:event-detail',
                        args=[self.pk])
     
-
+    def save(self, *args, **kwargs):
+        if self.date is None:
+            self.next_run = timezone.now()
+        elif self.date > timezone.now(): #born in the future!!
+            self.next_run = arrow.get(self.date).replace(year=timezone.now().year+1).datetime
+        elif self.date < timezone.now():
+            self.next_run = arrow.get(self.date).replace(years=+1).datetime
+        super(Event, self).save(*args, **kwargs)
    
 class PublicEvent(models.Model):
     
