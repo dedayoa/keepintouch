@@ -9,7 +9,6 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.views.generic.edit import ModelFormMixin
 from django.forms.models import formset_factory, inlineformset_factory
-from django.conf import settings
 
 
 from .models import Contact, Event, PublicEvent, MessageTemplate, KITUser, SMTPSetting, ContactGroup,\
