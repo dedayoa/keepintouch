@@ -1,0 +1,72 @@
+{% extends "core/base_generic.html" %}
+
+{% load staticfiles %}
+{% load gmz_extras %}
+{% load prices_i18n %}
+
+{% block head_base_links %}
+	{{ block.super }}
+{% endblock %}
+{% block title %}{{title}}{% endblock %}
+
+{% block container %}
+	<div class="small-12 large-12 column kitapp-content">
+		{% block content %}
+			{% if messages %}
+			<div class="alert callout">
+				{% for message in messages %}
+					<p>{{ message }}</p>
+				{% endfor %}
+			</div>
+			{% endif %}
+			<div class="row">
+			{% for subsc_product in subscription_products %}
+				<div class="column small-12 medium-{% widthratio 12 subscription_products|length 1 %}">
+					<table style="text-align: center;">
+						<tr>
+							<td>{{subsc_product.name|upper}}</td>
+						</tr>
+						<tr>
+							<td>{% gross subsc_product.price %}</td>
+						</tr>
+						<tr>
+							<td>
+								{% for plan_line in subsc_product.description|splittolist %}
+									<div>{{plan_line|default:"&nbsp;"}}</div>
+								{% endfor %}
+							</td>
+						</tr>
+						<tr>
+							<td>
+								{% if subsc_product.meta.plan_id == request.user.kituser.kitbilling.service_plan.pk %}
+									<button class="button renew-button" data-product-id="{{subsc_product.id}}">Renew</button>
+								{% else %}
+									<button class="button subscribe-button" data-product-id="{{subsc_product.id}}">Subscribe</button>
+								{% endif %}
+							</td>
+						</tr>
+					</table>
+					
+				</div>
+			{% endfor %}
+			
+			</div>
+		{% endblock %}
+	</div>
+
+{% endblock %}
+
+{% block foot_base_js %}
+	{{ block.super }}
+	<script type="text/javascript" src="{% static "js/humanize.js" %}"></script>
+	<script>
+		$("button.renew-button").click(function(e){
+			var url = '/order/start/?action=renew&product_id='+$(this).data('product-id');
+			window.location = url;
+		});
+		$("button.subscribe-button").click(function(e){
+			var url = '/order/start/?action=resub&product_id='+$(this).data('product-id');
+			window.location = url;
+		});
+	</script>
+{% endblock %}
