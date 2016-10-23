@@ -369,11 +369,11 @@ class ContactCreateView(CreateView):
 def privateevents(request):
     
     if request.method == "GET":
-        q_user = KITUser.objects.get(user=request.user)
+        #q_user = KITUser.objects.get(user=request.user)
         #q_grps = q_user.group.all() #groups the user belongs to
         #q_contacts = Contact.objects.filter(created_by_group__in=q_grps)
 
-        eventstable = PrivateEventTable(q_user.get_private_events())
+        eventstable = PrivateEventTable(request.user.kituser.get_private_events())
         RequestConfig(request, paginate={'per_page': 25}).configure(eventstable)
         params = {}
         params["title"] = "Events"
@@ -383,11 +383,11 @@ def privateevents(request):
 def publicevents(request):
     
     if request.method == "GET":
-        q_user = KITUser.objects.get(user=request.user)
+        #q_user = KITUser.objects.get(user=request.user)
         #q_grps = q_user.group.all() #groups the user belongs to
         #q_publ_ev = PublicEvent.objects.filter(event_group__in=q_grps)
 
-        eventstable = PublicEventTable(q_user.get_public_events())
+        eventstable = PublicEventTable(request.user.kituser.get_public_events())
         RequestConfig(request, paginate={'per_page': 25}).configure(eventstable)
         params = {}
         params["title"] = "Public Events"
@@ -609,7 +609,7 @@ class UserCreateView(PermissionRequiredMixin, View):
                     
                 return HttpResponseRedirect(reverse('core:kituser-detail', args=[f2.pk]))
             except IntegrityError:
-                flash_messages.add_message(request, flash_messages.INFO, "Username already exists" )
+                flash_messages.add_message(request, flash_messages.INFO, str(sys.exc_info()[1]) )
                 return render(request, self.template_name, self.params)
         
         return render(request, self.template_name, self.params)       
