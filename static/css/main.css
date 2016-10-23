@@ -2,6 +2,14 @@ body{
 	background-color: #8db5d2;
 }
 
+div.order-summary{
+	background-color: #fff;
+}
+
+span.cart-item-update{
+	display: none;
+}
+
 body.contact-page fieldset{
 	background-color: #fefefe;
     padding: 1rem 1rem 0;
