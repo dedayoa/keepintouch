@@ -31,6 +31,7 @@ def create_kituser_assoc_tables(sender, instance, **kwargs):
             
             kitbilling.objects.create(
                     kit_admin=instance,
+                    last_renew_date = timezone.now().date(),
                     next_due_date = timezone.now().date(),
                     registered_on = timezone.now().date()
                     )
