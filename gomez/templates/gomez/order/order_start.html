@@ -1,0 +1,97 @@
+{% extends "core/base_generic.html" %}
+
+{% load staticfiles %}
+{% load gmz_extras %}
+{% load prices_i18n %}
+
+{% block head_base_links %}
+	{{ block.super }}
+{% endblock %}
+{% block title %}{{title}}{% endblock %}
+
+{% block container %}
+	<div class="small-12 large-12 column kitapp-content">
+		{% block content %}
+			{% if messages %}
+			<div class="alert callout">
+				{% for message in messages %}
+					<p>{{ message }}</p>
+				{% endfor %}
+			</div>
+			{% endif %}
+			<div class="row">
+				<h3>Order # <span style="color: #444; font-size: 75%;">{{corder.order_number}}</span></h3>
+				<div class="column small-12 medium-9">
+					<form action="{% url 'gomez:order-update' corder.order_number %}" method="post">
+						{% csrf_token %}
+						<div class="shop-order">
+							<table>
+								<tr>
+									<th width="40%"></th>
+									<th>Price</th>
+									<th>Quantity</th>
+									<th></th>
+								</tr>
+								{% for item in corder %}
+									<tr>
+										<td>
+											<strong>{{item.product.name}}</strong>
+											<p style="color: #555; font-size: 70%">{{item.product.description}}</p>
+										</td>
+										<td style="text-align: center;">{% gross item.get_price_per_item %}</td>
+										<td class="cart-item-row" style="text-align: center;">
+											<input name="{{item.id}}" type="number" value="{{item.get_quantity}}" style="width: 4rem; display: inline-block;" min="1" />
+											<span class="cart-item-update"><a href="#">update</a></span>
+										</td>
+										<td>
+											<a href="#"><i style="color: red" class="fi-x" title="Remove Item"></i></a>
+										</td>
+									</tr>
+								{% endfor %}
+							</table>
+						</div>
+					</form>
+					<div class="shop-mini-store">
+						<h3>Store <small>Other Items that go with your selection</small></h3>
+					</div>
+				</div>
+				<div class="column small-12 medium-3 order-summary">
+					<h4>Order Summary</h4>
+					<p>
+						{{corder.get_items.count}} item{{corder.get_items.count|pluralize}} in your order.
+					</p>
+					<hr />
+					<h4 style="font-weight: bold; color: orangered; text-align: center;">{% gross corder.total %}</h4>
+					<button style="color: black; width: 10rem; display: block; margin: 1rem auto;" class="button warning">Checkout</button>
+				</div>
+			</div>
+		{% endblock %}
+	</div>
+
+{% endblock %}
+
+{% block foot_base_js %}
+	{{ block.super }}
+	<script type="text/javascript" src="{% static "js/humanize.js" %}"></script>
+	<script>
+		
+		(function(){
+			const initval = $('td.cart-item-row input[type="number"]').val();
+			$('td.cart-item-row input[type="number"]').change(function(){
+				if ($(this).val() == initval){
+					$(this).next().hide();
+				}else{
+					$(this).next().show();
+				}
+				
+			});
+		})();
+		$(document).ready(function(){
+			$('span.cart-item-update a').click(function(){
+				console.log('ah');
+				$(this).closest('form').submit();
+			});
+		});
+		
+	</script>
+{% endblock %}
