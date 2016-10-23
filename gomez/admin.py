@@ -6,7 +6,7 @@ from import_export.admin import ImportExportMixin
 from country_dialcode.models import Prefix
 from country_dialcode.admin import PrefixAdmin
 from .models import KITBilling, KITServicePlan, KITSystem, EmailReport, SMSReport, \
-                    SMSRateTable
+                    SMSRateTable, Product, Order, Invoice, OrderLine, PaymentMethod
 
 
 class SMSRateTableInline(admin.TabularInline):
@@ -53,4 +53,10 @@ admin.site.register(EmailReport, EmailReportAdmin)
 admin.site.register(SMSReport, SMSReportAdmin)
 admin.site.unregister(Prefix)
 admin.site.register(Prefix, MyPrefixAdmin)
+
+admin.site.register(Product)
+admin.site.register(Order)
+admin.site.register(Invoice)
+admin.site.register(OrderLine)
+admin.site.register(PaymentMethod)
 
