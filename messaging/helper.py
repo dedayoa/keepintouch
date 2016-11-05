@@ -3,7 +3,10 @@ Created on Jul 9, 2016
 
 @author: Dayo
 '''
+
+
 import sys, os
+import re
 import requests
 from dateutil.relativedelta import relativedelta
 from django.template import Context, Template, loader
@@ -381,3 +384,11 @@ def assemble_message(template_file, convars, custom_convars = {}):
     context_vars.update(default_convars)
     
     return t.render(Context(context_vars))
+
+
+
+
+    
+def text_2_wordlist(text, max_number_of_words):
+    text_list = re.sub("[^\w]", " ",  text).split()
+    return " ".join(text_list[0:max_number_of_words])+"..." if len(text_list) > max_number_of_words else text
