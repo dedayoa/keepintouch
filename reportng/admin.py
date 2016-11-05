@@ -19,9 +19,13 @@ class SMSDeliveryReportHistoryAdmin(admin.ModelAdmin):
 class SMSDeliveryReportTransactionAdmin(admin.ModelAdmin):
     
     list_display = ('body','date_received','status')
+    
+    
+class EmailDeliveryReportAdmin(admin.ModelAdmin):
+    list_display = ('from_email','to_email','msg_status','created')
 
 admin.site.register(SMSDeliveryReport, SMSDeliveryReportAdmin)
 admin.site.register(SMSDeliveryReportHistory, SMSDeliveryReportHistoryAdmin)
 admin.site.register(SMSDeliveryReportTransaction, SMSDeliveryReportTransactionAdmin)
-admin.site.register(EmailDeliveryReport)
+admin.site.register(EmailDeliveryReport, EmailDeliveryReportAdmin)
 
