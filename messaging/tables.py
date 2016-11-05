@@ -20,11 +20,7 @@ import re
 from django.forms.models import model_to_dict
 from django.core.urlresolvers import reverse
 
-
-    
-def text_2_wordlist(text, max_number_of_words):
-    text_list = re.sub("[^\w]", " ",  text).split()
-    return " ".join(text_list[0:max_number_of_words])+"..." if len(text_list) > max_number_of_words else text
+from .helper import text_2_wordlist
 
 
 
