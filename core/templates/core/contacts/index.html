@@ -11,21 +11,77 @@
 {% block content %}
 <div class="row">
 	<h3>{{page_title}}</h3>
+	{{ block.super }}
+	<div>
+		<div><a class="small button" href="{% url 'core:contact-new' %}">New Contact</a></span></div>
+	  	{% crispy contacts_search_form %}
+	</div>
 	<div class="table-scroll">
-		{{ block.super }}
-		<div>
-			<div><a class="small button" href="{% url 'core:contact-new' %}">New Contact</a></span></div>
-		  	{% crispy contacts_search_form %}
-		</div>
 		{% render_table table %}
 	</div>
 </div>
+<div class="reveal" id="single_sms_modal" data-reveal>
+	<h4>Quick SMS</h4>
+	<div id="single_sms_modal_content">
+		
+	</div>
+	<button class="close-button" data-close aria-label="Close modal" type="button">
+		<span aria-hidden="true">&times;</span>
+	</button>
+</div>
 {% endblock %}
 {% block foot_base_js %}
-	{{ block.super }}
+	
 	<script>
 		$('a.button.search').click(function(){
 			$('form#contact-search-form').submit();
 		})
+		$('a.sms-btn').click(function(){
+			var phonenum = $(this).parents("td.action").siblings("td.phone").children("span").text();
+			var fname = $(this).parents("td.action").siblings("td.first_name").text();
+			var lname = $(this).parents("td.action").siblings("td.last_name").text();
+			var contactid = $(this).parents("td.action").siblings("td.select").children("input").val();
+			if (phonenum == ""){
+				$("#single_sms_modal_content").html('<h3 style="text-align: center;"><i class="fi-alert"></i> Contact Does Not Have Phone Number</h3>');
+				$('#single_sms_modal').foundation('open');
+			};
+			$("#single_sms_modal_content").html(`{% crispy qsmsform %}`);
+			$("input#id_recipient").before('<p><strong>To</strong>: <span style="display: inline-block; border-bottom: 1px solid #333;">'+fname+" "+lname+'</span> <span style="padding: 0.2rem; background-color: #ddd; border-radius: 5%;">'+phonenum+'</span></p>');
+			$("input#id_recipient").val(contactid);
+			$('#single_sms_modal').foundation('open');
+		})
+		$(document.body).on('submit','form.quick-sms-form',function(e){
+			e.preventDefault();
+			var qsms_payload = $(this).serialize()
+			url = $(this).attr("action");
+
+			ajaxPost(url, qsms_payload, function(content){	
+				
+				if (content.hasOwnProperty("errors")){
+           			var errors = $.parseJSON(content.errors);	
+           		
+           			$.each(errors, function(index, value){
+           				if (index === '__all__'){
+           					$('div.nonfield-ajax-error').remove();
+           					$("small.error").remove();
+           					$("#single_sms_modal_content").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+           				}else{
+           					$("small.error").remove();
+           					//select field with error and apply text after it
+           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+           				}
+           			});
+           			
+           			return;
+           			
+           		}else{
+           			$('div.nonfield-ajax-error').remove();
+           			$("small.error").remove();
+           			$("#single_sms_modal_content").html(content.result);
+           			setTimeout(function(){window.location.replace(window.location);}, 3000);
+           		}
+			});
+		});
 	</script>
+	{{ block.super }}
 {% endblock %}
