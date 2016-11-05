@@ -24,8 +24,8 @@ from core.models import CustomData, Contact, SMTPSetting, MessageTemplate, Conta
 from messaging.sms_counter import SMSCounter
 
 from .forms import StandardMessagingForm, AdvancedMessagingForm, ReminderMessagingForm, ReminderFormSet,\
-                    IssueFeedbackForm
-from .helper import get_next_delivery_time 
+                    IssueFeedbackForm, QuickSMSForm
+from .helper import get_next_delivery_time, text_2_wordlist
 import base64
 from cryptography.fernet import Fernet
 
@@ -254,7 +254,7 @@ def send_message(request):
             
             QueuedMessages.objects.create(
                 message_type = request.POST.get("message_type"),
-                message_id = messageid, #-1 means it was never saved to draft
+                message_id = messageid, #0 means it was never saved to draft
                 message = {
                     'message_id' : messageid,
                     'title' : myform.cleaned_data.get('title',''),
@@ -501,3 +501,46 @@ def submit_issue_fb(request):
             obj.submitter = request.user.kituser
             obj.save()
             return {'result':'Feedback Received.<br />Thank You'}
+        
+        
+@ajax
+@login_required
+def send_quick_sms(request):
+    
+    if request.method == "POST":
+        
+        form = QuickSMSForm(request.POST)
+        if not form.is_valid():
+            return {'errors':form.errors.as_json(escape_html=True)}
+        else:
+            
+            smsmsg = form.cleaned_data.get('message','') 
+            recipient= (form.cleaned_data.get('recipient'),)
+            
+            QueuedMessages.objects.create(
+                message_type = 'STANDARD',
+                message_id = 0, #0 means it was never saved to draft
+                message = {
+                    'message_id' : 0,
+                    'title' : 'Quick SMS',
+                    'email_template' : '',
+                    'sms_template' : smsmsg,
+                    'send_email' : False,
+                    'send_sms' : True,
+                    'sms_insert_optout' : False,
+                    'sms_sender_id' : form.cleaned_data.get('sender_id'),
+                    'recipients' : recipient,
+                    'smtp_setting_id': '',
+                    'others' : {
+                            'draft_title' : text_2_wordlist(smsmsg, 7),
+                            'original_created' : '',
+                            'cc_recipients' : '',
+                            'cc_recipients_send_sms' : False,
+                            'cc_recipients_send_email' : False,                         
+                                }
+                            },
+                delivery_time = timezone.now(),
+                created_by = request.user.kituser
+                
+            )
+            return {'result':'SMS Sent!'}
