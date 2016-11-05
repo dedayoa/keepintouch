@@ -21,6 +21,7 @@ from django_select2.forms import Select2Widget, Select2MultipleWidget,\
 from django.utils import timezone
 from datetime import datetime
 from django.forms.models import inlineformset_factory, BaseInlineFormSet
+from django.core.urlresolvers import reverse
 
 
 
@@ -346,3 +347,20 @@ class IssueFeedbackForm(forms.ModelForm):
     class Meta:
         model = IssueFeedback
         fields = ['title','detail','screenshot']
+        
+        
+class QuickSMSForm(forms.Form):
+    
+    recipient = forms.CharField(widget = forms.HiddenInput)
+    sender_id = forms.CharField(label=_("Sender ID"),max_length=11)
+    message = forms.CharField(widget=forms.Textarea)
+    
+    def __init__(self, *args, **kwargs):        
+        self.sid_init = kwargs.pop('sender_id_init')
+        super(QuickSMSForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = True
+        self.helper.form_class = 'quick-sms-form'
+        self.helper.form_action = reverse('messaging:send-quick-sms')
+        self.fields["sender_id"].initial = self.sid_init
+        self.helper.add_input(Submit('submit', _('Submit'), css_id="issue-submit-button", css_class="success float-right"))
