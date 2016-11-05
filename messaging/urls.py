@@ -9,12 +9,13 @@ from django.conf.urls import url, include
 
 
 from .views import *
-from .ajax import prepare_to_send_message, send_message, run_reminder, submit_issue_fb
+from .ajax import prepare_to_send_message, send_message, run_reminder, submit_issue_fb, send_quick_sms
 
 urlpatterns = [
     url(r'^create/success/$', StandardMessageCreateView.as_view(), name=''),
     url(r'^prepare-to-send-message/$', prepare_to_send_message, name='messages-prepare-send-message'),
     url(r'^send-message/$', send_message, name='messages-send-message'),
+    url(r'^send-quick-sms/$', send_quick_sms, name='send-quick-sms'),
     url(r'^run-reminder/$', run_reminder, name='run-reminder-message'),
     url(r'^processed/messages/$', message_processed_status_view, name='messages-processed-status'),
     url(r'^queued/messages/$', message_queued_status_view, name='messages-queued-status'),
