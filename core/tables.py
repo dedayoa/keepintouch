@@ -31,15 +31,20 @@ class ContactTable(tables.Table):
     active = tables.BooleanColumn(verbose_name="Active?")
     email = tables.EmailColumn(verbose_name="Email", text= lambda row: "%s..."%row.email[:10] if len(row.email) > 10 else row.email)
     nickname = tables.Column(verbose_name="Nickname")
+    action = tables.Column(verbose_name="", accessor='pk', orderable=False)
     
     def render_phone(self,record):
         return mark_safe("<span>{}</span>".format(record.phone))
     
+    def render_action(self, record):
+        return mark_safe('<div style="width:6rem;"><a class="call-btn" href="#"><i style="font-size: 16pt;" class="fi-telephone"></i></a>'+\
+                         '<a class="sms-btn" href="#"><i style="font-size: 16pt;" class="fi-mail"></i></a></div>'
+                         )
+    
 
     class Meta:
         model = Contact
-        fields = ('select','first_name','last_name','nickname','email','phone','active')
-        attrs = {'style': 'width: 100%'}
+        fields = ('select','first_name','last_name','nickname','email','phone','active','action')
         empty_text = "Sorry, No Contact Found"
         attrs = {'style': 'width: 100%'}
         
