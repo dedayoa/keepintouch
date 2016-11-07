@@ -24,6 +24,8 @@ from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateT
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable,\
                     SMSTransferHistoryTable, UploadedContactFileHistoryTable, CustomDataStoreTable
                     
+from messaging.forms import QuickSMSForm
+                    
 from .tables import ContactTable_Admin
 from django.views.generic.edit import UpdateView, DeleteView, CreateView,\
     FormMixin
@@ -154,16 +156,19 @@ def contacts(request):
             #q_grps = user_q.group.all() #groups the user belongs to
             #user_s_group = CoUserGroup.objects.filter()
             #Contact.objects.filter()
+            params = {}
             if request.user.kituser.is_admin:
                 contactstable = ContactTable_Admin(request.user.kituser.get_contacts())
+                
             else:
                 contactstable = ContactTable(request.user.kituser.get_contacts())
             RequestConfig(request, paginate={'per_page': 25}).configure(contactstable)
-            params = {}
+            
             params["title"] = "Contacts"
             params["page_title"] = "Contacts"
             params["table"] = contactstable
             params["contacts_search_form"] = ContactSearchForm
+            params["qsmsform"] = QuickSMSForm(sender_id_init=request.user.kituser.get_default_sms_sender())
             return render(request, 'core/contacts/index.html', params)
         else:
             queryp = request.GET.get('search_query')
@@ -187,6 +192,7 @@ def contacts(request):
                 RequestConfig(request, paginate={'per_page': 25}).configure(contactstable)
                 params["table"] = contactstable
                 params["contacts_search_form"] = ContactSearchForm(initial={'search_query': queryp})
+                params["qsmsform"] = QuickSMSForm(sender_id_init=request.user.kituser.get_default_sms_sender())
                 return render(request, 'core/contacts/index.html', params)
             
             return render(request, 'core/contacts/index.html', params)
