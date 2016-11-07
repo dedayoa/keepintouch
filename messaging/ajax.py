@@ -509,7 +509,7 @@ def send_quick_sms(request):
     
     if request.method == "POST":
         
-        form = QuickSMSForm(request.POST)
+        form = QuickSMSForm(request.POST,sender_id_init=request.user.kituser.get_default_sms_sender())
         if not form.is_valid():
             return {'errors':form.errors.as_json(escape_html=True)}
         else:
