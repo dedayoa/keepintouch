@@ -2,6 +2,71 @@ body{
 	background-color: #8db5d2;
 }
 
+
+.call-btn{
+  background: #3498db;
+  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+  background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+  background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+  background-image: -o-linear-gradient(top, #3498db, #2980b9);
+  background-image: linear-gradient(to bottom, #3498db, #2980b9);
+  -webkit-box-shadow: 0px 2px 1px #888;
+  -moz-box-shadow: 0px 2px 1px #888;
+  box-shadow: 0px 2px 1px #888;
+  font-family: Arial;
+  color: #ffffff;
+  padding: 0.6rem 0.8rem;
+  text-decoration: none;
+  float: left;
+}
+
+.call-btn:hover{
+  background: #3cb0fd;
+  background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+  text-decoration: none;
+  -webkit-box-shadow: 0px 4px 4px #333;
+  -moz-box-shadow: 0px 4px 4px #333;
+  box-shadow: 0px 4px 4px #333;
+}
+
+.sms-btn {
+  background: #34d3d9;
+  background-image: -webkit-linear-gradient(top, #34d3d9, #2c97b8);
+  background-image: -moz-linear-gradient(top, #34d3d9, #2c97b8);
+  background-image: -ms-linear-gradient(top, #34d3d9, #2c97b8);
+  background-image: -o-linear-gradient(top, #34d3d9, #2c97b8);
+  background-image: linear-gradient(to bottom, #34d3d9, #2c97b8);
+  -webkit-box-shadow: 0px 2px 1px #888;
+  -moz-box-shadow: 0px 2px 1px #888;
+  box-shadow: 0px 2px 1px #888;
+  font-family: Arial;
+  color: #ffffff;
+  padding: 0.6rem 0.8rem;
+  text-decoration: none;
+  float: left;
+}
+
+.sms-btn:hover {
+  background: #3ce4fa;
+  background-image: -webkit-linear-gradient(top, #3ce4fa, #34d9d9);
+  background-image: -moz-linear-gradient(top, #3ce4fa, #34d9d9);
+  background-image: -ms-linear-gradient(top, #3ce4fa, #34d9d9);
+  background-image: -o-linear-gradient(top, #3ce4fa, #34d9d9);
+  background-image: linear-gradient(to bottom, #3ce4fa, #34d9d9);
+  text-decoration: none;
+  -webkit-box-shadow: 0px 4px 4px #333;
+  -moz-box-shadow: 0px 4px 4px #333;
+  box-shadow: 0px 4px 4px #333;
+}
+
+.call-btn i, .sms-btn i{
+	color: #fff;
+}
+
 div.order-summary{
 	background-color: #fff;
 }
