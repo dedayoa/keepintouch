@@ -171,6 +171,7 @@ def contacts(request):
             params["qsmsform"] = QuickSMSForm(sender_id_init=request.user.kituser.get_default_sms_sender())
             return render(request, 'core/contacts/index.html', params)
         else:
+            #for ajax post, visit ajax.py
             queryp = request.GET.get('search_query')
             form = ContactSearchForm(request.GET)
             if form.is_valid():
