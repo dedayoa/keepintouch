@@ -313,6 +313,10 @@ class KITSystem(models.Model):
     
     last_modified = models.DateTimeField(auto_now=True)
     
+    did_number = models.CharField(max_length=30, blank=True, verbose_name="DID Number")
+    
+    user_phone_as_callerid = models.BooleanField(default=False, verbose_name="User Phone Number as Caller ID")
+    
     def __str__(self):
         return "{} {}".format(self.kit_admin.user.first_name,self.kit_admin.user.last_name)
     
@@ -325,13 +329,19 @@ class KITSystem(models.Model):
 class SMSRateTable(models.Model):
     
     dialcode = models.OneToOneField(Prefix, verbose_name=_("Destination"), help_text=_("Select Prefix"))
-    sms_units = models.PositiveIntegerField(default=0)
+    sms_cost = models.DecimalField(max_digits=12, decimal_places=4)
+    
     
     def __str__(self):
         return str(self.dialcode)
     
     
+class CallRateTable(models.Model):
+    dialcode = models.OneToOneField(Prefix, verbose_name=_("Destination"), help_text=_("Select Prefix"))
+    call_cost = models.DecimalField(max_digits=12, decimal_places=4)
     
+    def __str__(self):
+        return str(self.dialcode)
         
         
 class SMSReport(models.Model):
