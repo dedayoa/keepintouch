@@ -33,7 +33,7 @@ def infobip_sms_delivery_report_callback(request):
 @csrf_exempt
 @require_POST
 def fs_call_detail_report_callback(request):
-    data = request.body.decode('utf-8')
+    data = request.body
     meta = copy.copy(request.META)
     jdata = json.loads(data)
     
