@@ -16,14 +16,14 @@
 {% block content %}
 	<div class="row">
 		{{ block.super }}
-		<h3>SMS <small>Transfer & History</small></h3>
+		<h3>Funds <small>Transfer & History</small></h3>
 		<div class="row column">
-			<form action="" method="post" id="sms-transfer-form">
+			<form action="" method="post" id="balance-transfer-form">
 				<table>
-					<h4 class="text-right">Total: <span class="stat" id="total-balance">{{total_balance}}</span> units</h4>
+					<h4 class="text-right">Total: <span class="stat" id="total-balance">{{total_balance|floatformat:2}}</span> NGN</h4>
 					<tr>
 						<td width="35%">
-							<div>Balance: <span id="user-balance">-</span> units</div>
+							<div>Balance: <span id="user-balance">-</span> NGN</div>
 							<div>{{transfer_form.users}}</div>
 						</td>
 						<td width="25%">
@@ -32,8 +32,8 @@
 						</td>
 						<td>
 							<div><br /></div>
-							<button class="button sms-txn-butn" data-mdir="credit"><i class="fi-plus"></i> Credit</button>
-							<button class="button sms-txn-butn" data-mdir="debit"><i class="fi-minus"></i> Debit</button>
+							<button class="button funds-txn-butn" data-mdir="credit"><i class="fi-plus"></i> Credit</button>
+							<button class="button funds-txn-butn" data-mdir="debit"><i class="fi-minus"></i> Debit</button>
 						</td>						
 					</tr>
 				</table>
@@ -51,13 +51,13 @@
 	<script type="text/javascript" src="{% static "js/humanize.js" %}"></script>
 	<script>
 	$(document).ready(function(){
-		$("#total-balance").text(function(){return Humanize.formatNumber($(this).text())});
-		$('.sms-txn-butn').click(function(e){
+		//$("#total-balance").text(function(){return Humanize.formatNumber($(this).text())});
+		$('.funds-txn-butn').click(function(e){
    			e.preventDefault();
-  			var payload = $("#sms-transfer-form").serializeArray();
+  			var payload = $("#balance-transfer-form").serializeArray();
   			payload.push({name:"mdir",value: $(this).data('mdir')});
 
-   			ajaxPost('/settings/account/sms/credit_transfer/',payload, function(content){   				
+   			ajaxPost('/settings/account/user/credit-transfer/',payload, function(content){   				
    				
            		if (content.hasOwnProperty("errors")){
            			var errors = $.parseJSON(content.errors);	
@@ -66,7 +66,7 @@
            				if (index === '__all__'){
            					$('div.nonfield-ajax-error').remove();
            					$("small.error").remove();
-           					$("#sms-transfer-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+           					$("#balance-transfer-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
            				}else{
            					$("small.error").remove();
            					//select field with error and apply text after it
@@ -80,17 +80,25 @@
            			$('div.nonfield-ajax-error').remove();
            			$("small.error").remove();
            			
-           			$("#total-balance").text(Humanize.formatNumber(content.result.admin_sms_bal));
-           			$("#user-balance").text(content.result.user_sms_bal);
+           			$("#total-balance").text(Humanize.formatNumber(content.result.admin_bal,2));
+           			$("#user-balance").text(Humanize.formatNumber(content.result.user_bal,2));
    				}
 			});
    		})
 
    		$( "#id_users" ).change(function() {
-   			var payload = $("#sms-transfer-form").serialize();
-   	  		ajaxGet('/settings/account/sms/get_user_balance/', payload, function(content){
-   	  			$("#user-balance").text(content.result.user_sms_bal)
-   	  		});
+   			var payload = $("#balance-transfer-form").serialize();
+
+   			if ($("#balance-transfer-form #id_users").val() == ""){
+   				$("#user-balance").text("");
+   				return
+   			}
+   			else{
+   				ajaxGet('/settings/account/user/get-balance/', payload, function(content){
+   	   	  			$("#user-balance").text(Humanize.formatNumber(content.result.user_bal,2))
+   	   	  		});
+   			}
+   	  		
    		});
 	})	   		
 	</script>

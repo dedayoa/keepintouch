@@ -523,26 +523,26 @@ class ContactGroupForm(forms.ModelForm):
             'contacts' : Select2MultipleWidget,
                    }
 
-class SMSTransferForm(forms.Form):
+class BalanceTransferForm(forms.Form):
     
     users = forms.ModelChoiceField(queryset=None, empty_label='-- Select A User --', widget=Select2Widget)
     admin = forms.CharField(widget=None)#(widget=forms.HiddenInput(attrs={'value':'{{adminid}}'}))
-    amount = forms.IntegerField(required=True, widget=forms.NumberInput(attrs={'min':settings.MIN_SMS_TRANSFERABLE, 'pattern':"^[0-9]"}))
+    amount = forms.DecimalField(required=True, widget=forms.NumberInput(attrs={'min':settings.MIN_BALANCE_TRANSFERABLE, 'pattern':"^[0-9]"}))
     
     def __init__(self, *args, **kwargs):
         self.crequest = kwargs.pop('crequest') or None
-        super(SMSTransferForm, self).__init__(*args, **kwargs)        
+        super(BalanceTransferForm, self).__init__(*args, **kwargs)        
         self.fields['users'].queryset = self.crequest.user.kituser.get_kitusers()
         self.fields['admin'].widget = forms.HiddenInput(attrs={'value':self.crequest.user.kituser.id})
         
         
     def clean(self):
         
-        cleaned_data = super(SMSTransferForm, self).clean()
+        cleaned_data = super(BalanceTransferForm, self).clean()
         
         
-        if cleaned_data.get("amount",0) < settings.MIN_SMS_TRANSFERABLE:
-            raise forms.ValidationError("Amount needs to be at least {}".format(settings.MIN_SMS_TRANSFERABLE));
+        if cleaned_data.get("amount",0) < settings.MIN_BALANCE_TRANSFERABLE:
+            raise forms.ValidationError("Amount needs to be at least {}".format(settings.MIN_BALANCE_TRANSFERABLE));
         
         if cleaned_data.get("users") is None:
             raise forms.ValidationError("You must select a user")

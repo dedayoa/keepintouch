@@ -3,7 +3,7 @@ from django.contrib import admin
 # Register your modelx here.
 
 from .models import Contact, KITUser, Event, PublicEvent, MessageTemplate, \
-                    SentMessage, SMTPSetting, CoUserGroup, ContactGroup, SMSTransfer,\
+                    SentMessage, SMTPSetting, CoUserGroup, ContactGroup, FundsTransfer,\
                     UploadedContact, CustomData, KITUBalance, KITActivationCode,\
                     OrganizationContact
 
@@ -33,7 +33,7 @@ class KITActivationCodeAdmin(admin.ModelAdmin):
     
 class KITUBalanceAdmin(admin.ModelAdmin):
     
-    list_display = ('kit_user','sms_balance','free_sms_balance')
+    list_display = ('kit_user','user_balance')
     
     def get_queryset(self, request):
         qs = super(KITUBalanceAdmin, self).get_queryset(request)
@@ -48,7 +48,7 @@ class KITUBalanceAdmin(admin.ModelAdmin):
 admin.site.register(Event)
 admin.site.register(PublicEvent)
 admin.site.register(UploadedContact)
-admin.site.register(SMSTransfer)
+admin.site.register(FundsTransfer)
 admin.site.register(KITUBalance, KITUBalanceAdmin)
 admin.site.register(Contact, ContactAdmin)
 admin.site.register(ContactGroup)

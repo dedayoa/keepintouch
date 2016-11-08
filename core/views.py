@@ -14,15 +14,15 @@ from django.utils import timezone
 from django_tables2 import RequestConfig
 
 from .models import Contact, CoUserGroup, KITUser, Event, PublicEvent, MessageTemplate,\
-                    SMTPSetting, ContactGroup, SMSTransfer, UploadedContact, CustomData, OrganizationContact
+                    SMTPSetting, ContactGroup, FundsTransfer, UploadedContact, CustomData, OrganizationContact
 from .forms import ContactForm, NewContactForm, EventFormSet, KITUserForm, ExistingUserForm,\
                     EventFormSetHelper, PublicEventForm, MessageTemplateForm, SMTPSettingForm, \
-                    UserGroupSettingForm, NewUserForm, ContactGroupForm, SMSTransferForm,\
+                    UserGroupSettingForm, NewUserForm, ContactGroupForm, BalanceTransferForm,\
                     ContactImportForm, PersonalProfileForm, CustomDataIngestForm, KITUBalanceForm,\
                     VerifyAccountForm, OrganizationContactForm, ContactSearchForm
 from .tables import ContactTable, PrivateEventTable, PublicEventTable, TemplateTable,\
                     KITUsersTable, SMTPSettingsTable, UserGroupsSettingsTable, ContactGroupsSettingsTable,\
-                    SMSTransferHistoryTable, UploadedContactFileHistoryTable, CustomDataStoreTable
+                    FundsTransferHistoryTable, UploadedContactFileHistoryTable, CustomDataStoreTable
                     
 from messaging.forms import QuickSMSForm
                     
@@ -62,7 +62,7 @@ from django.db.utils import IntegrityError
 from watson import search as watson
 from django.utils.safestring import mark_safe
 from django.db.models.deletion import ProtectedError
-from gomez.helper import SMSTransferHelper
+from gomez.helper import BalanceTransferHelper
 
 
 # Create your views here.
@@ -768,9 +768,9 @@ class KITUserDeleteView(View):
             
             # transfer user SMS balance to admin. Note that if the user had once been credited i.e sms_balance >0
             # this will lead to delete() failing as there will be an sms transfer log recorded.
-            if kuser.kitubalance.sms_balance > 0:
-                sth = SMSTransferHelper(kuser, self.request.user.kituser)
-                sth.credit(kuser.kitubalance.sms_balance)
+            if kuser.kitubalance.user_balance > 0:
+                sth = BalanceTransferHelper(kuser, self.request.user.kituser)
+                sth.credit(kuser.kitubalance.user_balance)
                
             kuser.user.delete()   
             
@@ -1018,22 +1018,22 @@ class ContactGroupCreateView(CreateView):
         return params
     
     
-class SMSBalanceTransferView(PermissionRequiredMixin, TemplateView):
+class UserBalanceTransferView(PermissionRequiredMixin, TemplateView):
     
-    permission_required = 'core.add_smstransfer'
+    permission_required = 'core.add_fundstransfer'
     
     template_name = "core/settings/accounts/sms_transfer_and_log.html"
     params = {}
 
     
     def get(self, request):
-        self.params['total_balance'] = request.user.kituser.kitubalance.sms_balance
+        self.params['total_balance'] = request.user.kituser.kitubalance.user_balance
         
-        smshtable = SMSTransferHistoryTable(SMSTransfer.objects.filter(created_by = request.user.kituser).order_by('-transaction_date'))
+        smshtable = FundsTransferHistoryTable(FundsTransfer.objects.filter(created_by = request.user.kituser).order_by('-transaction_date'))
         RequestConfig(request, paginate={'per_page': 50}).configure(smshtable)
         
         self.params['users'] = request.user.kituser.get_kitusers()
-        transfer_form = SMSTransferForm(crequest=request)
+        transfer_form = BalanceTransferForm(crequest=request)
         
         self.params['transfer_form'] = transfer_form
         self.params['table'] = smshtable
@@ -1049,7 +1049,7 @@ class AccountManagementView(TemplateView):
     
     def get(self, request):
         
-        self.params["sms_balance"] = request.user.kituser.kitubalance.sms_balance
+        self.params["user_balance"] = request.user.kituser.kitubalance.user_balance
         self.params["billing_info"] = request.user.kituser.kitbilling
         self.params["syssetid"] = request.user.kituser.kitsystem.id
         self.params["title"] = "Manage Account"

@@ -223,9 +223,8 @@ class SMSHelper():
         
         # check that user has enough SMS balance to send message
         #get_user_balance        
-        fsb = self.kuser.kitubalance.free_sms_balance
-        sb = self.kuser.kitubalance.sms_balance
-        
+        user_balance = self.kuser.kitubalance.user_balance
+                
         #get sms units required to send to destination
         ppsms = KITRateEngineA().get_sms_cost_to_number(self.destination)
         
@@ -233,29 +232,17 @@ class SMSHelper():
         smsct = SMSCounter().get_messages_count_only(self.sms_message)
         
         # all messages are billed using the user's account balance
-        if fsb >= (ppsms * smsct):
-            return ['fsb', fsb-(ppsms * smsct)]
-        elif sb >= (ppsms * smsct):
-            return ['sb', sb-(ppsms * smsct)]
+        if user_balance >= (ppsms * smsct):
+            return user_balance-(ppsms * smsct)
         else:
             raise NotEnoughBalanceError("Not enough units to send SMS")
         
 
         
         
-    def _update_user_sms_balance(self, balance_acct_debited, amount):
+    def _update_user_account_balance(self, amount):
         # save balance
-        '''
-        if is_company_wide(self.kuser) and self.msg_type == 'public_anniv_msg' or self.msg_type == 'private_anniv_msg':
-            if balance_acct_debited == 'p_fsb':
-                KITUBalance.objects.filter(kit_user=self.kuser.parent).update(free_sms_balance=amount)
-            elif balance_acct_debited == 'p_sb':
-                KITUBalance.objects.filter(kit_user=self.kuser.parent).update(sms_balance=amount)
-        else:'''
-        if balance_acct_debited == 'fsb':
-            KITUBalance.objects.filter(kit_user=self.kuser).update(free_sms_balance=amount)
-        elif balance_acct_debited == 'sb':
-            KITUBalance.objects.filter(kit_user=self.kuser).update(sms_balance=amount)
+        KITUBalance.objects.filter(kit_user=self.kuser).update(user_balance=amount)
     
     
         
@@ -306,8 +293,7 @@ class SMSHelper():
                         )
         else:
             # sms successfully sent...no exception. Deduct balance
-            print(result[0], result[1])
-            self._update_user_sms_balance(result[0], result[1])
+            self._update_user_account_balance(result)
         
         
 

@@ -43,13 +43,9 @@
 							<h4>Disk<small> (/)</small></h4>
 							<p><span>0</span>%</p>
 						</div>
-					{% endif %}					
-					<div class="grid-item" id="dsb-free_sms_balance">
-						<h4>Free SMS</h4>
-						<p class="stat text-center"><span>0</span></p>
-					</div>
-					<div class="grid-item" id="dsb-sms_balance">
-						<h4>SMS Balance</h4>
+					{% endif %}
+					<div class="grid-item" id="dsb-user_balance">
+						<h4>Balance</h4>
 						<p class="stat text-center"><span>0</span></p>
 					</div>
 					<div class="grid-item align-center" id="dsb-qmc">
@@ -130,8 +126,7 @@
 					if (content.hasOwnProperty("result")){
 						$("#dsb-qmc p span").text(content.result.qmc);
 						$("#dsb-pmc p span").text(content.result.pmc);
-						$("#dsb-sms_balance p span").text(Humanize.compactInteger(content.result.total_sms_balance));
-						$("#dsb-free_sms_balance p span").text(Humanize.compactInteger(content.result.free_sms_balance));
+						$("#dsb-user_balance p span").text(Humanize.compactInteger(content.result.user_balance));
 					}
 				}, {"onError":sayconnectiondown});		
 				setTimeout(get_qpc_stat, 240*1000);

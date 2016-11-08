@@ -13,7 +13,7 @@ from django.conf import settings
 from django.db import IntegrityError
 
 from core.models import KITActivationCode, KITUser
-from gomez.helper import SMSTransferHelper
+from gomez.helper import BalanceTransferHelper
 
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ def date_of_dayindex_in_this_week(self):
             if r.datetime.strftime("%H") == settings.RESET_SMS_DAY_TIME[1]:
                 return True
 
-
+'''
 def process_monthly_sms_crediting():
     if arrow.utcnow().date().day == 1:
         try:
@@ -39,7 +39,7 @@ def process_monthly_sms_crediting():
                     # transfer credit from system to user
                     ksystem = KITUser.objects.get(id=settings.SYSTEM_KITUSER_ID)
                     
-                    sth = SMSTransferHelper(ksystem, kadmin)
+                    sth = BalanceTransferHelper(ksystem, kadmin)
                     result = sth.debit(kadmin_monthly_credit)
                     # @todo: send email to user to inform her of this crediting
                 
@@ -49,7 +49,8 @@ def process_monthly_sms_crediting():
             logger.info("Retrying to process crediting of monthly SMS")
             process_monthly_sms_crediting()
     
-    
+'''
+               
 def expire_validation_code():
     
     result = KITActivationCode.objects.filter(created__lte = arrow.utcnow().replace(hours=-24).datetime).update(expired=True)

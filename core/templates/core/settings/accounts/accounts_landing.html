@@ -10,7 +10,7 @@
 			<a class="button" href="{% url 'gomez:system-settings' %}"><i class="fi-layout"></i> System</a>
 		</div>
 		<fieldset>
-		<p><strong>SMS Balance:</strong> <span id="sms-balance">{{sms_balance}}</span> units</p>
+		<p><strong>User Balance:</strong> <span id="user-balance">{{user_balance}}</span> NGN</p>
 		<p><strong>Registered on:</strong> <span>{{billing_info.registered_on}}</span></p>
 		<p><strong>Next Due Date:</strong> <span>{{billing_info.next_due_date}}</span></p>
 		<p><strong>Plan:</strong> <span>{{billing_info.service_plan}}</span></p>
@@ -27,7 +27,7 @@
 	<script type="text/javascript" src="{% static "js/humanize.js" %}"></script>
 	<script>
 	$(document).ready(function(){
-		$("#sms-balance").text(function(){return Humanize.formatNumber($(this).text())});
+		$("#user-balance").text(function(){return Humanize.formatNumber($(this).text())});
 	})
 	</script>
 	{{block.super}}

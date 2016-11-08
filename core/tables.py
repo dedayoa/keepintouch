@@ -11,7 +11,7 @@ import os
 import django_tables2 as tables
 from django_tables2.utils import A
 from .models import Contact, MessageTemplate, Event, PublicEvent, ContactGroup, \
-                    KITUser, SMTPSetting, CoUserGroup, SMSTransfer,\
+                    KITUser, SMTPSetting, CoUserGroup, FundsTransfer,\
                     UploadedContact, CustomData
 from django.utils.html import format_html, format_html_join
 from django.utils.safestring import mark_safe
@@ -200,16 +200,20 @@ class ContactGroupsSettingsTable(tables.Table):
         attrs = {'style': 'width: 100%'}
         
 
-class SMSTransferHistoryTable(tables.Table):
+class FundsTransferHistoryTable(tables.Table):
     
     from_user = tables.Column(verbose_name="From")
     to_user = tables.Column(verbose_name="To")
-    sms_units = tables.Column(verbose_name="SMS Units")
+    amount = tables.Column(verbose_name="Amount")
     transaction_date = tables.Column(verbose_name="Transaction Time")
     
+    
+    def render_amount(self, record):
+        return mark_safe('<span class="mamt-val">{0:.2f}</span>'.format(record.amount))
+    
     class Meta:
-        model = SMSTransfer
-        fields = ('from_user','to_user','sms_units','transaction_date')
+        model = FundsTransfer
+        fields = ('from_user','to_user','amount','transaction_date')
         attrs = {'style': 'width: 100%'}
         
         

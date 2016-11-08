@@ -17,9 +17,9 @@ import humanize
 import base64
 from cryptography.fernet import Fernet
 
-from .models import KITUser, SMSTransfer, CustomData, Contact, KITUBalance, KITActivationCode,\
-                    OrganizationContact
-from .forms import SMSTransferForm, ContactImportForm, CustomDataIngestForm, VerifyAccountForm,\
+from .models import KITUser, CustomData, Contact, KITUBalance, KITActivationCode
+
+from .forms import BalanceTransferForm, ContactImportForm, CustomDataIngestForm, VerifyAccountForm,\
                     OrganizationContactForm
 from .impexp import ContactResource
 import tablib
@@ -32,7 +32,7 @@ from django.utils.text import slugify
 from tablib.core import UnsupportedFormat
 from django.http.response import HttpResponseRedirect
 from django.utils import timezone
-from gomez.helper import SMSTransferHelper
+from gomez.helper import BalanceTransferHelper
 
 from ipware.ip import get_real_ip
 
@@ -64,8 +64,7 @@ def get_qpc_stats(request):
         result_dict = {}
         result_dict['qmc'] = request.user.kituser.get_queued_messages().cache(timeout=120).count()
         result_dict['pmc'] = request.user.kituser.get_processed_messages().cache(timeout=120).count()
-        result_dict['total_sms_balance'] = request.user.kituser.kitubalance.sms_balance
-        result_dict['free_sms_balance'] = request.user.kituser.kitubalance.free_sms_balance
+        result_dict['user_balance'] = request.user.kituser.kitubalance.user_balance
         
         return {'result': result_dict}
     
@@ -77,12 +76,12 @@ def return_all_level_err(message):
     
 @ajax
 @login_required
-def sms_credit_transfer(request):
+def user_credit_transfer(request):
     
     
     if request.method == "POST":
         result_dict = {}
-        myform = SMSTransferForm(request.POST, crequest=request)
+        myform = BalanceTransferForm(request.POST, crequest=request)
         if not myform.is_valid():
             return {'errors':myform.errors.as_json(escape_html=True)}
         else:
@@ -99,33 +98,33 @@ def sms_credit_transfer(request):
                 if request.POST.get("mdir") == 'credit': #give user units
                     #check before db entry that admin has sufficient balance to execute the transaction
                     
-                    rek = request.user.kituser.kitubalance.sms_balance - amount
+                    rek = request.user.kituser.kitubalance.user_balance - amount
                     if rek <= 0:
                         return {'errors': json.dumps(
                                                 {'__all__': [{'message' : 'Admin does not have enough balance to complete transaction'}]}
                                             )
                                     }
                     else:
-                        st = SMSTransferHelper(request.user.kituser, user)
+                        st = BalanceTransferHelper(request.user.kituser, user)
                         result = st.credit(amount)
                         
-                        result_dict['user_sms_bal'] = result[1]
-                        result_dict['admin_sms_bal'] = result[0]
+                        result_dict['user_bal'] = result[1]
+                        result_dict['admin_bal'] = result[0]
                         
                 elif request.POST.get("mdir") == 'debit':
                     
-                    uek = user.kitubalance.sms_balance - amount 
+                    uek = user.kitubalance.user_balance - amount 
                     if uek <= 0:
                         return {'errors': json.dumps(
                                                 {'__all__': [{'message' : 'User does not have enough balance to complete transaction'}]}
                                             )
                                     }
                     else:
-                        st = SMSTransferHelper(user, request.user.kituser)
+                        st = BalanceTransferHelper(user, request.user.kituser)
                         result = st.debit(amount)
                     
-                        result_dict['user_sms_bal'] = result[0]
-                        result_dict['admin_sms_bal'] = result[1]
+                        result_dict['user_bal'] = result[0]
+                        result_dict['admin_bal'] = result[1]
                 
             except IntegrityError:
                 print("Integrity Error Occured")
@@ -136,12 +135,12 @@ def sms_credit_transfer(request):
 
 @ajax
 @login_required
-def get_user_sms_balance(request):
+def get_user_balance(request):
     
     if request.method == "GET":
         result_dict = {}
         ku = KITUser.objects.select_related('kitubalance').get(pk=request.GET.get("users"))
-        result_dict["user_sms_bal"] = ku.kitubalance.sms_balance
+        result_dict["user_bal"] = ku.kitubalance.user_balance
         return {'result': result_dict}
 
 

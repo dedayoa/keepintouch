@@ -26,6 +26,7 @@ def run_schedules():
     
     # User SMS Balance crediting
     # Run every month
+    '''
     default_scheduler.schedule(
         #scheduled_time=arrow.utcnow().ceil('day').replace(seconds=+1).datetime, # Time for first execution, in UTC timezone
         scheduled_time=datetime.utcnow().replace(day=datetime.utcnow().day+1, hour=0, minute=0, second=0),
@@ -33,4 +34,4 @@ def run_schedules():
         #kwargs={'foo': 'bar'},         # Keyword arguments passed into function when executed
         interval=86400,              # Call once a day
         repeat=None                  # Repeat forever
-    )
+    )'''

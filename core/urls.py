@@ -44,9 +44,10 @@ urlpatterns = [
                 
                 #Accounts
                 url(r'^account/$', AccountManagementView.as_view(), name='account-mgmt'),
-                url(r'^account/sms/$', SMSBalanceTransferView.as_view(), name='sms-account-mgmt'),
-                url(r'^account/sms/credit_transfer/$', sms_credit_transfer, name='sms-credit-transfer'),
-                url(r'^account/sms/get_user_balance/$', get_user_sms_balance),
+                url(r'^account/user/get-balance/$', get_user_balance),
+                url(r'^account/user/transfer/$', UserBalanceTransferView.as_view(), name='user-balance-transfer'),
+                url(r'^account/user/credit-transfer/$', user_credit_transfer, name='credit-transfer'),
+                
                 
                 url(r'^account/user/send-verify-code/$', send_verification_code, name='send-verification-code'),
                 url(r'^account/user/verify/$', verify_user_details, name='now-validate-user-details'),
