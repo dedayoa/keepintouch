@@ -23,7 +23,7 @@ class SMSDeliveryReportTransactionAdmin(admin.ModelAdmin):
     
 class CallDetailReportTransactionAdmin(admin.ModelAdmin):
     
-    list_display = ('body','date_received','status')
+    list_display = ('call_uuid','date_received','status')
     
     
 class EmailDeliveryReportAdmin(admin.ModelAdmin):
