@@ -157,4 +157,4 @@ class CallDetailReportTransaction(models.Model):
     status = models.CharField(max_length=4, choices=STATUS, default='0')
 
     def __str__(self):
-        return '{0}'.format(self.date_received)
+        return '{0}'.format(self.call_uuid)
