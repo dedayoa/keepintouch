@@ -42,7 +42,8 @@ def fs_call_detail_report_callback(request):
     #        del meta[k]
     
     #CallDetailReportTransaction.objects.create(body = jdata, request_meta = meta)
-    
+    cdrguid = request.GET.get('uuid')
+    print(cdrguid)
     print(request.body)
     print(request.META)
     
