@@ -150,6 +150,7 @@ class CallDetailReportTransaction(models.Model):
     #date_generated = models.DateTimeField()
     date_received = models.DateTimeField(auto_now_add=True)
     
+    call_uuid = models.CharField(max_length=100)
     body = JSONField()
     request_meta = JSONField()
     
