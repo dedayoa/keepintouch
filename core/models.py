@@ -348,8 +348,8 @@ class KITActivationCode(models.Model):
 class KITUBalance(models.Model):
     
     kit_user = models.OneToOneField('core.KITUser')
-    sms_balance = models.PositiveIntegerField(default=0)
-    free_sms_balance = models.PositiveIntegerField(default=0)
+    user_balance = models.DecimalField(max_digits=12, decimal_places=4)
+    #free_sms_balance = models.PositiveIntegerField(default=0)
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -656,18 +656,18 @@ class SentMessage(models.Model):
 
 
 
-class SMSTransfer(models.Model):
+class FundsTransfer(models.Model):
     
     from_user = models.ForeignKey('core.KITUser', models.SET_NULL, null=True, blank=False, related_name='from_user')
     to_user = models.ForeignKey('core.KITUser', models.SET_NULL, null=True, blank=False, related_name = 'to_user')
-    sms_units = models.PositiveIntegerField(blank=False)
+    amount = models.DecimalField(max_digits=12, decimal_places=4)
     transaction_date = models.DateTimeField(auto_now_add=True)
     transaction_detail = JSONField(blank=False) #in case the user is deleted
     
     created_by = models.ForeignKey('core.KITUser', models.PROTECT, blank=False, limit_choices_to={'is_admin':True})
     
     def __str__(self):
-        return "{} units(s) from {} to {}".format(self.sms_units, self.from_user, self.to_user)
+        return "{} from {} to {}".format(self.amount, self.from_user, self.to_user)
 
 
 class UploadedContact(models.Model):
