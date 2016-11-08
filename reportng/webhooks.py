@@ -33,17 +33,15 @@ def infobip_sms_delivery_report_callback(request):
 @csrf_exempt
 @require_POST
 def fs_call_detail_report_callback(request):
-    #data = request.body.decode('utf-8')
-    #meta = copy.copy(request.META)
-    #jdata = json.loads(data)
+    calluid = request.GET.get('uuid')
+    data = request.POST.get('cdr')
+    meta = copy.copy(request.META)
+    jdata = json.loads(data)
     
-    #for k, v in meta.copy().items():
-    #    if not isinstance(v, str):
-    #        del meta[k]
+    for k, v in meta.copy().items():
+        if not isinstance(v, str):
+            del meta[k]
     
-    #CallDetailReportTransaction.objects.create(body = jdata, request_meta = meta)
-    cdrguid = request.GET.get('uuid')
-    print(cdrguid)
-    print(request.POST.get('cdr'))
+    CallDetailReportTransaction.objects.create(call_uuid = calluid, body = jdata, request_meta = meta)
     
     return HttpResponse(status=200)
