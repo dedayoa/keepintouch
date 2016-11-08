@@ -129,7 +129,7 @@ class KITRateEngineA(object):
             try:
                 dc = self.get_dialcode(receiving_number)
                 sms_u = SMSRateTable.objects.get(dialcode=dc)
-                return sms_u.sms_units
+                return sms_u.sms_cost
             
             except ObjectDoesNotExist:
                 raise MissingSMSRateError("SMS Rate Missing for %s"%dc)
