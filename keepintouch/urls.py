@@ -29,6 +29,7 @@ urlpatterns = [
     url(r'^messaging/', include('messaging.urls', namespace='messaging', app_name='messaging')),
     url(r'^reports/', include('reportng.urls', namespace='reports', app_name='reports')),
     url(r'^', include('gomez.urls', namespace='gomez', app_name='gomez')),
+    url(r'^callup/', include('kitcall.urls', namespace='callup', app_name='callup')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)#+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 admin.site.site_header = 'In.Touch Email+SMS Administration'
