@@ -8,10 +8,10 @@ import re
 from django.conf import settings
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
-from core.exceptions import MissingSMSRateError
+from core.exceptions import MissingSMSRateError, MissingCallRateError
 from core.models import KITUBalance, FundsTransfer
 
-from .models import SMSRateTable, EmailReport, SMSReport
+from .models import SMSRateTable, EmailReport, SMSReport, CallRateTable
 
 from cacheops import cached_as
 from country_dialcode.models import Prefix
@@ -125,7 +125,7 @@ class KITRateEngineA(object):
     def get_sms_cost_to_number(self, receiving_number):
         
         @cached_as(SMSRateTable, timeout=3600)        
-        def _get_sms_units_cost():
+        def _get_sms_cost():
             try:
                 dc = self.get_dialcode(receiving_number)
                 sms_u = SMSRateTable.objects.get(dialcode=dc)
@@ -134,7 +134,22 @@ class KITRateEngineA(object):
             except ObjectDoesNotExist:
                 raise MissingSMSRateError("SMS Rate Missing for %s"%dc)
         
-        return _get_sms_units_cost()
+        return _get_sms_cost()
+    
+    
+    def get_call_cost_to_number(self, dialled_number):
+        
+        @cached_as(CallRateTable, timeout=3600)        
+        def _get_call_cost():
+            try:
+                dc = self.get_dialcode(dialled_number)
+                sms_u = CallRateTable.objects.get(dialcode=dc)
+                return sms_u.call_cost
+            
+            except ObjectDoesNotExist:
+                raise MissingCallRateError("Call Rate Missing for %s"%dc)
+        
+        return _get_call_cost()
 
 
 
