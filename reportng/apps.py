@@ -8,4 +8,5 @@ class ReportngConfig(AppConfig):
 
 
     def ready(self):
+        import reportng.signals
         run_schedules()
