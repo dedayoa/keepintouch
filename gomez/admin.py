@@ -6,22 +6,31 @@ from import_export.admin import ImportExportMixin
 from country_dialcode.models import Prefix
 from country_dialcode.admin import PrefixAdmin
 from .models import KITBilling, KITServicePlan, KITSystem, EmailReport, SMSReport, \
-                    SMSRateTable, Product, Order, Invoice, OrderLine, PaymentMethod
+                    SMSRateTable, Product, Order, Invoice, OrderLine, PaymentMethod, CallRateTable
 
 
 class SMSRateTableInline(admin.TabularInline):
     
     model = SMSRateTable
+    
+    
+class CallRateTableInline(admin.TabularInline):
+    
+    model = CallRateTable
 
 class MyPrefixAdmin(ImportExportMixin, PrefixAdmin):
     inlines = [
-        SMSRateTableInline,
+        SMSRateTableInline, CallRateTableInline,
     ]
-    list_display = ('prefix','destination','get_sms_rate')
+    list_display = ('prefix','destination','get_sms_rate','get_call_rate')
     
     def get_sms_rate(self, obj):
-        return obj.smsratetable.sms_units
+        return obj.smsratetable.sms_cost
     get_sms_rate.short_description = 'SMS Rate'
+    
+    def get_call_rate(self, obj):
+        return obj.callratetable.call_cost
+    get_call_rate.short_description = 'Call Rate'
 
 class KITBillingAdmin(admin.ModelAdmin):
 
@@ -34,7 +43,12 @@ class KITBillingAdmin(admin.ModelAdmin):
     
 class SMSRateTableAdmin(ImportExportMixin, admin.ModelAdmin):
     
-    list_display = ("dialcode","sms_units")
+    list_display = ("dialcode","sms_cost")
+    
+    
+class CallRateTableAdmin(ImportExportMixin, admin.ModelAdmin):
+    
+    list_display = ("dialcode","call_cost")
 
 
 class EmailReportAdmin(admin.ModelAdmin):
@@ -48,7 +62,10 @@ class SMSReportAdmin(admin.ModelAdmin):
 admin.site.register(KITBilling, KITBillingAdmin)
 admin.site.register(KITServicePlan)
 admin.site.register(KITSystem)
+
 admin.site.register(SMSRateTable, SMSRateTableAdmin)
+admin.site.register(CallRateTable, CallRateTableAdmin)
+
 admin.site.register(EmailReport, EmailReportAdmin)
 admin.site.register(SMSReport, SMSReportAdmin)
 admin.site.unregister(Prefix)
