@@ -47,12 +47,22 @@ class SMSGatewayError(Exception):
     
 
 class MissingSMSRateError(Exception):
-    # balance not enogh error
+    
     def __init__(self, message):
         self.message = message
         
     def __str__(self):
         return repr(self.message)
+    
+    
+class MissingCallRateError(Exception):
+    
+    def __init__(self, message):
+        self.message = message
+        
+    def __str__(self):
+        return repr(self.message)
+    
     
 class GoogleAPIError(Exception):
     # balance not enogh error
@@ -65,6 +75,15 @@ class GoogleAPIError(Exception):
     
 class InvalidPhoneNumberError(Exception):
     # Invalid Phone Number
+    def __init__(self, message):
+        self.message = message
+        
+    def __str__(self):
+        return repr(self.message)
+    
+    
+class FailedDialOutError(Exception):
+    # 
     def __init__(self, message):
         self.message = message
         
