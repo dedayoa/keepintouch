@@ -2,6 +2,8 @@ from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.postgres.fields.jsonb import JSONField
 import uuid
+from django_prices.models import PriceField
+from django.conf import settings
 
 # Create your models here.
 
@@ -115,8 +117,8 @@ class EmailDeliveryReport(models.Model):
     
     msg_status = models.CharField(max_length=20, choices=STATUS, default='')
     
-    kituser_id = models.IntegerField(db_index=True) #report will be generated on this field
-    kitu_parent_id = models.IntegerField(db_index=True)
+    kituser_id = models.IntegerField(db_index=True, editable=False) #report will be generated on this field
+    kitu_parent_id = models.IntegerField(db_index=True, editable=False)
     
     last_modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True) #report will be generated on this field
@@ -137,7 +139,50 @@ class EmailEventHistory(models.Model):
     def __str__(self):
         return str(self.id)
     
+
+class CallDetailReport(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False)
     
+    a_leg_billsec = models.PositiveIntegerField(default=0)
+    b_leg_billsec = models.PositiveIntegerField(default=0, blank=True)
+    
+    a_leg_callerid = models.CharField(max_length=50)
+    b_leg_callerid = models.CharField(max_length=50, blank=True)
+    
+    a_leg_called_number = models.CharField(max_length=50)
+    b_leg_called_number = models.CharField(max_length=50, blank=True)
+    
+    a_leg_call_start = models.DateTimeField()
+    
+    a_leg_uuid = models.ForeignKey('reportng.CallDetailReportTransaction', null=True, on_delete=models.SET_NULL, related_name='acdrt')
+    b_leg_uuid = models.ForeignKey('reportng.CallDetailReportTransaction', null=True, on_delete=models.SET_NULL, related_name='bcdrt')
+    
+    
+    a_leg_per_min_call_price = PriceField('Price', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2)
+    b_leg_per_min_call_price = PriceField('Price', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2)
+    
+    total_call_cost = PriceField('Price', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2)
+    
+    kituser_id = models.IntegerField(db_index=True, editable=False) #report will be generated on this field
+    kitu_parent_id = models.IntegerField(db_index=True, editable=False)
+    
+    last_modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True) #report will be generated on this field
+    
+    
+    def get_total_billable_call_duration(self):
+        # return the billable seconds for both the A & B legs
+        return self.a_leg_billsec+self.b_leg_billsec
+    
+    def get_total_call_cost(self):
+        # return the total call cost. I save the per_min_call_price for historial reasons
+        a_leg_tp = (self.a_leg_billsec/60)*self.a_leg_per_min_call_price
+        b_leg_tp = (self.b_leg_billsec/60)*self.b_leg_per_min_call_price
+        return a_leg_tp+b_leg_tp
+
+    def save(self, *args, **kwargs):
+        self.total_call_cost = self.get_total_call_cost()
+        super(CallDetailReport,self).save(*args, **kwargs)
     
 class CallDetailReportTransaction(models.Model):
 
