@@ -23,10 +23,12 @@ class SystemSettingsForm(forms.ModelForm):
         self.helper.form_tag = True
         self.helper.add_input(Submit('submit', _('Update'), css_class="success float-right"))
         self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+        self.fields['did_number'].disabled = True
     
     class Meta:
         model = KITSystem
-        fields = ['company_wide_contacts', 'default_sms_sender','sms_unsubscribe_message']
+        fields = ['company_wide_contacts', 'default_sms_sender','sms_unsubscribe_message','did_number',\
+                  'user_phone_as_callerid']
         widgets = {
             'sms_unsubscribe_message' : forms.Textarea(attrs={'rows':5, 'cols': 30})
                    }
