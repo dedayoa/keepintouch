@@ -19,8 +19,8 @@ def process_cdr_transaction(sender, instance, **kwargs):
             if instance.body['variables']['leg'] == '1' or 'A':                
                 CallDetailReport.objects.filter(id=instance.body['variables']['uuid']).update(
                             a_leg_billsec = instance.body['variables']['billsec'],
-                            a_leg_callerid = instance.body['callflow']['caller_profile']['caller_id_name'],
-                            a_leg_called_number = instance.body['callflow']['caller_profile']['destination_number'],
+                            a_leg_callerid = instance.body['callflow'][0]['caller_profile']['caller_id_name'],
+                            a_leg_called_number = instance.body['callflow'][0]['caller_profile']['destination_number'],
                             a_leg_call_start = arrow.get(instance.body['variables']['start_epoch']).datetime,
                             a_leg_uuid = instance.call_uuid
                             )
@@ -41,8 +41,8 @@ def process_cdr_transaction(sender, instance, **kwargs):
             elif instance.body['variables']['leg'] == '2' or 'B':
                 CallDetailReport.objects.filter(id=instance.body['variables']['uuid']).update(
                             b_leg_billsec = instance.body['variables']['billsec'],
-                            b_leg_callerid = instance.body['callflow']['caller_profile']['caller_id_name'],
-                            b_leg_called_number = instance.body['callflow']['caller_profile']['destination_number'],
+                            b_leg_callerid = instance.body['callflow'][0]['caller_profile']['caller_id_name'],
+                            b_leg_called_number = instance.body['callflow'][0]['caller_profile']['destination_number'],
                             b_leg_uuid = instance.call_uuid
                             )
                 kucdr = CallDetailReport.objects.get(id=instance.body['variables']['uuid'])
