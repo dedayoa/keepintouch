@@ -89,21 +89,20 @@ class CallHelper():
     def make_my_call(self):
         
         try:
-            cppm = self._check_call_can_be_made()
+            cppm = self._check_call_can_be_made()            
+            job_uuid = self.dial()
             CallDetailReport.objects.create(id=self.uuid,a_leg_per_min_call_price=cppm[0],\
                             b_leg_per_min_call_price=cppm[1], kituser_id = self.kuser.id, \
                             kitu_parent_id = self.kuser.parent.id                            
                             )
-            
-            job_uuid = self.dial()
-            CallStatus.objects.create(id=job_uuid) #this should actually be in redis
+            CallStatus.objects.create(job_uuid=job_uuid) #this should actually be in redis
             
         except InvalidPhoneNumberError as e:
-            pass
+            print(e.message)
         except NotEnoughBalanceError as e:
-            pass
+            print(e.message)
         except FailedDialOutError as e:
-            pass
+            print(e.message)
         except MissingCallRateError as e:
-            pass
+            print(e.message)
     
