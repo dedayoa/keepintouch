@@ -1,3 +1,4 @@
+import decimal
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.postgres.fields.jsonb import JSONField
@@ -158,8 +159,8 @@ class CallDetailReport(models.Model):
     b_leg_uuid = models.ForeignKey('reportng.CallDetailReportTransaction', null=True, on_delete=models.SET_NULL, related_name='bcdrt')
     
     
-    a_leg_per_min_call_price = PriceField('A-Leg Cost', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2)
-    b_leg_per_min_call_price = PriceField('B-Leg Cost', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2)
+    a_leg_per_min_call_price = PriceField('A-Leg Cost', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2, default=0)
+    b_leg_per_min_call_price = PriceField('B-Leg Cost', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2, default=0)
     
     total_call_cost = PriceField('Total Cost', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2, null=True)
     
@@ -176,13 +177,13 @@ class CallDetailReport(models.Model):
     
     def get_total_call_cost(self):
         # return the total call cost. I save the per_min_call_price for historial reasons
-        a_leg_tp = (self.a_leg_billsec/60)*self.a_leg_per_min_call_price
-        b_leg_tp = (self.b_leg_billsec/60)*self.b_leg_per_min_call_price
+        a_leg_tp = decimal.Decimal(self.a_leg_billsec/60)*self.a_leg_per_min_call_price
+        b_leg_tp = decimal.Decimal(self.b_leg_billsec/60)*self.b_leg_per_min_call_price
         return a_leg_tp+b_leg_tp
 
-    #def save(self, *args, **kwargs):
-    #    self.total_call_cost = self.get_total_call_cost()
-    #    super(CallDetailReport,self).save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        self.total_call_cost = self.get_total_call_cost()
+        super(CallDetailReport,self).save(*args, **kwargs)
     
 class CallDetailReportTransaction(models.Model):
 
