@@ -143,8 +143,8 @@ class EmailEventHistory(models.Model):
 class CallDetailReport(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     
-    a_leg_billsec = models.PositiveIntegerField(default=0)
-    b_leg_billsec = models.PositiveIntegerField(default=0, blank=True)
+    a_leg_billsec = models.DecimalField(max_digits=12, decimal_places=4, default=0)
+    b_leg_billsec = models.DecimalField(max_digits=12, decimal_places=4, default=0, blank=True)
     
     a_leg_callerid = models.CharField(max_length=50)
     b_leg_callerid = models.CharField(max_length=50, blank=True)
@@ -152,16 +152,16 @@ class CallDetailReport(models.Model):
     a_leg_called_number = models.CharField(max_length=50)
     b_leg_called_number = models.CharField(max_length=50, blank=True)
     
-    a_leg_call_start = models.DateTimeField()
+    a_leg_call_start = models.DateTimeField(null=True)
     
     a_leg_uuid = models.ForeignKey('reportng.CallDetailReportTransaction', null=True, on_delete=models.SET_NULL, related_name='acdrt')
     b_leg_uuid = models.ForeignKey('reportng.CallDetailReportTransaction', null=True, on_delete=models.SET_NULL, related_name='bcdrt')
     
     
-    a_leg_per_min_call_price = PriceField('Price', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2)
-    b_leg_per_min_call_price = PriceField('Price', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2)
+    a_leg_per_min_call_price = PriceField('A-Leg Cost', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2)
+    b_leg_per_min_call_price = PriceField('B-Leg Cost', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2)
     
-    total_call_cost = PriceField('Price', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2)
+    total_call_cost = PriceField('Total Cost', currency=settings.DEFAULT_CURRENCY, max_digits=12, decimal_places=2, null=True)
     
     kituser_id = models.IntegerField(db_index=True, editable=False) #report will be generated on this field
     kitu_parent_id = models.IntegerField(db_index=True, editable=False)
@@ -180,9 +180,9 @@ class CallDetailReport(models.Model):
         b_leg_tp = (self.b_leg_billsec/60)*self.b_leg_per_min_call_price
         return a_leg_tp+b_leg_tp
 
-    def save(self, *args, **kwargs):
-        self.total_call_cost = self.get_total_call_cost()
-        super(CallDetailReport,self).save(*args, **kwargs)
+    #def save(self, *args, **kwargs):
+    #    self.total_call_cost = self.get_total_call_cost()
+    #    super(CallDetailReport,self).save(*args, **kwargs)
     
 class CallDetailReportTransaction(models.Model):
 
