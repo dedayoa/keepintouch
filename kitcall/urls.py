@@ -10,5 +10,5 @@ from .views import *
 from .ajax import call_number
 
 urlpatterns = [
-    url(r'^dial/(?P<pn>\d+)/$', call_number, name='ajax-dial-number'),
+    url(r'^call/(?P<pn>\+?[1-9]\d{1,14})/$', call_number, name='ajax-dial-number'),
                 ]
