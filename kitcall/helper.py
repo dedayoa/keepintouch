@@ -67,6 +67,8 @@ class CallHelper():
         
         self.uuid = str(uuid4())
         
+        print(self._get_call_duration())
+        
         data = {
                 'uuid': self.uuid,
                 'caller':self.caller[1:],
