@@ -67,7 +67,7 @@ class CallHelper():
         
         self.uuid = str(uuid4())
         
-        print(self._get_call_duration())
+        calltout = self._get_call_duration()
         
         data = {
                 'uuid': self.uuid,
@@ -77,7 +77,7 @@ class CallHelper():
                 'dialstringbase' : dsb,
                 'origcrcid' : self.orig_caller_cid,
                 'origcecid' : self.orig_callee_cid,
-                'calltimeout' : self._get_call_duration()
+                'calltimeout' : calltout
                 }
         
         #af = '+OK Job-UUID: 8e44c73c-3c52-4573-b2a0-cc938678ee3d'
