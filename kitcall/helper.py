@@ -85,7 +85,7 @@ class CallHelper():
         try:
             fs = greenswitch.InboundESL(host=intouch_fs_gw, port=8021, password=intouch_fs_gw_pwd)
             fs.connect()
-            r = fs.send('bgapi luarun callup.lua {uuid} {dialstringbase}{caller}@{voipgw} {dialstringbase}{callee}@{voipgw} {origcrcid} {origcecid} {calltimeout}'.\
+            r = fs.send('bgapi luarun callup.lua {uuid} {calltimeout} {dialstringbase}{caller}@{voipgw} {dialstringbase}{callee}@{voipgw} {origcrcid} {origcecid}'.\
                         format(**data))
             
             
