@@ -22,12 +22,21 @@
 </div>
 <div class="reveal" id="single_sms_modal" data-reveal>
 	<h4>Quick SMS</h4>
-	<div id="single_sms_modal_content">
-		
+	<div id="single_sms_modal_content">		
 	</div>
 	<button class="close-button" data-close aria-label="Close modal" type="button">
 		<span aria-hidden="true">&times;</span>
 	</button>
+</div>
+<div class="tiny reveal" id="q-callup-modal" data-reveal>
+	<center>
+		<h4><i class="fi-telephone"></i> CallUp <small class="qcall-pn"></small></h4>
+		<div id="q-callup-modal-content">
+			<h5 style="margin: 0 0 1rem 0;">You are about to call <span class="qcall-fn" style="text-decoration: underline;"></span></h5>
+			<button class="button alert" data-close aria-label="Close modal" type="button">Cancel</button>
+			<button class="button success" id="call-now-btn">Call Now</button>
+		</div>
+	</center>	
 </div>
 {% endblock %}
 {% block foot_base_js %}
@@ -82,6 +91,43 @@
            		}
 			});
 		});
+		$("a.call-btn").click(function(e){
+			e.preventDefault();			
+			var phonenum = $(this).parents("td.action").siblings("td.phone").children("span").text();
+			var fname = $(this).parents("td.action").siblings("td.first_name").text();
+			var lname = $(this).parents("td.action").siblings("td.last_name").text();
+			$(".qcall-pn").text(phonenum);
+			$(".qcall-fn").text(fname+" "+lname);
+			$('#q-callup-modal').foundation('open');
+			
+			$('#call-now-btn').click(function(){
+				
+				ajaxGet('/callup/call/'+phonenum, function(content){
+					if (content.hasOwnProperty("errors")){
+	           			var errors = $.parseJSON(content.errors);	
+	           		
+	           			$.each(errors, function(index, value){
+	           				if (index === '__all__'){
+	           					$('div.nonfield-ajax-error').remove();
+	           					$("small.error").remove();
+	           					$("#q-callup-modal-content").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+	           				}else{
+	           					$("small.error").remove();
+	           					//select field with error and apply text after it
+	           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+	           				}
+	           			});
+	           			
+	           			return;
+	           			
+	           		}else{
+	           			console.log(content.result);
+	           			$('#q-callup-modal').foundation('close');
+	           		}
+				})
+			});
+			
+		})
 	</script>
 	{{ block.super }}
 {% endblock %}
