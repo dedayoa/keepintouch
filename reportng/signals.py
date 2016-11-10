@@ -32,7 +32,6 @@ def process_cdr_transaction(sender, instance, **kwargs):
                 cdrb.b_leg_billsec = instance.body['variables']['billsec'],
                 cdrb.b_leg_callerid = instance.body['callflow']['caller_profile']['caller_id_name'],
                 cdrb.b_leg_called_number = instance.body['callflow']['caller_profile']['destination_number'],
-                cdrb.b_leg_call_start = arrow.get(instance.body['variables']['start_epoch']).datetime,
                 cdrb.b_leg_uuid = instance.call_uuid
                 
                 cdrb.save()
