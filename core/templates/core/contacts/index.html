@@ -91,17 +91,23 @@
            		}
 			});
 		});
-		$("a.call-btn").click(function(e){
-			e.preventDefault();			
-			var phonenum = $(this).parents("td.action").siblings("td.phone").children("span").text();
-			var fname = $(this).parents("td.action").siblings("td.first_name").text();
-			var lname = $(this).parents("td.action").siblings("td.last_name").text();
-			$(".qcall-pn").text(phonenum);
-			$(".qcall-fn").text(fname+" "+lname);
-			$('#q-callup-modal').foundation('open');
+		(function(){
 			
-			$('#call-now-btn').click(function(){
+			var phonenum;
+			
+			$("a.call-btn").click(function(e){
+				e.preventDefault();	
 				
+				phonenum = $(this).parents("td.action").siblings("td.phone").children("span").text();
+				var fname = $(this).parents("td.action").siblings("td.first_name").text();
+				var lname = $(this).parents("td.action").siblings("td.last_name").text();
+				$(".qcall-pn").text(phonenum);
+				$(".qcall-fn").text(fname+" "+lname);
+				$('#q-callup-modal').foundation('open');
+				
+				
+			});
+			$('#call-now-btn').on('click', function(ev){
 				ajaxGet('/callup/call/'+phonenum, function(content){
 					if (content.hasOwnProperty("errors")){
 	           			var errors = $.parseJSON(content.errors);	
@@ -118,16 +124,20 @@
 	           				}
 	           			});
 	           			
-	           			return;
-	           			
 	           		}else{
+	           			$('div.nonfield-ajax-error').remove();
+	           			$("small.error").remove();
 	           			console.log(content.result);
 	           			$('#q-callup-modal').foundation('close');
+	           			
 	           		}
-				})
+				});
+				
 			});
+		}());
+		
 			
-		})
+		
 	</script>
 	{{ block.super }}
 {% endblock %}
