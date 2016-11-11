@@ -3,12 +3,13 @@ Created on Nov 9, 2016
 
 @author: Dayo
 '''
+
 from django.db import transaction
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 import arrow
 
-from core.models import KITUBalance, KITUser
+from core.models import KITUBalance
 from .models import CallDetailReportTransaction, CallDetailReport
 
 @receiver(post_save, sender=CallDetailReportTransaction)
@@ -30,7 +31,8 @@ def process_cdr_transaction(sender, instance, **kwargs):
                 kubal = KITUBalance.objects.get(kit_user__id=kucdr.kituser_id)
                 
                 #deduct cost of call
-                new_balance = kubal.user_balance - ((instance.body['variables']['billsec']*kucdr.a_leg_per_min_call_price)/60)
+                billsec = int(instance.body['variables']['billsec'])
+                new_balance = kubal.user_balance - ((billsec*kucdr.a_leg_per_min_call_price)/60).gross
                 
                 # save new balance
                 kubal.user_balance = new_balance
@@ -51,7 +53,8 @@ def process_cdr_transaction(sender, instance, **kwargs):
                 kubal = KITUBalance.objects.get(kit_user__id=kucdr.kituser_id)
                 
                 #deduct cost of call
-                new_balance = kubal.user_balance - ((instance.body['variables']['billsec']*kucdr.b_leg_per_min_call_price)/60)
+                billsec = int(instance.body['variables']['billsec'])
+                new_balance = kubal.user_balance - ((billsec*kucdr.b_leg_per_min_call_price)/60).gross
                 
                 # save new balance
                 kubal.user_balance = new_balance
