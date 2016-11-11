@@ -14,10 +14,9 @@ from .models import CallDetailReportTransaction, CallDetailReport
 
 @receiver(post_save, sender=CallDetailReportTransaction)
 def process_cdr_transaction(sender, instance, **kwargs):
-    if kwargs.get('created', False):
-        
+    if kwargs.get('created', False):        
         def on_commit():
-            if instance.body['variables']['leg'] == '1' or 'A':                
+            if instance.body['variables']['leg'] == '1':                
                 CallDetailReport.objects.filter(id=instance.body['variables']['uuid']).update(
                             a_leg_billsec = instance.body['variables']['billsec'],
                             a_leg_callerid = instance.body['callflow'][0]['caller_profile']['caller_id_name'],
@@ -40,7 +39,7 @@ def process_cdr_transaction(sender, instance, **kwargs):
                 
                 
             
-            elif instance.body['variables']['leg'] == '2' or 'B':
+            elif instance.body['variables']['leg'] == '2':
                 CallDetailReport.objects.filter(id=instance.body['variables']['uuid']).update(
                             b_leg_billsec = instance.body['variables']['billsec'],
                             b_leg_callerid = instance.body['callflow'][0]['caller_profile']['caller_id_name'],
