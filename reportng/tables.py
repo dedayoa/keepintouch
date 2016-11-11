@@ -12,7 +12,7 @@ from django_tables2.utils import A
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html, html_safe
 
-from .models import SMSDeliveryReport, SMSDeliveryReportHistory, EmailDeliveryReport
+from .models import SMSDeliveryReport, SMSDeliveryReportHistory, EmailDeliveryReport, CallDetailReport
 from django.core.urlresolvers import reverse, reverse_lazy
 
 import html2text
@@ -87,5 +87,31 @@ class EmailReportTable(tables.Table):
     class Meta:
         model = EmailDeliveryReport
         fields = ('email_message','from_email','to_email','msg_status','created')
+        empty_text = 'There are no Reports to display.'
+        attrs = {'style': 'width: 100%'}
+        
+        
+class CallReportTable(tables.Table):
+    
+    a_leg_call_start = tables.TimeColumn(verbose_name='Time')
+    b_leg_called_number = tables.Column(verbose_name='Called Number')
+    get_total_billable_call_duration = tables.Column(verbose_name='Duration')
+    total_call_cost = tables.Column(verbose_name='Debit')
+    
+    def render_total_call_cost(self, record):
+        return "{} {}".format(record.total_call_cost.gross, record.total_call_cost.currency)
+    
+    def render_get_total_billable_call_duration(self, record):
+        m, s = divmod(record.get_total_billable_call_duration(), 60)
+        h, m = divmod(m, 60)
+        return "%d:%02d:%02d" % (h, m, s)
+    
+    def render_b_leg_called_number(self, record):
+        return mark_safe('<div>{}<br/><small style="color: #444">{}</small></div>'.format(record.b_leg_called_number, record.b_leg_callerid))
+    
+    
+    class Meta:
+        model = CallDetailReport
+        fields = ('a_leg_call_start','b_leg_called_number','get_total_billable_call_duration','total_call_cost')
         empty_text = 'There are no Reports to display.'
         attrs = {'style': 'width: 100%'}
