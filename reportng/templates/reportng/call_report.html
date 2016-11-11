@@ -1,0 +1,48 @@
+{% extends "core/base_generic.html" %}
+{% load render_table from django_tables2 %}
+{% load crispy_forms_tags %}
+{% load nvd3_tags %}
+
+{% load staticfiles %}
+
+{% block head_base_links %}
+	{{ block.super }}
+	<link href="{% static 'css/nv.d3.css' %}" rel="stylesheet">
+	
+{% endblock %}
+
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="row">
+	<h3>Call Report <small></small></h3>
+	{{ block.super }}
+	{# include_container data.chartcontainer '400' '100%' #}
+	<hr></hr>
+	<h4>Report</h4>
+	<div class="table-scroll">
+		{% render_table table %}
+	</div>
+</div>
+<div class="reveal" id="sms-delivery-detail-modal" data-reveal>
+  <h3>Detail</h3>
+  <p id="modal-mdt" class="lead"></p>
+  <button class="close-button" data-close aria-label="Close modal" type="button">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endblock %}
+{% block foot_base_js %}
+	{{ block.super }}
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js"></script>
+	<script type="text/javascript" src="{% static 'js/nv.d3-1.1.11b.js' %}"></script>
+	{# load_chart data.charttype data.chartdata data.chartcontainer data.extra #}
+	<script>		
+		$(".sms-delivery-detail").click(function(e){
+			sms_message = jQuery.parseJSON($(this).attr('data-sms'));
+			message_delivery_history = jQuery.parseJSON($(this).attr('data-sms-history'));
+			$('#sms-delivery-detail-modal').foundation('open');
+		});
+	</script>
+	
+{% endblock %}
