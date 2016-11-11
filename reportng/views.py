@@ -10,9 +10,9 @@ from django.core.urlresolvers import reverse_lazy, reverse
 from django.contrib.auth.mixins import PermissionRequiredMixin
 # Create your views here.
 
-from .models import SMSDeliveryReport, EmailDeliveryReport
+from .models import SMSDeliveryReport, EmailDeliveryReport, CallDetailReport
 
-from .tables import SMSReportTable, EmailReportTable
+from .tables import SMSReportTable, EmailReportTable, CallReportTable
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -94,5 +94,23 @@ class EmailReport(View):
         self.params["table"] = reporttable
         self.params['title'] = 'Email Report'
         self.params['body_class'] = 'email-report-page'        
+        
+        return render(request, self.template_name, self.params)
+    
+    
+class CallReport(View):
+    
+    template_name = 'reportng/call_report.html'
+    params= {}
+    
+    def get(self, request):
+        if request.user.kituser.is_admin:
+            reporttable = CallReportTable(CallDetailReport.objects.filter(kitu_parent_id=request.user.kituser.id).order_by('-a_leg_call_start'))
+        else:
+            reporttable = CallReportTable(CallDetailReport.objects.filter(kituser_id=request.user.kituser.id).order_by('-a_leg_call_start'))
+        RequestConfig(request, paginate={'per_page': 25}).configure(reporttable)
+        self.params["table"] = reporttable
+        self.params['title'] = 'Call Report'
+        self.params['body_class'] = 'call-report-page'        
         
         return render(request, self.template_name, self.params)
