@@ -88,7 +88,8 @@ def free_trial_user_signup_callback(signup_result, flow, request, **kwargs):
                 service_plan = free_trial_service_plan,
                 next_due_date = arrow.utcnow().replace(days=settings.FREE_TRIAL_VALIDITY_PERIOD).datetime.date(),
                 registered_on = timezone.now().date(),
-                account_status = 'AC'
+                account_status = 'AC',
+                last_renew_date = timezone.now().date()
                 )
         
         kitsystem = apps.get_model('gomez', 'KITSystem')
