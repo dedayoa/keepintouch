@@ -431,7 +431,7 @@ class KITUserForm(forms.ModelForm):
 
 class KITUBalanceForm(forms.ModelForm):
 
-    sms_balance = forms.IntegerField(disabled=True, required=False, label="SMS Balance")
+    user_balance = forms.IntegerField(disabled=True, required=False, label="User Balance")
     
     def __init__(self, *args, **kwargs):
         super(KITUBalanceForm, self).__init__(*args, **kwargs)
@@ -442,7 +442,7 @@ class KITUBalanceForm(forms.ModelForm):
     
     class Meta:
         model = KITUBalance
-        fields = ['sms_balance']
+        fields = ['user_balance']
        
         
 class SMTPSettingForm(forms.ModelForm):
