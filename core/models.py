@@ -348,7 +348,7 @@ class KITActivationCode(models.Model):
 class KITUBalance(models.Model):
     
     kit_user = models.OneToOneField('core.KITUser')
-    user_balance = models.DecimalField(max_digits=12, decimal_places=4)
+    user_balance = models.DecimalField(max_digits=12, decimal_places=4, default=0)
     #free_sms_balance = models.PositiveIntegerField(default=0)
     
     last_modified = models.DateTimeField(auto_now=True)
