@@ -502,6 +502,7 @@ class UserGroupSettingForm(forms.ModelForm):
 class ContactGroupForm(forms.ModelForm):
     
     title = forms.CharField(label=_('Title'), widget=forms.TextInput(attrs={'required':''}), required=True)
+    all_contacts = forms.CheckboxInput()
 
     def __init__(self, *args, **kwargs):
         self.kuser = kwargs.pop('kituser') or None
@@ -512,8 +513,18 @@ class ContactGroupForm(forms.ModelForm):
         
         self.helper = FormHelper()
         self.helper.form_action = '.'
-        self.helper.add_input(Submit('submit', _('Submit'), css_class="success float-right"))
-        self.helper.add_input(Reset('reset', _('Reset'), css_class="float-right"))
+        self.helper.layout = Layout(
+            Div(
+                'title',
+                'description',
+                HTML('<a href="#" title="Insert All Contacts" id="sel-all-contacts" class="button tiny" style="float: right; margin-bottom: 3px;">All Contacts</a>'),
+                'contacts'
+            ),
+            ButtonHolder(
+                Submit('submit', _('Submit'), css_class="success float-right"),
+                Reset('reset', _('Reset'), css_class="float-right")
+            )
+        )
     
     class Meta:
         model = ContactGroup
