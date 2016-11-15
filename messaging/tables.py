@@ -61,6 +61,7 @@ class DraftStandardMessagesTable(tables.Table):
         model = StandardMessaging
         fields = ('title','recipients','sms_sender','last_modified','table_model_action')
         empty_text = "There are no Draft Standard Messages to display"
+        attrs = {'style': 'width: 100%'}
         
         
 class DraftAdvancedMessagesTable(tables.Table):
@@ -88,6 +89,7 @@ class DraftAdvancedMessagesTable(tables.Table):
         model = AdvancedMessaging
         fields = ('title','message_template','contact_group','last_modified','table_model_action')
         empty_text = "There are no Draft Advanced Messages to display"
+        attrs = {'style': 'width: 100%'}
         
         
 class ProcessedMessagesTable(tables.Table):
@@ -109,6 +111,7 @@ class ProcessedMessagesTable(tables.Table):
         model = ProcessedMessages
         fields = ['message','message_type','processed_at']
         empty_text = "There are no Processed Messages"
+        attrs = {'style': 'width: 100%'}
         
         
 class QueuedMessagesTable(tables.Table):
@@ -117,6 +120,7 @@ class QueuedMessagesTable(tables.Table):
         model = QueuedMessages
         fields = ['message','message_type','delivery_time','message_id']
         empty_text = "There are no Queued Messages to display"
+        attrs = {'style': 'width: 100%'}
 
 
     
@@ -149,6 +153,7 @@ class DraftReminderMessagesTable(tables.Table):
         model = ReminderMessaging
         fields = ['title','custom_data_namespace','contact_group','last_modified','table_model_action']
         empty_text = "There are no Draft Reminder Messages to display"
+        attrs = {'style': 'width: 100%'}
         
         
 class RunningMessagesTable(tables.Table):
@@ -162,6 +167,7 @@ class RunningMessagesTable(tables.Table):
         model = RunningMessage
         fields = ['message','contact_dsoi','reminders','started_at']
         empty_text = "There are no Running Messages to display"
+        attrs = {'style': 'width: 100%'}
         
 
 class FailedKITMessagesTable(tables.Table):
@@ -186,6 +192,7 @@ class FailedKITMessagesTable(tables.Table):
         model = FailedKITMessage
         fields = ('message_category','reason','created','retries')
         empty_text = "There are no Failed Messages to display"
+        attrs = {'style': 'width: 100%'}
         
 class FailedSMSMessagesTable(tables.Table):
     
@@ -211,6 +218,7 @@ class FailedSMSMessagesTable(tables.Table):
         model = FailedSMSMessage
         fields = ('sms_pickled_data','reason','retries','created','record_action')
         empty_text = "There are no Failed SMS Messages to display"
+        attrs = {'style': 'width: 100%'}
         
 class FailedSMSMessagesTable_Admin(tables.Table):
     
@@ -232,6 +240,7 @@ class FailedSMSMessagesTable_Admin(tables.Table):
         model = FailedSMSMessage
         fields = ('sms_pickled_data','reason','retries','owned_by','created')
         empty_text = "There are no Failed SMS Messages to display"
+        attrs = {'style': 'width: 100%'}
     
         
         
@@ -257,6 +266,7 @@ class FailedEmailMessagesTable(tables.Table):
         model = FailedEmailMessage
         fields = ('email_pickled_data','reason','retries','created','record_action')
         empty_text = "There are no Failed Email Messages to display"
+        attrs = {'style': 'width: 100%'}
         
         
 class FailedEmailMessagesTable_Admin(tables.Table):
@@ -282,6 +292,7 @@ class FailedEmailMessagesTable_Admin(tables.Table):
         model = FailedEmailMessage
         fields = ('email_pickled_data','reason','retries','owned_by','created')
         empty_text = "There are no Failed Email Messages to display"
+        attrs = {'style': 'width: 100%'}
         
         
       

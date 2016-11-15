@@ -13,7 +13,9 @@
 <div class="row">
 	<h3>Running <small>Reminder Messages</small></h3>
 	{{ block.super }}
+	<div class="table-scroll" style="width:100%;">
 	{% render_table table %}
+	</div>
 </div>
 <div class="reveal" id="message-modal" data-reveal>
   <h3>Detail</h3>
