@@ -17,4 +17,11 @@
 {% block foot_base_js %}
 	{{block.super}}
 	{{form.media.js}}
+	<script>
+	$('a#sel-all-contacts').click(function(e){
+		e.preventDefault();
+		$('select#id_contacts option').attr('selected', 'selected');
+		$('select#id_contacts').trigger('change');
+	})
+	</script>
 {% endblock %}
