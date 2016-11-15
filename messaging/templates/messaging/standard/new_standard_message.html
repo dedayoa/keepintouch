@@ -39,6 +39,11 @@
 	<script src="{% static "js/sms_counter.js" %}"></script>
 	<script src="{% static "js/foundation-datepicker.js" %}"></script>
 	<script>
+		$('a#sel-all-contacts').click(function(e){
+			e.preventDefault();
+			$('select#id_recipients option').attr('selected', 'selected');
+			$('select#id_recipients').trigger('change');
+		})
 		$('#id_sms_message').countSms('.sms-textarea-status-bar');
 		
 		var nowTemp = new Date();
