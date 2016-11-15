@@ -59,7 +59,12 @@ class StandardMessagingForm(forms.ModelForm):
             Hidden('message_id', '{{messageid}}'),                  
             Fieldset(
                 ugettext('Delivery Settings'),
-                Row(Column('recipients'), css_class="ss-recipients"),
+                Row(Column(
+                        HTML('<a href="#" title="Insert All Contacts" id="sel-all-contacts" class="button tiny" style="float: right; margin-bottom: 3px;">All Contacts</a>'),
+                        'recipients'
+                    ),
+                    css_class="ss-recipients"
+                ),
                 Row(
                     Column('copied_recipients', css_class="small-8"),
                     Column(
