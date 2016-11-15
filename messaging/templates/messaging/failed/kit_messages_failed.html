@@ -14,7 +14,7 @@
 	{{ block.super }}
 	{% include "messaging/failed/nav_tab.html" %}
 	
-	<div class="table-container">
+	<div class="table-container table-scroll">
 		{% block table %}
 			<table{% if table.attrs %} {{ table.attrs.as_html }}{% endif %}>
 				<thead>

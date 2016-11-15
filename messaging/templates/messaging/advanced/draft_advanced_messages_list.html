@@ -10,6 +10,8 @@
 	<h3>Draft <small>Advanced Messages</small></h3>
 	{{ block.super }}
 	{% include "messaging/messaging_nav_tab.html" %}
+	<div class="table-scroll">
 	{% render_table table %}
+	</div>
 </div>
 {% endblock %}

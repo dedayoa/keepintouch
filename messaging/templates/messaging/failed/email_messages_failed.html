@@ -10,6 +10,8 @@
 	<h3>Failed <small>Emails</small></h3>
 	{{ block.super }}
 	{% include "messaging/failed/nav_tab.html" %}
+	<div class="table-scroll">
 	{% render_table table %}
+	</div>
 </div>
 {% endblock %}
