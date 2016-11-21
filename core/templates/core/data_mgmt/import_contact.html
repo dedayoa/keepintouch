@@ -56,6 +56,13 @@
 		</table>
 	</div>
 	<div>
+		<div>
+			<input type="checkbox" id="create-contact-list-from-upload-chkbtn" name="ccl4mup" class="checkboxinput" value="cr8" />
+			<label for="create-contact-list-from-upload-chkbtn">
+                Create Contact List from Upload?
+            </label>
+            <input type="text" name="cclfufld" id="cclfufld" style="display:none;" class="textinput textInput" maxlength="100"/>
+        </div>
 		<button class="button success" id="import-contact-button">Import</button>
 	</div>
 	<button class="close-button" data-close aria-label="Close modal" type="button">
@@ -78,6 +85,15 @@
 			};
 			
 			$("span#max-file-size").text(function(){return Humanize.fileSize($(this).text())});
+			
+			
+			$("#create-contact-list-from-upload-chkbtn").change(function(){
+				if (this.checked) {
+			        $('input#cclfufld').css("display","inline-block");
+			    } else {
+			    	$('input#cclfufld').hide();
+			    }
+			})
 		});
 		
 
@@ -150,14 +166,38 @@
 				var payload = new FormData()
 				payload.append('namega',glcontent.result.namega);
 				payload.append('sook',glcontent.result.sook);
-				
+				payload.append('create_list', ($("#create-contact-list-from-upload-chkbtn").is(':checked')) ? 1 : 0);
+				payload.append('list_title',  $('input#cclfufld').val());
 				
 				
 				ajaxPost('/data-mgmt/import_contact/import/',payload, function(content){
-					$('#import-success-modal').foundation('open');
-					//setTimeout(function(){ alert(content.reply); }, 1000);
-					setTimeout(function(){window.location.replace(window.location);}, 5000);						
+					if (content.hasOwnProperty("errors")){
+	           			var errors = $.parseJSON(content.errors);	
+	           		
+	           			$.each(errors, function(index, value){
+	           				if (index === '__all__'){
+	           					$('div.nonfield-ajax-error').remove();
+	           					$("small.error").remove();
+	           					$("#contactfile-upload-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+	           				}else{
+	           					$("small.error").remove();
+	           					//select field with error and apply text after it
+	           					$("[name="+index+"]").after('<small class="error inline-block">'+value[0].message+'</small>');
+	           				}
+	           			});
+	           			
+	           			return;
+	           			
+	           		}else{
+	           			$('div.nonfield-ajax-error').remove();
+	           			$("small.error").remove();
+	           			
+	           			$('#import-success-modal').foundation('open');
+						//setTimeout(function(){ alert(content.reply); }, 1000);
+						setTimeout(function(){window.location.replace(window.location);}, 5000);
+					}					
 				},{"processData":false,"contentType":false,"cache":false,"onError":sayconnectiondown});
+					
 			})
 		})();
 		
