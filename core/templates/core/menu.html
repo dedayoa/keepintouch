@@ -2,6 +2,7 @@
 	{% if request.user.kituser.is_admin %}
 		<li><a href="{% url 'core:dashboard-view' %}"><i class="fi-home"></i> Dashboard</a></li>
 	{% endif %}
+	<li><a href="#"><i class="fi-telephone"></i> Phone</a></li>
 	<li>
 		<a href="#"><i class="fi-address-book"></i> Contact</a>
 		<ul class="menu vertical nested is-active">
@@ -9,9 +10,12 @@
 			<li><a href="{% url 'core:contactgroup-list' %}">Lists</a></li>
 		</ul>
 	</li>
+	
+	
 	<li>
 		<a href="#"><i class="fi-mail"></i> Messaging</a>
 		<ul class="menu vertical nested is-active">
+			<li><a href="#"><i class=""></i>Inbox</a></li>
 			<li><a href="{% url 'messaging:new-standard-message' %}">Standard</a></li>
 			<li><a href="{% url 'messaging:new-advanced-message' %}">Advanced</a></li>
 			{% if perms.messaging.add_remindermessaging %}
