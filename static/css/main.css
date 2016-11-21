@@ -3,6 +3,15 @@ body{
 }
 
 
+input#cclfufld{
+	width: 350px;
+}
+
+.inline-block{
+	display: inline-block !important;
+	margin-left: 1rem; 
+}
+
 .call-btn{
   background: #3498db;
   background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
