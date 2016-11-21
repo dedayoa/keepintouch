@@ -93,7 +93,7 @@ class EmailReportTable(tables.Table):
         
 class CallReportTable(tables.Table):
     
-    a_leg_call_start = tables.TimeColumn(verbose_name='Time')
+    a_leg_call_start = tables.DateTimeColumn(verbose_name='Time')
     b_leg_called_number = tables.Column(verbose_name='Called Number')
     get_total_billable_call_duration = tables.Column(verbose_name='Duration')
     total_call_cost = tables.Column(verbose_name='Debit')
