@@ -39,7 +39,7 @@
 				<input type="reset" name="reset" value="Reset" class="reset button float-right" id="reset-id-reset">
 			</div>
 		</form>
-		<input type="submit" value="Reset Password" class="button warning float-right reset-user-button">
+		<!-- <input type="submit" value="Reset Password" class="button warning float-right reset-user-button"> -->
 		{% if can_delete %}
 		<form method="POST" action="{% url 'core:kituser-delete' kuserid %}">
 		   {% csrf_token %}
