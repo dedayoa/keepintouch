@@ -17,7 +17,7 @@ import humanize
 import base64
 from cryptography.fernet import Fernet
 
-from .models import KITUser, CustomData, Contact, KITUBalance, KITActivationCode
+from .models import KITUser, CustomData, Contact, KITUBalance, KITActivationCode, ContactGroup
 
 from .forms import BalanceTransferForm, ContactImportForm, CustomDataIngestForm, VerifyAccountForm,\
                     OrganizationContactForm
@@ -252,10 +252,15 @@ def wet_run_file(file, fext, kuserid):
         
         res_cr_dr = cr.import_data(dataset, dry_run=False)
         
+        # get the ids of all created rows/objects
+        objids = []
+        for r in res_cr_dr.rows:
+            objids.append(r.object_id)
+        
         if res_cr_dr.has_errors():
             return 'err21' #error occured during wet run
         else:
-            return [res_cr_dr.totals, dataset_ut] 
+            return [res_cr_dr.totals, dataset_ut, objids] 
             
     except:
         print(sys.exc_info())#[0])    
@@ -269,9 +274,15 @@ def now_import_contacts(request):
     if request.method == 'POST':
                    
         try:
+            
             file_name = request.POST.get('namega')
             enc_file_loc = request.POST.get('sook')
-        
+            create_c_list = request.POST.get('create_list')
+            c_list_title = request.POST.get('list_title')
+            
+            
+            print(create_c_list, c_list_title)
+            
             aix = bytes(settings.SECRET_KEY[:32],'utf-8')
             f = Fernet(base64.urlsafe_b64encode(aix))
             file_loc = (f.decrypt(bytes(enc_file_loc,'utf-8'))).decode('utf-8')
@@ -279,6 +290,19 @@ def now_import_contacts(request):
             fext = os.path.splitext(str(file_loc))[1]
             
             result = wet_run_file(file_loc, fext, request.user.kituser.id)
+            
+            # if set to create contact list from upload, do that now
+            if create_c_list == '1' and c_list_title != "":
+                cg = ContactGroup.objects.create(
+                        title = c_list_title,
+                        kit_user = request.user.kituser
+                                            )
+                cg.contacts = result[2]
+                cg.save()
+            elif create_c_list == '1' and c_list_title == "":
+                return {"errors": "{\"cclfufld\": [{\"message\": \"List Title is Required.\", \"code\": \"required\"}]}"}
+            else:
+                pass
             
             #save upload to the uploaded table
             UploadedContact.objects.create(
@@ -288,7 +312,7 @@ def now_import_contacts(request):
                     file_extension = fext[1:], #remove leading dot
                     import_status = result[0],
                     uploaded_by = request.user.kituser
-                    )            
+                    )       
             return {'result':'Done!'}
         except:
             print(sys.exc_info())
