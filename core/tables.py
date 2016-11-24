@@ -65,6 +65,7 @@ class ContactTable_Admin(tables.Table):
         model = Contact
         fields = ('select','first_name','last_name','phone','active','kit_user')
         attrs = {'style': 'width: 100%'}
+        empty_text = "Sorry, No Contact Found"
         
         
 class PrivateEventTable(tables.Table):
@@ -86,6 +87,7 @@ class PrivateEventTable(tables.Table):
         model = Event
         fields = ('contact','date','title','message')
         attrs = {'style': 'width: 100%'}
+        empty_text = "Sorry, No Private Anniversary Found"
         
 class PublicEventTable(tables.Table):
     
@@ -99,6 +101,7 @@ class PublicEventTable(tables.Table):
         model = PublicEvent
         fields = ('title','date', 'message', 'kit_user')
         attrs = {'style': 'width: 100%'}
+        empty_text = "Sorry, No Public Anniversary Found"
     
 class TemplateTable(tables.Table):
     
@@ -111,6 +114,7 @@ class TemplateTable(tables.Table):
         model = MessageTemplate
         fields = ('title','smtp_setting', 'cou_group', 'send_sms')
         attrs = {'style': 'width: 100%'}
+        empty_text = "Sorry, No Template Found"
         
         
 class KITUsersTable(tables.Table):
@@ -145,6 +149,7 @@ class KITUsersTable(tables.Table):
     class Meta:
         model = KITUser
         #fields = ('user', 'company', 'phone_number', 'groups')
+        empty_text = "Sorry, No User Found"
         
 class SMTPSettingsTable(tables.Table):
     
@@ -158,6 +163,7 @@ class SMTPSettingsTable(tables.Table):
         model = SMTPSetting
         fields = ('description', 'smtp_server', 'smtp_user','active')
         attrs = {'style': 'width: 100%'}
+        empty_text = "Sorry, No SMTP Configuration Found"
         
         
 class UserGroupsSettingsTable(tables.Table):
@@ -170,6 +176,7 @@ class UserGroupsSettingsTable(tables.Table):
         model = CoUserGroup
         fields = ('title','description','active')
         attrs = {'style': 'width: 100%'}
+        empty_text = "Sorry, No User Group Found"
         
         
 class ContactGroupsSettingsTable(tables.Table):
@@ -198,6 +205,7 @@ class ContactGroupsSettingsTable(tables.Table):
         model = ContactGroup
         fields = ('title','description','contacts','last_modified')
         attrs = {'style': 'width: 100%'}
+        empty_text = "Sorry, No Contact List Found"
         
 
 class FundsTransferHistoryTable(tables.Table):
@@ -215,6 +223,7 @@ class FundsTransferHistoryTable(tables.Table):
         model = FundsTransfer
         fields = ('from_user','to_user','amount','transaction_date')
         attrs = {'style': 'width: 100%'}
+        empty_text = "Sorry, No Transfer Found"
         
         
 class UploadedContactFileHistoryTable(tables.Table):
@@ -238,7 +247,7 @@ class UploadedContactFileHistoryTable(tables.Table):
         model = UploadedContact
         fields = ('name','file_json','import_status','upload_date')
         attrs = {'style': 'width: 100%'}
-        
+        empty_text = "Sorry, No Upload Found"
 
 
 class CustomDataStoreTable(tables.Table):
@@ -255,4 +264,5 @@ class CustomDataStoreTable(tables.Table):
         model = CustomData
         fields = ('namespace','system_id_field','identity_column_name','created')
         attrs = {'style': 'width: 100%'}
+        empty_text = "Sorry, No CustomData Found"
         
