@@ -20,6 +20,9 @@
 		<link rel="stylesheet" href="{% static "css/offlinejs-themes/offline-language-english.css" %}" />
 		
 		<link href="{% static "css/main.css" %}" rel="stylesheet">
+		{% if request.user.kituser.is_admin %}
+		<link href="{% static "css/kitadmin.css" %}" rel="stylesheet">
+		{% endif %}
 		
 		<script type="text/javascript" src="{% static 'js/offline.js' %}"></script>
 		<script>
