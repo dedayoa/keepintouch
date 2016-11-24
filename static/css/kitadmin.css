@@ -1,0 +1,18 @@
+@CHARSET "ISO-8859-1";
+
+
+body {
+    background-color: #535353;
+}
+
+a{
+	color: #444;
+}
+
+div.off-canvas-content{
+	background-color: #535353;
+}
+
+div.kitapp-content > div.row{
+	background-color: #aaa;
+}
