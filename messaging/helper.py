@@ -217,6 +217,10 @@ class SMSHelper():
         
     def _check_sms_can_be_sent(self):
         
+        # check there is a destination
+        if self.destination == "":
+            raise InvalidPhoneNumberError("Recipient Number Not Provided")
+        
         # check that phone number is valid        
         if not phonenumbers.is_valid_number(phonenumbers.parse(self.destination)):
             raise InvalidPhoneNumberError("%s is Not a Valid Phone Number"%str(self.destination))
