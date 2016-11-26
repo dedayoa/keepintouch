@@ -1,0 +1,11 @@
+<nav aria-label="You are here:" role="navigation">
+  <ul class="breadcrumbs">
+	  {% for url, label in breadcrumbs %}
+	    {% if not url or forloop.counter == breadcrumbs_total %}
+	    	<li><span class="show-for-sr">Current: </span> {{ label|safe }}</li>
+	    {% else %}
+	    	<li><a href="{{ url }}">{{ label|safe }}</a></li>
+	    {% endif %}
+	  {% endfor %}
+  </ul>
+</nav>
