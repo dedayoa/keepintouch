@@ -10,9 +10,12 @@ from .helper import CallHelper, return_all_level_err
 
 @ajax
 @login_required
-def call_number(request, pn):
+def call_number(request, pn=""):
     
     if request.method == "GET":
+        if pn == "":
+            return {'errors':return_all_level_err("Contact Does Not Have a Phone Number")}
+        
         k = CallHelper(pn, request.user.kituser)
         resp = k.make_my_call()
         if resp[0] == 0:            
