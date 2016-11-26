@@ -1,79 +1,83 @@
-<ul class="vertical menu kitapp-lsm" data-accordion-menu>
-	{% if request.user.kituser.is_admin %}
-		<li><a href="{% url 'core:dashboard-view' %}"><i class="fi-home"></i> Dashboard</a></li>
-	{% endif %}
-	<li><a href="#"><i class="fi-telephone"></i> Phone</a></li>
-	<li>
-		<a href="#"><i class="fi-address-book"></i> Contact</a>
-		<ul class="menu vertical nested is-active">
-			<li><a href="{% url 'core:contacts-list' %}">Contacts</a></li>
-			<li><a href="{% url 'core:contactgroup-list' %}">Lists</a></li>
-		</ul>
-	</li>
-	
-	
-	<li>
-		<a href="#"><i class="fi-mail"></i> Messaging</a>
-		<ul class="menu vertical nested is-active">
-			<li><a href="#"><i class=""></i>Inbox</a></li>
-			<li><a href="{% url 'messaging:new-standard-message' %}">Standard</a></li>
-			<li><a href="{% url 'messaging:new-advanced-message' %}">Advanced</a></li>
-			{% if perms.messaging.add_remindermessaging %}
-			<li><a href="{% url 'messaging:new-reminder-message' %}">Reminder</a></li>
-			{% endif %}
-			<hr style="padding: 0 1rem">
-			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:standard-draft-messages' %}"><i class="fi-folder"></i> Drafts</a></li>
-			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:messages-queued-status' %}"><i class="fi-database"></i> Queued</a></li>
-			{% if perms.messaging.add_remindermessaging %}
-			<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:messages-running-status' %}"><i class="fi-foot"></i> Running Reminders</a></li>
-			{% endif %}
-			<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:messages-processed-status' %}"><i class="fi-checkbox"></i> Processed</a></li>
-			<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:kit-messages-failed' %}"><i class="fi-prohibited"></i> Failed<span style="padding: 5px; border-radius: 10%; margin-left: 1rem;" class="alert badge">{{total_failed_msg_count}}</span></a></li>
-		</ul>
-	</li>
-	{% if perms.core.add_messagetemplate %}
-	<li><a href="{% url 'core:templates-list' %}"><i class="fi-page-multiple"></i> Templates</a></li>
-	{% endif %}
-	<li>
-		<a href="#"><i class="fi-calendar"></i> Anniversaries</a>
-		<ul class="menu vertical nested">
-			<li><a href="{% url 'core:events-list' %}">Private</a></li>
-			<li><a href="{% url 'core:public-events-list' %}">Public</a></li>
-		</ul>
-	</li>	
-	<li>
-		<a href="#"><i class="fi-database"></i> Data Management</a>
-		<ul class="menu vertical nested">
-			<li><a href="{% url 'core:contact-import' %}">Import Contacts</a></li>
-			{% if perms.core.add_customdata %}
-			<li><a href="{% url 'core:custom-data' %}">Custom Data</a></li>
-			{% endif %}
-			<li><a href="{% url 'core:export-data' %}">Collection</a></li>
-			<li><a href="{% url 'core:export-data' %}">Export</a></li>
-			
-		</ul>
-	</li>
-	<li>
-		<a href="#"><i class="fi-page-csv"></i> Reports</a>
-		<ul class="menu vertical nested">
-			<li><a href="{% url 'reports:sms-reports' %}">SMS</a></li>
-			<li><a href="{% url 'reports:email-reports' %}">Email</a></li>
-			<li><a href="{% url 'reports:call-reports' %}">Call</a></li>
-		</ul>
-	</li>
-	<li>
-		<a href="#"><i class="fi-wrench"></i> Settings</a>
-		<ul class="menu vertical nested">
+{% load activeurl %}
+
+{% activeurl %}
+	<ul class="vertical menu kitapp-lsm" data-accordion-menu>
 		{% if request.user.kituser.is_admin %}
-			<li><a href="{% url 'core:user-balance-transfer' %}"><i class="fi-burst"></i>Funds Transfer</a></li>
-			<li><a href="{% url 'core:kituser-settings-list' %}"><i class="fi-torsos-female-male"></i>Users</a></li>
-			<li><a href="{% url 'core:usergroup-list' %}"><i class="fi-torsos-all"></i> User Groups</a></li>
-			<!-- <li><a href="#"><i class="fi-lock"></i> Permissions</a></li>  -->
-			<li><a href="{% url 'core:account-mgmt' %}"><i class="fi-shopping-cart"></i> Account</a></li>
-			<li><a href="{% url 'core:smtp-settings-list' %}"><i class="fi-mail"></i> SMTP</a></li>
+			<li><a href="{% url 'core:dashboard-view' %}"><i class="fi-home"></i> Dashboard</a></li>
 		{% endif %}
-			<!-- <li><a href="{% url 'core:kituser-personal-profile' %}"><i class="fi-sheriff-badge"></i>My Profile</a></li> -->
-			<!-- <li><a href="#"><i class="fi-guide-dog"></i>Permissions</a></li> -->
-		</ul>
-	</li>
-</ul>
+		<li><a href="#"><i class="fi-telephone"></i> Phone</a></li>
+		<li class="kparnt">
+			<a href="#"><i class="fi-address-book"></i> Contact</a>
+			<ul class="menu vertical nested is-active">
+				<li><a href="{% url 'core:contacts-list' %}">Contacts</a></li>
+				<li><a href="{% url 'core:contactgroup-list' %}">Lists</a></li>
+			</ul>
+		</li>
+		
+		
+		<li class="kparnt">
+			<a href="#"><i class="fi-mail"></i> Messaging</a>
+			<ul class="menu vertical nested is-active">
+				<li><a href="#"><i class=""></i>Inbox</a></li>
+				<li><a href="{% url 'messaging:new-standard-message' %}">Standard</a></li>
+				<li><a href="{% url 'messaging:new-advanced-message' %}">Advanced</a></li>
+				{% if perms.messaging.add_remindermessaging %}
+				<li><a href="{% url 'messaging:new-reminder-message' %}">Reminder</a></li>
+				{% endif %}
+				<hr style="padding: 0 1rem">
+				<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:standard-draft-messages' %}"><i class="fi-folder"></i> Drafts</a></li>
+				<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:messages-queued-status' %}"><i class="fi-database"></i> Queued</a></li>
+				{% if perms.messaging.add_remindermessaging %}
+				<li class="kitapp-lsm-submenu"><a href="{% url 'messaging:messages-running-status' %}"><i class="fi-foot"></i> Running Reminders</a></li>
+				{% endif %}
+				<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:messages-processed-status' %}"><i class="fi-checkbox"></i> Processed</a></li>
+				<li class="kitapp-lsm-submenu" ><a href="{% url 'messaging:kit-messages-failed' %}"><i class="fi-prohibited"></i> Failed<span style="padding: 5px; border-radius: 10%; margin-left: 1rem;" class="alert badge">{{total_failed_msg_count}}</span></a></li>
+			</ul>
+		</li>
+		{% if perms.core.add_messagetemplate %}
+		<li><a href="{% url 'core:templates-list' %}"><i class="fi-page-multiple"></i> Templates</a></li>
+		{% endif %}
+		<li class="kparnt">
+			<a href="#"><i class="fi-calendar"></i> Anniversaries</a>
+			<ul class="menu vertical nested">
+				<li><a href="{% url 'core:events-list' %}">Private</a></li>
+				<li><a href="{% url 'core:public-events-list' %}">Public</a></li>
+			</ul>
+		</li>	
+		<li class="kparnt">
+			<a href="#"><i class="fi-database"></i> Data Management</a>
+			<ul class="menu vertical nested">
+				<li><a href="{% url 'core:contact-import' %}">Import Contacts</a></li>
+				{% if perms.core.add_customdata %}
+				<li><a href="{% url 'core:custom-data' %}">Custom Data</a></li>
+				{% endif %}
+				<li><a href="{% url 'core:export-data' %}">Collection</a></li>
+				<li><a href="{% url 'core:export-data' %}">Export</a></li>
+				
+			</ul>
+		</li>
+		<li class="kparnt">
+			<a href="#"><i class="fi-page-csv"></i> Reports</a>
+			<ul class="menu vertical nested">
+				<li><a href="{% url 'reports:sms-reports' %}">SMS</a></li>
+				<li><a href="{% url 'reports:email-reports' %}">Email</a></li>
+				<li><a href="{% url 'reports:call-reports' %}">Call</a></li>
+			</ul>
+		</li>
+		<li class="kparnt">
+			<a href="#"><i class="fi-wrench"></i> Settings</a>
+			<ul class="menu vertical nested">
+			{% if request.user.kituser.is_admin %}
+				<li><a href="{% url 'core:user-balance-transfer' %}"><i class="fi-burst"></i>Funds Transfer</a></li>
+				<li><a href="{% url 'core:kituser-settings-list' %}"><i class="fi-torsos-female-male"></i>Users</a></li>
+				<li><a href="{% url 'core:usergroup-list' %}"><i class="fi-torsos-all"></i> User Groups</a></li>
+				<!-- <li><a href="#"><i class="fi-lock"></i> Permissions</a></li>  -->
+				<li><a href="{% url 'core:account-mgmt' %}"><i class="fi-shopping-cart"></i> Account</a></li>
+				<li><a href="{% url 'core:smtp-settings-list' %}"><i class="fi-mail"></i> SMTP</a></li>
+			{% endif %}
+				<!-- <li><a href="{% url 'core:kituser-personal-profile' %}"><i class="fi-sheriff-badge"></i>My Profile</a></li> -->
+				<!-- <li><a href="#"><i class="fi-guide-dog"></i>Permissions</a></li> -->
+			</ul>
+		</li>
+	</ul>
+{% endactiveurl %}
