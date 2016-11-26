@@ -512,10 +512,12 @@ def send_quick_sms(request):
         form = QuickSMSForm(request.POST,sender_id_init=request.user.kituser.get_default_sms_sender())
         if not form.is_valid():
             return {'errors':form.errors.as_json(escape_html=True)}
-        else:
-            
+        else:            
             smsmsg = form.cleaned_data.get('message','') 
             recipient= (form.cleaned_data.get('recipient'),)
+            
+            if Contact.objects.get(pk=recipient[0]).phone == "":
+                return {'errors':return_all_level_err("Contact Does Not Have a Phone Number")}
             
             QueuedMessages.objects.create(
                 message_type = 'STANDARD',
