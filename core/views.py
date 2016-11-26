@@ -939,7 +939,7 @@ def contactgroups(request):
         congrpstable = ContactGroupsSettingsTable(request.user.kituser.get_contact_groups())
         RequestConfig(request, paginate={'per_page': 25}).configure(congrpstable)
         params = {}
-        params["title"] = "Contact Groups"
+        params["title"] = "Contact List"
         params["table"] = congrpstable
         return render(request, 'core/contacts/groups/index.html', params)
     
