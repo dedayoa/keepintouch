@@ -2,6 +2,11 @@ body{
 	background-color: #8db5d2;
 }
 
+li.kparnt.active > a{
+	color: #231f1f;
+    background: transparent;
+    font-weight: bold;
+}
 
 input#cclfufld{
 	width: 350px;
