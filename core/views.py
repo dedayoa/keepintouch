@@ -108,19 +108,6 @@ def exitdoor(request):
     return HttpResponseRedirect('/')
 
 
-class Index(View):
-    
-    def get(self, request):
-        
-
-        params = {}
-        params["name"] = "Django"
-        return render(request,'core/base.html', params)
-    
-    def post(self, request):
-        return HttpResponse("Hallo World")
-
-
 class DashboardView(TemplateView):
     
     template_name = 'core/dashboard.html'
@@ -147,7 +134,7 @@ class DashboardView(TemplateView):
             return render(request,self.template_name, self.params)
         
         else:
-            return HttpResponseRedirect(reverse('messaging:new-standard-message'))
+            return HttpResponseRedirect(reverse('core:contacts-list'))
 
 def contacts(request):
     
