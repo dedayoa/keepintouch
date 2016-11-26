@@ -36,7 +36,7 @@ class CallHelper():
     
         # check that there was even a phone number
         if self.callee == "":
-            raise InvalidPhoneNumberError("Callee Phone Number Not Found")
+            raise InvalidPhoneNumberError("Callee Phone Number Not Provided")
         
         # check that phone numbers are valid       
         if not phonenumbers.is_valid_number(phonenumbers.parse(self.callee)):
