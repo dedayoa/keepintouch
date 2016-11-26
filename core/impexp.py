@@ -37,8 +37,10 @@ class ContactResource(resources.ModelResource):
         if not self.fields['first_name'].clean(row):
             return True
         try:
-            # if when trying to parse a number, an exception occurs, ignore.
-            phonenumbers.parse(self.fields['phone'].clean(row), 'NG')
+            # if there is a phone number
+            if self.fields['phone'].clean(row):
+                # if when trying to parse a number, an exception occurs, ignore.            
+                phonenumbers.parse(self.fields['phone'].clean(row), 'NG')
         except NumberParseException:
             return True
         
