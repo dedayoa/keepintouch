@@ -34,7 +34,11 @@ class CallHelper():
     
     def _check_call_can_be_made(self):
     
-        # check that phone numbers are valid        
+        # check that there was even a phone number
+        if self.callee == "":
+            raise InvalidPhoneNumberError("Callee Phone Number Not Found")
+        
+        # check that phone numbers are valid       
         if not phonenumbers.is_valid_number(phonenumbers.parse(self.callee)):
             raise InvalidPhoneNumberError("Callee Number, %s is Not a Valid Phone Number"%str(self.callee))
         
