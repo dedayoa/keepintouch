@@ -1,5 +1,6 @@
 {% extends "core/base_generic.html" %}
 {% load render_table from django_tables2 %}
+{% load django_bootstrap_breadcrumbs %}
 
 {% load crispy_forms_tags %}
 
@@ -10,8 +11,12 @@
 
 {% block content %}
 <div class="row">
-	<h3>{{page_title}}</h3>
+	{% block breadcrumbs %}
+    	{{ block.super }}
+    	{% breadcrumb "Contacts" "core:contacts-list" %}
+	{% endblock %}
 	{{ block.super }}
+	<h3>{{page_title}}</h3>	
 	<div>
 		<div><a class="small button" href="{% url 'core:contact-new' %}">New Contact</a></span></div>
 	  	{% crispy contacts_search_form %}
@@ -59,6 +64,8 @@
 			$("input#id_recipient").val(contactid);
 			$('#single_sms_modal').foundation('open');
 		})
+		
+		//QuickSMS function
 		$(document.body).on('submit','form.quick-sms-form',function(e){
 			e.preventDefault();
 			var qsms_payload = $(this).serialize()
@@ -91,6 +98,8 @@
            		}
 			});
 		});
+		
+		//Callup Function
 		(function(){
 			
 			var phonenum;
@@ -103,6 +112,8 @@
 				var lname = $(this).parents("td.action").siblings("td.last_name").text();
 				$(".qcall-pn").text(phonenum);
 				$(".qcall-fn").text(fname+" "+lname);
+				
+				$("small.error").remove();
 				$('#q-callup-modal').foundation('open');
 				
 				
