@@ -1,5 +1,8 @@
 {% extends "core/base.html" %}
 {% load staticfiles %}
+{% load django_bootstrap_breadcrumbs %}
+
+
 
 {% block body %}
 	<div class="off-canvas-wrapper">
@@ -80,8 +83,13 @@
 								</script>
 							</div>
 						</div>
-						<div class="small-12 large-9 column kitapp-content clearfix">
+						<div class="small-12 large-9 column kitapp-content clearfix">							
+							{% block breadcrumbs %}
+							    {% clear_breadcrumbs %}
+							    {% breadcrumb_safe "<i class='fi-home'></i>" "/" %}
+							{% endblock %}
 							{% block content %}
+								{% render_breadcrumbs %}
 								{% if messages %}
 								<div class="alert callout">
 									{% for message in messages %}
