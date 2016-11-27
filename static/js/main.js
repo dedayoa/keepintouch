@@ -12,6 +12,24 @@ if ($('#id_all_contacts').prop('checked')){
 }
 
 
+//display alert error 
+
+function display_ajax_alert_error(index, value)
+{
+	if (index === '__all__'){
+		$('div.nonfield-ajax-error').remove();
+		$("#standard-message-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+		document.querySelector('.alert.callout.nonfield-ajax-error').scrollIntoView({ 
+		  behavior: 'smooth' 
+		});
+	}else{
+		$("[name="+index+"] + small.error").remove();	           					
+		$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
+	}
+}
+
+
+
 function get_u_val(valu){
 	// returns 'Yes' or 'No', instead of Blank or true
 	if (valu == true){
