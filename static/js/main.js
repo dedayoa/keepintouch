@@ -13,12 +13,12 @@ if ($('#id_all_contacts').prop('checked')){
 
 
 //display alert error 
-
-function display_ajax_alert_error(index, value)
+// mfvid is the main form/encapsulating id
+function display_ajax_alert_error(index, value, mfvid)
 {
 	if (index === '__all__'){
 		$('div.nonfield-ajax-error').remove();
-		$("#standard-message-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
+		$(mfvid).prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
 		document.querySelector('.alert.callout.nonfield-ajax-error').scrollIntoView({ 
 		  behavior: 'smooth' 
 		});
