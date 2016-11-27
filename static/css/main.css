@@ -148,6 +148,10 @@ box-shadow: 0px 0px 6px 1px rgba(0,0,0,0.30);
 	text-align: center;
 }
 
+.contact-list-system-lists-ent table{
+	width: 100%;	
+}
+
 
 div.title-bar{
 	padding-top: 0;

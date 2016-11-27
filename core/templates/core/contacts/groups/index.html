@@ -16,6 +16,58 @@
 	{{ block.super }}
 	<div class="table-scroll">
 		<h3>Contact Lists</h3>
+		<div class="clearfix hide" style="margin-bottom: 1rem; ">
+			<div class="column small-12 medium-6" style="margin-bottom: 1rem;">
+				<div class="contact-list-system-lists-ent">
+					<h4 class="contact-list-system-lists-h4">SMS</h4>
+					<div class="row columns">					
+						<table>
+							<tr>
+								<td width="50%">
+									<h5>Unsubscribe</h5>
+									<div>12 new</div>
+								</td>
+								<td width="50%">
+									<h5>DND</h5>
+									<div>8 new</div>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="column small-12 medium-6">
+				<div class="contact-list-system-lists-ent">
+					<h4 class="contact-list-system-lists-h4">Email</h4>
+					<div class="row columns">					
+						<table>
+							<tr>
+								<td width="50%">
+									<h5>Unsubscribe</h5>
+									<div>12 new</div>
+								</td>
+								<td width="50%">
+									<h5>Invalid</h5>
+									<div>8 new</div>
+								</td>
+							</tr>
+							<tr>
+								<td width="50%">
+									<h5>Spam Reports</h5>
+									<div>12 new</div>
+								</td>
+								<td width="50%">
+									<h5>Bounces</h5>
+									<div>8 new</div>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+		<hr />
 		<a class="small button" href="{% url 'core:contactgroup-new' %}">New Contact List</a>
 		{% render_table table %}
 	</div>
