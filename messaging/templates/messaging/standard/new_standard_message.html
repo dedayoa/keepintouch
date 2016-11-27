@@ -79,7 +79,7 @@
 	           			var errors = $.parseJSON(content.errors);	
 	           		
 	           			$.each(errors, function(index, value){
-	           				display_ajax_alert_error(index, value);
+	           				display_ajax_alert_error(index, value, "#standard-message-form");
 	           			});
 	           			
 	           			return;

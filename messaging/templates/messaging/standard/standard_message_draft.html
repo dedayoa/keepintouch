@@ -88,13 +88,7 @@
 	           			var errors = $.parseJSON(content.errors);	
 	           		
 	           			$.each(errors, function(index, value){
-	           				if (index === '__all__'){
-	           					$('div.nonfield-ajax-error').remove();
-	           					$("#standard-message-form").prepend('<div class="alert callout nonfield-ajax-error">'+value[0].message+'</div>');
-	           				}else{
-	           					$("[name="+index+"] + small.error").remove();
-	           					$("[name="+index+"]").after('<small class="error">'+value[0].message+'</small>');
-	           				}
+	           				display_ajax_alert_error(index, value,"#standard-message-form");
 	           			});
 	           			
 	           			return;
