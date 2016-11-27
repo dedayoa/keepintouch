@@ -1,10 +1,17 @@
 {% extends "core/base_generic.html" %}
 {% load crispy_forms_tags %}
+{% load django_bootstrap_breadcrumbs %}
 
 {% block title %}{{title}}{% endblock %}
 
 {% block content %}
 	<div class="row">
+		{% block breadcrumbs %}
+	    	{{ block.super }}
+	    	{% breadcrumb "Contacts" "core:contacts-list" %}
+	    	{% breadcrumb "New" "core:contact-new" %}
+		{% endblock %}
+		{{ block.super }}
 		<h3>Contact <small>New</small></h3>
 		{% crispy form %}
 	</div>

@@ -1,6 +1,7 @@
 {% extends "core/base_generic.html" %}
 {% load crispy_forms_tags %}
 {% load staticfiles %}
+{% load django_bootstrap_breadcrumbs %}
 
 {% block title %}{{title}}{% endblock %}
 {% block head_base_links %}
@@ -9,8 +10,13 @@
 {% endblock %}
 {% block content %}
 	<div class="row">
-		<h3>Contact <small></small></h3>
+		{% block breadcrumbs %}
+	    	{{ block.super }}
+	    	{% breadcrumb "Contacts" "core:contacts-list" %}
+	    	{% breadcrumb contact "core:contact-detail" %}
+		{% endblock %}
 		{{ block.super }}
+		<h3>Contact <small></small></h3>		
 		<form action="." method="post">
 			{% crispy form %} {# I have set helper not to generate the form tag #}
 			<fieldset class="fieldset">

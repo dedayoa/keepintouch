@@ -1,5 +1,7 @@
 {% extends "core/base_generic.html" %}
 {% load render_table from django_tables2 %}
+{% load django_bootstrap_breadcrumbs %}
+
 {% block head_base_links %}
 	{{ block.super }}
 {% endblock %}
@@ -7,8 +9,13 @@
 
 {% block content %}
 <div class="row">
+	{% block breadcrumbs %}
+    	{{ block.super }}
+    	{% breadcrumb "Contact Lists" "core:contactgroup-list" %}
+	{% endblock %}
+	{{ block.super }}
 	<div class="table-scroll">
-		{{ block.super }}
+		<h3>Contact Lists</h3>
 		<a class="small button" href="{% url 'core:contactgroup-new' %}">New Contact List</a>
 		{% render_table table %}
 	</div>

@@ -1,6 +1,7 @@
 {% extends "core/base_generic.html" %}
 {% load crispy_forms_tags %}
 {% load staticfiles %}
+{% load django_bootstrap_breadcrumbs %}
 
 {% block title %}{{title}}{% endblock %}
 {% block head_base_links %}
@@ -9,9 +10,14 @@
 {% endblock %}
 {% block content %}
 	<div class="row">
-		<h3>Contact List <small>{{objtitle}}</small></h3>
+		{% block breadcrumbs %}
+	    	{{ block.super }}
+	    	{% breadcrumb "Contact Lists" "core:contactgroup-list" %}
+	    	{% breadcrumb contactgroup "core:contactgroup-detail" %}
+		{% endblock %}
 		{{ block.super }}
-			{% crispy form %}	
+		<h3>Contact List <small>{{objtitle}}</small></h3>
+		{% crispy form %}	
 		<form method="POST" action="{% url 'core:contactgroup-delete' contactgroupid %}">
 		   {% csrf_token %}
 		   <input type="submit" value="Delete" class="button alert float-left" 
