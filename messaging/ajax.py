@@ -3,7 +3,7 @@ Created on Jul 13, 2016
 
 @author: Dayo
 '''
-import os, sys
+import os, sys, re
 import pickle
 import tablib
 import json
@@ -30,10 +30,10 @@ import base64
 from cryptography.fernet import Fernet
 
 from gomez.models import KITSystem
+from django.template.exceptions import TemplateSyntaxError
 
 
 def _compose(template, convars):
-    
     t = Template(template)
     return t.render(Context({
                             'firstname':getattr(convars,'first_name',''),
@@ -60,6 +60,14 @@ def _untokenize(enc_file_loc):
     file_loc = (f.decrypt(bytes(enc_file_loc,'utf-8'))).decode('utf-8')
     
     return file_loc
+
+
+
+def return_tplsynerr_important_segment(msg):
+    res0 = re.search("'\w+ \w+'",str(msg))
+    if res0:
+        res1 = res0.group(0)
+        return return_all_level_err("The placeholder {{{{{0}}}}} is Invalid".format(res1[1:-1]))
 
 @ajax
 @login_required
@@ -91,9 +99,17 @@ def prepare_to_send_message(request):
                     result_dict['nocwe'] = num_of_contacts_with_emails
                     result_dict['mail_server'] = '<a href="{}" target="_blank">{}</a>'.\
                                                 format(smtp_to_use.get_absolute_url(),smtp_to_use.smtp_server)            
-                    result_dict['sample_email'] = _compose(request.POST.get('email_message'),cts.first()) #convert to img
-                    result_dict['sample_email_title'] = _compose(request.POST.get('title'),cts.first())
-                    #code_seg_1 = get_random_string(length=10)
+                    
+                    try:
+                        result_dict['sample_email'] = _compose(request.POST.get('email_message'),cts.first()) #convert to img
+                    except TemplateSyntaxError as e:
+                        return {'errors':return_tplsynerr_important_segment(e)}
+                    
+                    try:
+                        result_dict['sample_email_title'] = _compose(request.POST.get('title'),cts.first())
+                        #code_seg_1 = get_random_string(length=10)
+                    except TemplateSyntaxError as e:
+                        return {'errors':return_tplsynerr_important_segment(e)}
                 
                 else:
                     result_dict['nocwe'] = 0 #if this is 0, then it all dont matter
@@ -106,11 +122,19 @@ def prepare_to_send_message(request):
                     contacts_with_phone = cts.exclude(phone__exact = '')
                     
                     for contact in contacts_with_phone:
-                        mc_var = SMSCounter().get_messages_count_only(_compose(request.POST.get('sms_message'), contact))
-                        m_count+=mc_var
+                        try:
+                            mc_var = SMSCounter().get_messages_count_only(_compose(request.POST.get('sms_message'), contact))
+                            m_count+=mc_var
+                        except TemplateSyntaxError as e:
+                            return {'errors':return_tplsynerr_important_segment(e)}
                         
                     result_dict['total_sms_count'] = m_count
-                    result_dict['sample_sms'] = _compose(request.POST.get('sms_message'),cts.first())
+                    
+                    # sample SMS
+                    try:
+                        result_dict['sample_sms'] = _compose(request.POST.get('sms_message'),cts.first())
+                    except TemplateSyntaxError as e:
+                        return {'errors':return_tplsynerr_important_segment(e)}
                     #code_seg_2 = get_random_string(length=10)
                     
                 else:
@@ -167,9 +191,16 @@ def prepare_to_send_message(request):
                     contacts.add(elem)
                     ##                 ##
                     
-                    a_contact = elem    
-                    result_dict['sample_email'] = _compose(msg_t.email_template,a_contact) #convert to img
-                    result_dict['sample_email_title'] = _compose(msg_t.title,a_contact)
+                    a_contact = elem
+                    try:
+                        result_dict['sample_email'] = _compose(msg_t.email_template,a_contact) #convert to img
+                    except TemplateSyntaxError as e:
+                        return {'errors':return_tplsynerr_important_segment(e)}
+                    
+                    try:
+                        result_dict['sample_email_title'] = _compose(msg_t.title,a_contact)
+                    except TemplateSyntaxError as e:
+                        return {'errors':return_tplsynerr_important_segment(e)}
                     #code_seg_1 = get_random_string(length=10)
                 
                 else:
@@ -181,9 +212,12 @@ def prepare_to_send_message(request):
                     
                     m_count = 0                    
                     for contact in contacts:
-                        if contact.phone != '':
-                            mc_var = SMSCounter().get_messages_count_only(_compose(msg_t.sms_template,contact))
-                            m_count+=mc_var
+                        try:
+                            if contact.phone != '':
+                                mc_var = SMSCounter().get_messages_count_only(_compose(msg_t.sms_template,contact))
+                                m_count+=mc_var
+                        except TemplateSyntaxError as e:
+                            return {'errors':return_tplsynerr_important_segment(e)}
                     
                     ## get any contact
                     elem = contacts.pop()
@@ -192,7 +226,11 @@ def prepare_to_send_message(request):
                     
                     a_contact = elem 
                     result_dict['total_sms_count'] = m_count
-                    result_dict['sample_sms'] = _compose(msg_t.sms_template,a_contact)
+                    
+                    try:
+                        result_dict['sample_sms'] = _compose(msg_t.sms_template,a_contact)
+                    except TemplateSyntaxError as e:
+                        return {'errors':return_tplsynerr_important_segment(e)}
                     #code_seg_2 = get_random_string(length=10)
                     
                 else:
