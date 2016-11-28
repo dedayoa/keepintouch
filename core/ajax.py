@@ -254,9 +254,12 @@ def wet_run_file(file, fext, kuserid):
         
         # get the ids of all created rows/objects
         objids = []
-        for r in res_cr_dr.rows:
-            objids.append(r.object_id)
         
+        for r in res_cr_dr.rows:
+            # turns out rows without email or phone don't get an object_id.
+            if r.object_id != "": # bug reported by customer @ToyinKareem
+                objids.append(r.object_id)
+            
         if res_cr_dr.has_errors():
             return 'err21' #error occured during wet run
         else:
