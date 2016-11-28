@@ -382,3 +382,11 @@ def assemble_message(template_file, convars, custom_convars = {}):
 def text_2_wordlist(text, max_number_of_words):
     text_list = re.sub("[^\w]", " ",  text).split()
     return " ".join(text_list[0:max_number_of_words])+"..." if len(text_list) > max_number_of_words else text
+
+
+def templatesyntaxerror_message(msg):
+    # returns a more (In.Touch) useful TemplateSyntaxError message
+    res0 = re.search("'\w+ \w+'",str(msg))
+    if res0:
+        res1 = res0.group(0)
+        return "The placeholder {{{{{0}}}}} is Invalid".format(res1[1:-1])
