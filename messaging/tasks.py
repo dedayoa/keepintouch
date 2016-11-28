@@ -17,12 +17,13 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from .models import QueuedMessages, ProcessedMessages,RunningMessage, FailedKITMessage
-from .helper import SMTPHelper, SMSHelper, get_next_delivery_time, OKToSend
+from .helper import SMTPHelper, SMSHelper, get_next_delivery_time, OKToSend, templatesyntaxerror_message
 
 from core.exceptions import *
 from core.models import Contact, PublicEvent, KITUser, SMTPSetting, Event, CustomData
 from core.googlext import GoogleURLShortener
 import uuid
+from django.template.exceptions import TemplateSyntaxError
 
 
 
@@ -120,6 +121,13 @@ def process_private_anniversary(private_events=None):
                     reason = e.message,
                     owned_by = peven.contact.kit_user
                                             )
+        except TemplateSyntaxError as e:
+            FailedKITMessage.objects.create(
+                    message_data = [peven],
+                    message_category = 'private_anniv_msg',
+                    reason = templatesyntaxerror_message(e),
+                    owned_by = peven.contact.kit_user
+            )
              
     
     
@@ -171,6 +179,14 @@ def process_public_anniversary(public_events=None):
                         reason = e.message,
                         owned_by = publicevent.kit_user
                                                 )
+            except TemplateSyntaxError as e:
+                FailedKITMessage.objects.create(
+                        message_data = [publicevent],
+                        message_category = 'public_anniv_msg',
+                        reason = templatesyntaxerror_message(e),
+                        owned_by = publicevent.kit_user
+                )
+            
             
         publicevent.date = timezone.now().date()+relativedelta(years=1)
         publicevent.save()
@@ -277,8 +293,13 @@ def process_onetime_event(queued_messages=None):
                     reason = 'The Custom Data "%s" being referenced is no longer Available'%(due_queued_messages.message["custom_data_id"]),
                     owned_by = queued_message.created_by
                                             )
-        
-
+        except TemplateSyntaxError as e:
+            FailedKITMessage.objects.create(
+                    message_data = [queued_message],
+                    message_category = 'queued_msg',
+                    reason = templatesyntaxerror_message(e),
+                    owned_by = queued_message.created_by
+            )
         
         # delete queued message from queuedmessage table if it does not reccur
         if queued_message.recurring == False:
@@ -367,6 +388,13 @@ def process_reminder_event(running_messages=None):
                         reason = 'The Custom Data "%s" being referenced is no longer Available'%(message["others"]["custom_data_namespace"]),
                         owned_by = created_by
                                                 )
+            except TemplateSyntaxError as e:
+                FailedKITMessage.objects.create(
+                        message_data = [running_message],
+                        message_category = 'running_msg',
+                        reason = templatesyntaxerror_message(e),
+                        owned_by = running_message.created_by
+                )
  
                 
 
