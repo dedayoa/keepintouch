@@ -53,6 +53,8 @@ def fs_call_detail_report_callback(request):
     # at the same time I want things to be as fast as possible, so no key/id comparisions - even from memory
     # so if the sender tries to duplicate the uuid and cause those massive errors I'm seeing, just ignore, but tell him
     # all went well. That's a bandwidth hog though so I need to figure out how to block them at source
+    
+    # discovered the cause of this error was actually the lack of 'leg' 5*748=3737
     try:
         CallDetailReportTransaction.objects.create(call_uuid = calluid, body = jdata, request_meta = meta)
     except IntegrityError:
