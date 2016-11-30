@@ -148,9 +148,9 @@ class StandardMessagingForm(forms.ModelForm):
         
         if cleaned_data.get("recipients").count() > self.kuser.kitsystem.max_standard_message: #settings.MAX_MSG_RECIPIENT:
             raise forms.ValidationError(
-                'To check Spam, only {} recipients are allowed. \
-                To send to a greater number of recipients, contact Admin or \
-                use the Advanced Messaging'.self.kuser.kitsystem.max_standard_message
+                'To check spam, only {} recipients are allowed. \
+                To send to a greater number of recipients, contact your Admin or \
+                use Advanced Messaging'.format(self.kuser.kitsystem.max_standard_message)
                                         )
         
         return cleaned_data   
