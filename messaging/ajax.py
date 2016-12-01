@@ -307,6 +307,7 @@ def send_message(request):
                     'others' : {
                             'draft_title' : myform.cleaned_data.get('title',''),
                             'original_created' : created_time.strftime('%d-%m-%Y %H:%M') if created_time else None,
+                            'email_reply_to' : request.POST.getlist('email_reply_to',[]),
                             'cc_recipients' : request.POST.getlist('copied_recipients',[]),
                             'cc_recipients_send_sms' : myform.cleaned_data.get('cc_recipients_send_sms', False),
                             'cc_recipients_send_email' : myform.cleaned_data.get('cc_recipients_send_email', False),                         
@@ -374,6 +375,7 @@ def send_message(request):
                                 'repeat_until' :  None if not repeat_until else repeat_until.strftime('%d-%m-%Y %H:%M'),
                                 'first_delivery_time' : fdt,
                                 'custom_data_namespace' : getattr(my_adv_form[0].cleaned_data.get('custom_data_namespace'),'namespace', None),
+                                'email_reply_to' : [k.pk for k in my_adv_form[2].email_reply_to.all()],                                
                                 'cc_recipients' : [],
                                 'cc_recipients_send_sms' : False,
                                 'cc_recipients_send_email' : False, 
