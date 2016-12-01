@@ -20,7 +20,7 @@ from django.core.validators import validate_email
 
 #from gomez.models import KITBilling
 from .models import FailedEmailMessage, FailedSMSMessage, FailedSMSSystemBacklog
-from core.models import KITUser, SMTPSetting, KITUBalance
+from core.models import KITUser, SMTPSetting, KITUBalance, Contact
 from core.exceptions import *
 
 from cacheops import cached_as
@@ -389,3 +389,14 @@ def templatesyntaxerror_message(msg):
     if res0:
         res1 = res0.group(0)
         return "The placeholder {{{{{0}}}}} is Invalid".format(res1[1:-1])
+    
+    
+    
+def contactpklist_to_emaillist(contactpklist):
+    
+    elist = []
+    
+    for el in contactpklist:
+        elist.append(Contact.objects.get(pk=el).email)
+        
+    return elist
