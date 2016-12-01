@@ -119,19 +119,14 @@ class SMTPHelper():
         
         try:
             
-            conn = self.get_connection()                 
+            conn = self.get_connection()
             
             with conn as smtp_connection:
-                mail.EmailMessage(
-                    'This is an SMTP Test Message',
-                    '''
-                    This is a message to Test that your SMTP settings are working OK
-                    
-                    Regards,
-                    In.Touch
-                    ''',
-                    self.smtp_user,
-                    ['dayo@windom.biz'],
+                EmailMessage(
+                    subject = self.email_title,
+                    body = self.email_msg,
+                    from_email = self.smtp_user,
+                    to = [self.email_recipient],
                     connection=smtp_connection,
                 ).send()
                                 

@@ -1,6 +1,6 @@
 import sys
 import datetime
-
+import uuid
 
 from django import forms
 from django.db import transaction
@@ -849,7 +849,13 @@ class CheckSMTPServerView(View):
             #pulling from DB, not Form
             smtp_profile = get_object_or_404(SMTPSetting, pk=pk, kit_admin=request.user.kituser)
             
-            eh = SMTPHelper(smtp_profile)
+            emsg = [
+                    'This is an SMTP Test Message',
+                    '<p>This is a message to Test that your SMTP settings are working OK</p>Regards,<p>In.Touch</p>',
+                    'dayo@windom.biz'
+                    ]
+            
+            eh = SMTPHelper(smtp_profile,emsg,uuid.uuid4())
             er = eh.test_smtp_server()
             
             if er == True:
