@@ -17,7 +17,8 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from .models import QueuedMessages, ProcessedMessages,RunningMessage, FailedKITMessage
-from .helper import SMTPHelper, SMSHelper, get_next_delivery_time, OKToSend, templatesyntaxerror_message
+from .helper import SMTPHelper, SMSHelper, get_next_delivery_time, OKToSend, templatesyntaxerror_message,\
+                    contactpklist_to_emaillist
 
 from core.exceptions import *
 from core.models import Contact, PublicEvent, KITUser, SMTPSetting, Event, CustomData
@@ -86,7 +87,7 @@ def process_private_anniversary(private_events=None):
                     _send_email.delay([rttempl,etempl,peven.contact.email],\
                                               peven.message.smtp_setting,\
                                               owner = peven.contact.kit_user,
-                                              reply_to = peven.message.reply_to
+                                              reply_to = [c.email for c in peven.message.reply_to]
                                               )
                     
                 if peven.message.send_sms and peven.contact.phone and peven.message.sms_template:
@@ -150,7 +151,7 @@ def process_public_anniversary(public_events=None):
                         _send_email.delay([e_title,e_msg,recipient_d.email],\
                                           publicevent.message.smtp_setting,\
                                           owner = publicevent.kit_user,
-                                          reply_to = publicevent.message.reply_to
+                                          reply_to = [c.email for c in publicevent.message.reply_to]
                                           )
                         
                     if publicevent.message.send_sms and recipient_d.phone and publicevent.message.sms_template:
@@ -244,7 +245,7 @@ def process_onetime_event(queued_messages=None):
                                               cc_recipients = cc_emails,
                                               owner = queued_message.created_by,
                                               batch_id = sprm.id,
-                                              reply_to = queued_message.message["others"].get("email_reply_to",[])
+                                              reply_to = contactpklist_to_emaillist(queued_message.message["others"].get("email_reply_to",[]))
                                               )
                         #sms   
                         if queued_message.message["send_sms"] and recipient_d.phone and queued_message.message["sms_template"]:
@@ -352,7 +353,8 @@ def process_reminder_event(running_messages=None):
                         e_msg = _compose(message["email_template"], recipient_d, cdd)
                         e_title = _compose(message["title"], recipient_d, cdd)
                         _send_email.delay([e_title, e_msg, recipient_d.email],\
-                                          smtp_setting_qsv, owner = created_by, reply_to = message["others"].get("email_reply_to",[])
+                                          smtp_setting_qsv, owner = created_by,\
+                                          reply_to = contactpklist_to_emaillist(message["others"].get("email_reply_to",[]))
                                           )
                     #sms
                     if message["send_sms"] and recipient_d.phone and message["sms_template"]:
