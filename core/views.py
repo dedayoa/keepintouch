@@ -851,7 +851,7 @@ class CheckSMTPServerView(View):
             
             emsg = [
                     'This is an SMTP Test Message',
-                    '<p>This is a message to Test that your SMTP settings are working OK</p>Regards,<p>In.Touch</p>',
+                    'This is a message to Test that your SMTP settings are working OK\n\nRegards,\n\nIn.Touch',
                     'dayo@windom.biz'
                     ]
             
