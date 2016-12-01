@@ -525,6 +525,8 @@ class MessageTemplate(models.Model):
     email_template = models.TextField(blank=True)
     sms_template = models.TextField(blank=True)
     
+    email_reply_to = models.ManyToManyField('core.Contact', verbose_name="Reply To")
+    
     sms_sender = models.CharField(max_length=11, blank=True)
     smtp_setting = models.ForeignKey('core.SMTPSetting', models.SET_NULL, null=True, \
                                      blank=True, verbose_name="SMTP Account")
