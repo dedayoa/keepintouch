@@ -63,6 +63,8 @@ class SMTPHelper():
         self.smtp_user = getattr(self.ssp,'smtp_user','')
         self.smtp_password = getattr(self.ssp,'smtp_password','')
         
+        self.reply_to = kwargs.get('reply_to')
+        
         self.email_title = email_message[0]
         self.email_msg = email_message[1]
         self.email_recipient = email_message[2]
@@ -148,6 +150,7 @@ class SMTPHelper():
                     #from_email = self.smtp_user,
                     to = [self.email_recipient], #recipient
                     cc = self.email_cc_recipients,
+                    reply_to = self.reply_to,
                     connection=smtp_connection,
                     headers={
                              'X-Mailer': 'In.Touch Business Messaging Automation',
@@ -167,6 +170,7 @@ class SMTPHelper():
                                          'from' : self.smtp_user,
                                          'to' : self.email_recipient,
                                          'cc' : self.email_cc_recipients,
+                                         'reply_to' : self.reply_to,
                                          'message' : self.email_msg
                                          },
                         email_gateway = {
