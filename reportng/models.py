@@ -100,6 +100,7 @@ class EmailDeliveryReport(models.Model):
         ('3', 'DEFERRED'),
         ('4', 'DELIVERED'),
         ('5', 'BOUNCED'),
+        ('6', 'SENDING...')
         
         #('1', 'OPENED'), #ER
         #('2', 'CLICKED'), #ER
@@ -131,14 +132,36 @@ class EmailDeliveryReport(models.Model):
 class EmailEventHistory(models.Model):
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    evtype = models.CharField(max_length=75, null=True)
+    email = models.CharField(max_length=150, null=True)
     message_id = models.ForeignKey(EmailDeliveryReport, on_delete=models.CASCADE)
-    data = JSONField()
+    evdata = JSONField()
     
     created = models.DateTimeField(auto_now_add=True)
     last_modified = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return str(self.id)
+    
+    
+class EmailReportTransaction(models.Model):
+
+    STATUS = (
+        ('0', 'Unprocessed'),
+        ('1', 'Processed'),
+        ('2', 'Error'),
+    )
+
+    #date_generated = models.DateTimeField()
+    date_received = models.DateTimeField(auto_now_add=True)
+    
+    body = JSONField()
+    request_meta = JSONField()
+    
+    status = models.CharField(max_length=4, choices=STATUS, default='0')
+
+    def __str__(self):
+        return '{0}'.format(self.date_received)
     
 
 class CallDetailReport(models.Model):
