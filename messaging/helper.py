@@ -153,7 +153,7 @@ class SMTPHelper():
                     reply_to = self.reply_to,
                     connection=smtp_connection,
                     headers={
-                             'X-Mailer': 'In.Touch Business Messaging Automation',
+                             'X-Mailer': 'In.Touch Business Communication Automation',
                              'X-Twitter-ID': '@intouchng',
                              'X-Facebook-ID' : 'https://www.facebook.com/intouchng'
                              },
