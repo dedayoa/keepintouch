@@ -4,7 +4,7 @@ Created on Jul 9, 2016
 @author: Dayo
 '''
 
-
+import json
 import sys, os
 import re
 import requests
@@ -142,6 +142,30 @@ class SMTPHelper():
         try:
             conn = self.get_connection() 
             
+            # create delivery report to get email_uuid to use to track email
+            email_uuid = EmailDeliveryReport.objects.create(
+                    batch_id = self.batch_id,
+                    to_email = self.email_recipient,
+                    from_email = self.smtp_user,
+                    email_message = {
+                                     'title':self.email_title,
+                                     'from' : self.smtp_user,
+                                     'to' : self.email_recipient,
+                                     'cc' : self.email_cc_recipients,
+                                     'reply_to' : self.reply_to,
+                                     'message' : self.email_msg
+                                     },
+                    email_gateway = {
+                            'server' :self.smtp_server,
+                            'port': self.smtp_port,
+                            'security': self.connection_security,
+                            'username' : self.smtp_user
+                                     },
+                    msg_status = '6',
+                    kituser_id = self.kuser.id,
+                    kitu_parent_id = self.kuser.get_parent().id
+            )
+            
             with conn as smtp_connection:    
                 msg = EmailMessage(
                     subject = self.email_title, #title
@@ -153,43 +177,21 @@ class SMTPHelper():
                     reply_to = self.reply_to,
                     connection=smtp_connection,
                     headers={
-                             'X-Mailer': 'In.Touch Business Communication Automation',
-                             'X-Twitter-ID': '@intouchng',
-                             'X-Facebook-ID' : 'https://www.facebook.com/intouchng'
+                            'X-Mailer': 'In.Touch Business Communication Automation',
+                            'X-Twitter-ID': '@intouchng',
+                            'X-Facebook-ID' : 'https://www.facebook.com/intouchng',
+                            "X-SMTPAPI": json.dumps({
+                                            "unique_args": {
+                                                "batch_id" : self.batch_id,
+                                                'email_id' : email_uuid.id
+                                            }
+                                        })
                              },
                 )
                 msg.content_subtype = "html"
                 msg.send()
                 
-                EmailDeliveryReport.objects.create(
-                        batch_id = self.batch_id,
-                        to_email = self.email_recipient,
-                        from_email = self.smtp_user,
-                        email_message = {
-                                         'title':self.email_title,
-                                         'from' : self.smtp_user,
-                                         'to' : self.email_recipient,
-                                         'cc' : self.email_cc_recipients,
-                                         'reply_to' : self.reply_to,
-                                         'message' : self.email_msg
-                                         },
-                        email_gateway = {
-                                'server' :self.smtp_server,
-                                'port': self.smtp_port,
-                                'security': self.connection_security,
-                                'username' : self.smtp_user
-                                         },
-                        msg_status = '0',
-                        kituser_id = self.kuser.id,
-                        kitu_parent_id = self.kuser.get_parent().id
-                )
-                '''
-                temp_log_to_db(
-                    'email',
-                    email_msg = email_message,
-                    sender_mail = "{} <{}>".format(self.from_sender, self.smtp_user),
-                    owner = kwargs['owner']
-                )'''
+                
         except smtplib.SMTPDataError:
             FailedEmailMessage.objects.create(
                         email_pickled_date = [self.email_msg, self.ssp],
