@@ -13,7 +13,7 @@ from django.http.response import HttpResponse
 from django.conf import settings
 
 import json, copy
-from .models import SMSDeliveryReportTransaction, CallDetailReportTransaction
+from .models import SMSDeliveryReportTransaction, CallDetailReportTransaction, EmailReportTransaction
 from django.db.utils import IntegrityError
 
 
@@ -67,10 +67,15 @@ def fs_call_detail_report_callback(request):
 @csrf_exempt
 @require_POST
 def sendgrid_report_callback(request):
-    data = request.POST.get('headers')
+    data = request.body.decode('utf-8')
     meta = copy.copy(request.META)
     
+    for k, v in meta.copy().items():
+        if not isinstance(v, str):
+            del meta[k]
+    
     jdata = json.loads(data)
-    print(jdata)
+    
+    EmailReportTransaction.objects.create(body=jdata, request_meta=meta)
     
     return HttpResponse(status=200)
