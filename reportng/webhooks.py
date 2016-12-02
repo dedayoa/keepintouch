@@ -62,3 +62,15 @@ def fs_call_detail_report_callback(request):
         return HttpResponse(status=200)
     
     return HttpResponse(status=200)
+
+
+@csrf_exempt
+@require_POST
+def sendgrid_report_callback(request):
+    data = request.POST.get('headers')
+    meta = copy.copy(request.META)
+    
+    jdata = json.loads(data)
+    print(jdata)
+    
+    return HttpResponse(status=200)
