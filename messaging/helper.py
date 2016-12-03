@@ -182,8 +182,8 @@ class SMTPHelper():
                             'X-Facebook-ID' : 'https://www.facebook.com/intouchng',
                             "X-SMTPAPI": json.dumps({
                                             "unique_args": {
-                                                "batch_id" : self.batch_id,
-                                                'email_id' : email_uuid.id
+                                                "batch_id" : str(self.batch_id),
+                                                'email_id' : str(email_uuid.id)
                                             }
                                         })
                              },
