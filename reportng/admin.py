@@ -3,7 +3,8 @@ from django.contrib import admin
 # Register your models here.
 
 from .models import SMSDeliveryReport, SMSDeliveryReportHistory, SMSDeliveryReportTransaction,\
-                    EmailDeliveryReport, EmailEventHistory, CallDetailReportTransaction, CallDetailReport
+                    EmailDeliveryReport, EmailEventHistory, CallDetailReportTransaction, CallDetailReport,\
+                    EmailReportTransaction
 
 class SMSDeliveryReportAdmin(admin.ModelAdmin):
     def recipient(self, obj):
@@ -32,6 +33,10 @@ class CallDetailReportTransactionAdmin(admin.ModelAdmin):
     
 class EmailDeliveryReportAdmin(admin.ModelAdmin):
     list_display = ('from_email','to_email','msg_status','created')
+    
+class EmailReportTransactionAdmin(admin.ModelAdmin):
+    
+    list_display = ('body','date_received','status')
 
 admin.site.register(SMSDeliveryReport, SMSDeliveryReportAdmin)
 admin.site.register(SMSDeliveryReportHistory, SMSDeliveryReportHistoryAdmin)
@@ -39,4 +44,5 @@ admin.site.register(SMSDeliveryReportTransaction, SMSDeliveryReportTransactionAd
 admin.site.register(CallDetailReportTransaction, CallDetailReportTransactionAdmin)
 admin.site.register(EmailDeliveryReport, EmailDeliveryReportAdmin)
 admin.site.register(CallDetailReport, CallDetailReportAdmin)
+admin.site.register(EmailReportTransaction, EmailReportTransactionAdmin)
 
