@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from .models import SMSDeliveryReport, SMSDeliveryReportHistory, SMSDeliveryReportTransaction,\
                     EmailDeliveryReport, EmailEventHistory, CallDetailReportTransaction, CallDetailReport,\
-                    EmailReportTransaction
+                    EmailReportTransaction, EmailReceiverAction
 
 class SMSDeliveryReportAdmin(admin.ModelAdmin):
     def recipient(self, obj):
@@ -32,11 +32,16 @@ class CallDetailReportTransactionAdmin(admin.ModelAdmin):
     
     
 class EmailDeliveryReportAdmin(admin.ModelAdmin):
-    list_display = ('from_email','to_email','msg_status','created')
+    list_display = ('from_email','to_email','msg_status','processed','sent_at')
     
 class EmailReportTransactionAdmin(admin.ModelAdmin):
     
     list_display = ('body','date_received','status')
+
+
+class EmailReceiverActionAdmin(admin.ModelAdmin):
+    list_display = ('__str__','action_time')
+
 
 admin.site.register(SMSDeliveryReport, SMSDeliveryReportAdmin)
 admin.site.register(SMSDeliveryReportHistory, SMSDeliveryReportHistoryAdmin)
@@ -45,4 +50,5 @@ admin.site.register(CallDetailReportTransaction, CallDetailReportTransactionAdmi
 admin.site.register(EmailDeliveryReport, EmailDeliveryReportAdmin)
 admin.site.register(CallDetailReport, CallDetailReportAdmin)
 admin.site.register(EmailReportTransaction, EmailReportTransactionAdmin)
+admin.site.register(EmailReceiverAction, EmailReceiverActionAdmin)
 
