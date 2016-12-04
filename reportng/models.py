@@ -8,7 +8,7 @@ from django.conf import settings
 
 # Create your models here.
 
-
+#####################
 
 class SMSDeliveryReport(models.Model):
     
@@ -89,23 +89,33 @@ class SMSDeliveryReportTransaction(models.Model):
 
     def __str__(self):
         return '{0}'.format(self.date_received)
-    
+
+
+#######################################
+   
     
 class EmailDeliveryReport(models.Model):
     
+    # the main report page showed under reports
+    
+    E_SENT = '0'
+    E_PROCESSED = '1'
+    E_DROPPED = '2'
+    E_DEFERRED = '3'
+    E_DELIVERED = '4'
+    E_BOUNCED = '5'
+    E_SENDING = '6'
+    
     STATUS = (
-        ('0', 'SENT'), #DR
-        ('1', 'PROCESSED'), #this information will be visible to us only
-        ('2', 'DROPPED'),
-        ('3', 'DEFERRED'),
-        ('4', 'DELIVERED'),
-        ('5', 'BOUNCED'),
-        ('6', 'SENDING...')
+        (E_SENT, 'SENT'), #DR
+        (E_PROCESSED, 'PROCESSED'), #this information will be visible to us only. Not used for user
+        (E_DROPPED, 'DROPPED'),
+        (E_DEFERRED, 'DEFERRED'),
+        (E_DELIVERED, 'DELIVERED'),
+        (E_BOUNCED, 'BOUNCED'),
+        (E_SENDING, 'SENDING...')
         
-        #('1', 'OPENED'), #ER
-        #('2', 'CLICKED'), #ER
-        #('7', 'SPAM REPORT'), #ER
-        #('8', 'UNSUBSCRIBE'), #does not apply. will be handled by In.Touch
+
              )
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -123,13 +133,43 @@ class EmailDeliveryReport(models.Model):
     kitu_parent_id = models.IntegerField(db_index=True, editable=False)
     
     last_modified = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now_add=True) #report will be generated on this field
+    processed = models.DateTimeField(auto_now_add=True) #report will be generated on this field
+    sent_at = models.DateTimeField(verbose_name="Sent")
     
     
     def __str__(self):
         return "Email from {} to {}".format(self.from_email,self.to_email)
 
+
+class EmailReceiverAction(models.Model):
+    
+    # recorded actions of user. what and when
+    
+    
+    
+    RECVR_ACTION = (
+        ('1', 'OPENED'),
+        ('2', 'CLICKED'),
+        ('7', 'SPAM REPORT'),
+        #('8', 'UNSUBSCRIBE'), #does not apply. will be handled by In.Touch
+    )
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email_delivery_report = models.ForeignKey('reportng.EmailDeliveryReport', on_delete=models.CASCADE)
+    action = models.CharField(max_length=2, choices=RECVR_ACTION)
+    action_time = models.DateTimeField()
+    note = models.TextField()
+    extra_data = JSONField()
+    
+    last_modified = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return "{}, {}".format(self.email_delivery_report,self.action)    
+
+
 class EmailEventHistory(models.Model):
+    
+    # the history of the email itself
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     evtype = models.CharField(max_length=75, null=True)
@@ -162,6 +202,9 @@ class EmailReportTransaction(models.Model):
 
     def __str__(self):
         return '{0}'.format(self.date_received)
+
+
+####################################
     
 
 class CallDetailReport(models.Model):
