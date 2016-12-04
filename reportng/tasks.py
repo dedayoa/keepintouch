@@ -35,7 +35,8 @@ def process_email_deliveryreport_transaction():
     
     def email_event_fxn(email_dr_id, email_status, sent_at=0):
         
-        if sent_at != 0:
+        # email is sent (actually processed from far end) and sent_at is not 0
+        if email_status=='0' and sent_at != 0:
             # convert unix timestamp to utc datetune
             sent_at_pydt = arrow.get(sent_at).datetime
              
@@ -68,7 +69,7 @@ def process_email_deliveryreport_transaction():
             if report['event'] == 'delivered':
                 email_event_fxn(report['email_id'],EmailDeliveryReport.E_DELIVERED)
             if report['event'] == 'processed':
-                email_event_fxn(report['email_id'],EmailDeliveryReport.E_SENT)
+                email_event_fxn(report['email_id'],EmailDeliveryReport.E_SENT, sent_at=report['timestamp'])
             if report['event'] == 'dropped':
                 email_event_fxn(report['email_id'],EmailDeliveryReport.E_DROPPED)
             if report['event'] == 'bounced':
