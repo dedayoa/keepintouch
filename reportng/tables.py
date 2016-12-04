@@ -75,10 +75,10 @@ class SMSReportTable(tables.Table):
 class EmailReportTable(tables.Table):
     
     email_message = tables.Column(verbose_name='Email')
-    from_email = tables.EmailColumn(verbose_name="From")
+    from_email = tables.Column(verbose_name="From")
     to_email = tables.EmailColumn(verbose_name="To")
     msg_status = tables.Column(verbose_name='Status')
-    created = tables.Column(verbose_name="Sent")
+    sent_at = tables.Column(verbose_name="Sent")
     
     
     def render_email_message(self, record):
@@ -86,9 +86,11 @@ class EmailReportTable(tables.Table):
     
     class Meta:
         model = EmailDeliveryReport
-        fields = ('email_message','from_email','to_email','msg_status','created')
+        fields = ('email_message','from_email','to_email','msg_status','sent_at')
         empty_text = 'There are no Reports to display.'
         attrs = {'style': 'width: 100%'}
+
+
         
         
 class CallReportTable(tables.Table):
