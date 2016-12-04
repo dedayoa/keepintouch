@@ -87,9 +87,9 @@ class EmailReport(View):
     
     def get(self, request):
         if request.user.kituser.is_admin:
-            reporttable = EmailReportTable(EmailDeliveryReport.objects.filter(kitu_parent_id=request.user.kituser.id).order_by('-created'))
+            reporttable = EmailReportTable(EmailDeliveryReport.objects.filter(kitu_parent_id=request.user.kituser.id).order_by('-sent_at'))
         else:
-            reporttable = EmailReportTable(EmailDeliveryReport.objects.filter(kituser_id=request.user.kituser.id).order_by('-created'))
+            reporttable = EmailReportTable(EmailDeliveryReport.objects.filter(kituser_id=request.user.kituser.id).order_by('-sent_at'))
         RequestConfig(request, paginate={'per_page': 25}).configure(reporttable)
         self.params["table"] = reporttable
         self.params['title'] = 'Email Report'
