@@ -134,7 +134,7 @@ class EmailDeliveryReport(models.Model):
     
     last_modified = models.DateTimeField(auto_now=True)
     processed = models.DateTimeField(auto_now_add=True) #report will be generated on this field
-    sent_at = models.DateTimeField(verbose_name="Sent")
+    sent_at = models.DateTimeField(null=True, verbose_name="Sent")
     
     
     def __str__(self):
