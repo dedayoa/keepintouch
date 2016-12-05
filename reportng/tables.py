@@ -6,6 +6,7 @@ Created on Aug 3, 2016
 
 import os, json
 import re
+import arrow
 
 import django_tables2 as tables
 from django_tables2.utils import A
@@ -82,6 +83,11 @@ class EmailReportTable(tables.Table):
     sent_at = tables.Column(verbose_name="Sent")
     activity = tables.Column(verbose_name="Activity", accessor='pk', attrs={'td': {'style':'width:130px; white-space: nowrap'}})
     
+    
+    def __init__(self, *args, **kwargs):
+        self.utz = kwargs.pop('utz')
+        super(EmailReportTable, self).__init__(*args, **kwargs)
+    
     @cached_as(timeout=120)
     def render_activity(self, record):
         
@@ -93,9 +99,9 @@ class EmailReportTable(tables.Table):
                 '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-open" if ev_open else "kt-e-inactivity")+'" title="Open: {}">O</span>'+
                 '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-click" if ev_click else "kt-e-inactivity")+'" title="Click: {}">C</span>'+
                 '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-spamr" if ev_spam_report else "kt-e-inactivity")+'" title="Spam Report: {}">R</span>',
-                "" if not ev_open else ev_open[0].action_time,
-                "" if not ev_click else ev_click[0].action_time,
-                "" if not ev_spam_report else ev_spam_report[0].action_time
+                "" if not ev_open else (arrow.get(ev_open[0].action_time).to(self.utz)).datetime,
+                "" if not ev_click else (arrow.get(ev_click[0].action_time).to(self.utz)).datetime,
+                "" if not ev_spam_report else (arrow.get(ev_spam_report[0].action_time).to(self.utz)).datetime
                 )
     
     
