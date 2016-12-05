@@ -82,10 +82,52 @@ class SMSReport(View):
     
 class EmailReport(View):
     
+    @cached_as(timeout=600)
+    def get_xydata(self, request):
+        status = dict(EmailDeliveryReport.STATUS)
+        del status[EmailDeliveryReport.E_PROCESSED]
+        
+        
+        xdata = []
+        ydata = []
+        
+        try:
+            for k,v in status.items():
+                xdata.append(v)
+                if request.user.kituser.is_admin:
+                    ydata.append(EmailDeliveryReport.objects.filter(kitu_parent_id=request.user.kituser.id, msg_status=k).count())
+                else:
+                    ydata.append(EmailDeliveryReport.objects.filter(kituser_id=request.user.kituser.id, msg_status=k).count())
+            return [xdata, ydata]
+        except ObjectDoesNotExist:
+            return [0,0,0,0,0,0]
+    
     template_name = 'reportng/email_report.html'
     params= {}
     
     def get(self, request):
+        
+        xdata = self.get_xydata(request)[0]
+        ydata = self.get_xydata(request)[1]
+    
+        extra_serie1 = {"tooltip": {"y_start": "", "y_end": " cal"}}
+        chartdata = {
+            'x': xdata, 'name1': '', 'y1': ydata, 'extra1': extra_serie1,
+        }
+        charttype = "discreteBarChart"
+        chartcontainer = 'discretebarchart_container'  # container name
+        self.params['data'] = {
+            'charttype': charttype,
+            'chartdata': chartdata,
+            'chartcontainer': chartcontainer,
+            'extra': {
+                'x_is_date': False,
+                'x_axis_format': '',
+                'tag_script_js': True,
+                'jquery_on_ready': True,
+            },
+        }
+        
         if request.user.kituser.is_admin:
             reporttable = EmailReportTable(EmailDeliveryReport.objects.filter(kitu_parent_id=request.user.kituser.id).order_by('-sent_at'), utz='')
         else:
