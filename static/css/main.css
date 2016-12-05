@@ -2,6 +2,37 @@ body{
 	background-color: #8db5d2;
 }
 
+
+.circle{
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+	-moz-border-radius: 15px;
+	-webkit-border-radius: 15px;
+	border-radius: 15px;
+	line-height: 22px;
+	text-align: center;
+	padding: 5px;
+	color: #fff;
+	font-weight: bold;
+	margin-left: 5px;
+}
+
+.kt-e-activity-open{
+	background-color: #f1a721;
+}
+.kt-e-activity-click{
+	background-color: #786ac5;
+}
+.kt-e-activity-spamr{
+	background-color: #f92727;
+}
+
+.kt-e-inactivity{
+	color: #888;
+	background-color: #bbb;
+}
+
 .callout.alert{
     background-color: #f34242;
     color: #fff;
