@@ -54,7 +54,8 @@ def process_email_deliveryreport_transaction():
         # convert unix timestamp to utc datetune
         action_t = arrow.get(action_timestamp).datetime
         
-        EmailReceiverAction.objects.filter(email_delivery_report=email_dr_id).update(
+        EmailReceiverAction.objects.create(
+                    email_delivery_report = email_dr_id,
                     action = action_id,
                     action_time = action_t,
                     extra_data = report
