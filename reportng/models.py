@@ -164,7 +164,7 @@ class EmailReceiverAction(models.Model):
     last_modified = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return "{}, {}".format(self.email_delivery_report,self.action.get_action_display())    
+        return "{}, {}".format(self.email_delivery_report,self.action)    
 
 
 class EmailEventHistory(models.Model):
