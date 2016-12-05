@@ -90,9 +90,9 @@ class EmailReportTable(tables.Table):
         ev_spam_report = EmailReceiverAction.objects.filter(email_delivery_report = record.pk, action= '7')
         
         return format_html(''+
-                '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-open" if ev_open else "kt-e-inactivity")+'" title="{}">O</span>'+
-                '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-click" if ev_open else "kt-e-inactivity")+'" title="{}">C</span>'+
-                '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-spamr" if ev_open else "kt-e-inactivity")+'" title="{}">R</span>',
+                '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-open" if ev_open else "kt-e-inactivity")+'" title="Open: {}">O</span>'+
+                '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-click" if ev_click else "kt-e-inactivity")+'" title="Click: {}">C</span>'+
+                '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-spamr" if ev_spam_report else "kt-e-inactivity")+'" title="Spam Report: {}">R</span>',
                 "" if not ev_open else ev_open[0].action_time,
                 "" if not ev_click else ev_click[0].action_time,
                 "" if not ev_spam_report else ev_spam_report[0].action_time
