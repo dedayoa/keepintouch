@@ -307,7 +307,8 @@ td.phone span{
 }
 
 body.sms-report-page .kitapp-content .row,
-body.dashboard div.kitapp-content .row{
+body.dashboard div.kitapp-content .row,
+body.email-report-page div.kitapp-content .row{
 	background-color: #fff;
 }
 
