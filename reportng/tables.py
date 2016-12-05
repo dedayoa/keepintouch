@@ -80,7 +80,7 @@ class EmailReportTable(tables.Table):
     from_email = tables.Column(verbose_name="From")
     to_email = tables.EmailColumn(verbose_name="To")
     msg_status = tables.Column(verbose_name='Status')
-    sent_at = tables.Column(verbose_name="Sent")
+    sent_at = tables.Column(verbose_name="Sent", attrs={'td': {'style':'width:80px; white-space: nowrap; font-size: 9pt;'}})
     activity = tables.Column(verbose_name="Activity", accessor='pk', attrs={'td': {'style':'width:130px; white-space: nowrap'}})
     
     
@@ -99,9 +99,9 @@ class EmailReportTable(tables.Table):
                 '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-open" if ev_open else "kt-e-inactivity")+'" title="Open: {}">O</span>'+
                 '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-click" if ev_click else "kt-e-inactivity")+'" title="Click: {}">C</span>'+
                 '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-spamr" if ev_spam_report else "kt-e-inactivity")+'" title="Spam Report: {}">R</span>',
-                "" if not ev_open else (arrow.get(ev_open[0].action_time).to(self.utz)).datetime,
-                "" if not ev_click else (arrow.get(ev_click[0].action_time).to(self.utz)).datetime,
-                "" if not ev_spam_report else (arrow.get(ev_spam_report[0].action_time).to(self.utz)).datetime
+                "" if not ev_open else (arrow.get(ev_open[0].action_time).to(self.utz).format('DD-MM-YYYY HH:mm')).datetime,
+                "" if not ev_click else (arrow.get(ev_click[0].action_time).to(self.utz).format('DD-MM-YYYY HH:mm')).datetime,
+                "" if not ev_spam_report else (arrow.get(ev_spam_report[0].action_time).to(self.utz).format('DD-MM-YYYY HH:mm')).datetime
                 )
     
     
