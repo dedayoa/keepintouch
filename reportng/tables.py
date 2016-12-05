@@ -12,11 +12,12 @@ from django_tables2.utils import A
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html, html_safe
 
-from .models import SMSDeliveryReport, SMSDeliveryReportHistory, EmailDeliveryReport, CallDetailReport
+from .models import SMSDeliveryReport, SMSDeliveryReportHistory, EmailDeliveryReport, CallDetailReport,\
+                    EmailReceiverAction
 from django.core.urlresolvers import reverse, reverse_lazy
 
 import html2text
-
+from cacheops import cached_as
 
 
 
@@ -79,6 +80,23 @@ class EmailReportTable(tables.Table):
     to_email = tables.EmailColumn(verbose_name="To")
     msg_status = tables.Column(verbose_name='Status')
     sent_at = tables.Column(verbose_name="Sent")
+    activity = tables.Column(verbose_name="Activity", accessor='pk', attrs={'td': {'style':'width:130px; white-space: nowrap'}})
+    
+    @cached_as(timeout=120)
+    def render_activity(self, record):
+        
+        ev_open = EmailReceiverAction.objects.filter(email_delivery_report = record.pk, action= '1')
+        ev_click = EmailReceiverAction.objects.filter(email_delivery_report = record.pk, action= '2')
+        ev_spam_report = EmailReceiverAction.objects.filter(email_delivery_report = record.pk, action= '7')
+        
+        return format_html(''+
+                '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-open" if ev_open else "kt-e-inactivity")+'" title="{}">O</span>'+
+                '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-click" if ev_open else "kt-e-inactivity")+'" title="{}">C</span>'+
+                '<span data-tooltip aria-haspopup="true" class="has-tip circle '+("kt-e-activity-spamr" if ev_open else "kt-e-inactivity")+'" title="{}">R</span>',
+                "" if not ev_open else ev_open[0].action_time,
+                "" if not ev_click else ev_click[0].action_time,
+                "" if not ev_spam_report else ev_spam_report[0].action_time
+                )
     
     
     def render_email_message(self, record):
@@ -86,7 +104,7 @@ class EmailReportTable(tables.Table):
     
     class Meta:
         model = EmailDeliveryReport
-        fields = ('email_message','from_email','to_email','msg_status','sent_at')
+        fields = ('email_message','from_email','to_email','msg_status','sent_at','activity')
         empty_text = 'There are no Reports to display.'
         attrs = {'style': 'width: 100%'}
 
