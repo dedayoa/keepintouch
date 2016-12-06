@@ -69,23 +69,27 @@ def process_email_deliveryreport_transaction():
     for edr in all_unprocessed_edr:
         
         for report in edr.body:
-            if report['event'] == 'delivered':
-                email_event_fxn(report['email_id'],EmailDeliveryReport.E_DELIVERED)
-            if report['event'] == 'processed':
-                email_event_fxn(report['email_id'],EmailDeliveryReport.E_SENT, sent_at=report['timestamp'])
-            if report['event'] == 'dropped':
-                email_event_fxn(report['email_id'],EmailDeliveryReport.E_DROPPED)
-            if report['event'] == 'bounced':
-                email_event_fxn(report['email_id'],EmailDeliveryReport.E_BOUNCED)
-            if report['event'] == 'deferred':
-                email_event_fxn(report['email_id'],EmailDeliveryReport.E_DEFERRED)
+            try:
+                if report['event'] == 'delivered':
+                    email_event_fxn(report['email_id'],EmailDeliveryReport.E_DELIVERED)
+                if report['event'] == 'processed':
+                    email_event_fxn(report['email_id'],EmailDeliveryReport.E_SENT, sent_at=report['timestamp'])
+                if report['event'] == 'dropped':
+                    email_event_fxn(report['email_id'],EmailDeliveryReport.E_DROPPED)
+                if report['event'] == 'bounced':
+                    email_event_fxn(report['email_id'],EmailDeliveryReport.E_BOUNCED)
+                if report['event'] == 'deferred':
+                    email_event_fxn(report['email_id'],EmailDeliveryReport.E_DEFERRED)
             
-            if report['event'] == 'open':
-                recepient_action_fxn(report['email_id'], 1, report['timestamp'],report)
-            if report['event'] == 'click':
-                recepient_action_fxn(report['email_id'], 2, report['timestamp'],report)
-            if report['event'] == 'spamreport':
-                recepient_action_fxn(report['email_id'], 7, report['timestamp'],report)
+                if report['event'] == 'open':
+                    recepient_action_fxn(report['email_id'], 1, report['timestamp'],report)
+                if report['event'] == 'click':
+                    recepient_action_fxn(report['email_id'], 2, report['timestamp'],report)
+                if report['event'] == 'spamreport':
+                    recepient_action_fxn(report['email_id'], 7, report['timestamp'],report)
+            
+            except KeyError:
+                pass
             
         # now update the status of the SMS delivery report transaction.
         edr.status = '1'
