@@ -80,7 +80,7 @@ class EmailReportTable(tables.Table):
     from_email = tables.Column(verbose_name="From")
     to_email = tables.EmailColumn(verbose_name="To")
     msg_status = tables.Column(verbose_name='Status')
-    sent_at = tables.Column(verbose_name="Sent", attrs={'td': {'style':'width:80px; white-space: nowrap; font-size: 9pt;'}})
+    sent_at = tables.Column(verbose_name="Sent", attrs={'td': {'style':'min-width:100px; font-size: 9pt;'}})
     activity = tables.Column(verbose_name="Activity", accessor='pk', attrs={'td': {'style':'width:130px; white-space: nowrap'}})
     
     
