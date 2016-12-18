@@ -1,3 +1,7 @@
+
+import random
+from datetime import time
+
 from django.db import models
 
 # Create your models here.
@@ -293,7 +297,8 @@ class KITBilling(models.Model):
         return "{} {}".format(self.kit_admin.user.first_name,self.kit_admin.user.last_name)
     
     
-
+def get_random_message_send_time():
+    return time(random.randrange(6,12), random.randrange(0,60))
     
     
 class KITSystem(models.Model):
@@ -318,6 +323,9 @@ class KITSystem(models.Model):
     #user_phone_as_callerid = models.BooleanField(default=False, verbose_name="User Phone Number as Caller ID")
     
     max_standard_message = models.PositiveIntegerField(help_text="Maximum number of Recipients Allowed for Standard Message",default=50)
+    
+    default_message_send_time = models.TimeField(blank=False, default=get_random_message_send_time(), \
+                                                 verbose_name="Default Message Send Time")
     
     def __str__(self):
         return "{} {}".format(self.kit_admin.user.first_name,self.kit_admin.user.last_name)
