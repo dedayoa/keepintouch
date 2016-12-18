@@ -315,7 +315,7 @@ class KITSystem(models.Model):
     
     did_number = models.CharField(max_length=30, blank=True, verbose_name="DID Number")
     
-    user_phone_as_callerid = models.BooleanField(default=False, verbose_name="User Phone Number as Caller ID")
+    #user_phone_as_callerid = models.BooleanField(default=False, verbose_name="User Phone Number as Caller ID")
     
     max_standard_message = models.PositiveIntegerField(help_text="Maximum number of Recipients Allowed for Standard Message",default=50)
     
