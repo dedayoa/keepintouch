@@ -131,7 +131,7 @@ class KITUser(models.Model):
     def get_absolute_url(self):
         return reverse('core:kituser-detail',args=[self.pk])
     
-    @cached_as(timeout=600)    
+    #@cached_as(timeout=600)    #this cached all the way into kitsystem. Need to fix before recaching
     def get_parent(self):
         if self.is_admin:
             return self
