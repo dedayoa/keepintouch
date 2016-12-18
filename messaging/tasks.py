@@ -76,7 +76,39 @@ def process_private_anniversary(private_events=None):
                                                                       date__month = timezone.now().month,
                                                                       next_run__year__lte = timezone.now().year)
     # For each due private anniversary, prepare email and sms
-    
+    for peven in due_private_events:
+        
+        dmst = peven.contact.kit_user.get_parent().kitsystem.default_message_send_time
+        kutz = peven.contact.kit_user.get_parent().timezone
+        
+        QueuedMessages.objects.create(
+                message_type = 'STANDARD',
+                message_id = 0, #0 means it was never saved to draft
+                message = {
+                    'message_id' : 0,
+                    'title' : _compose(peven.message.title, peven.contact),
+                    'email_template' : _compose(peven.message.email_template, peven.contact),
+                    'sms_template' : _compose(peven.message.sms_template, peven.contact),
+                    'send_email' : peven.message.send_email,
+                    'send_sms' : peven.message.send_sms,
+                    'sms_insert_optout' : peven.message.insert_optout,
+                    'sms_sender_id' : _compose(peven.message.sms_sender, peven.contact),
+                    'recipients' : [peven.contact.slug],
+                    'smtp_setting_id': peven.message.smtp_setting.id,
+                    'others' : {
+                            'draft_title' : _compose(peven.message.title, peven.contact),
+                            'original_created' : '',
+                            'email_reply_to' : [c.email for c in peven.message.email_reply_to.all()],                        
+                                }
+                            },
+                delivery_time = arrow.utcnow().to(kutz).replace(hour=dmst.hour, minute=dmst.minute).datetime,
+                created_by = peven.contact.kit_user
+                
+            )
+        
+        peven.next_run=timezone.now().date()+relativedelta(years=1)
+        peven.save()
+    '''
     for peven in due_private_events:
         try:
             ok_to_send = OKToSend(peven.contact.kit_user)
@@ -130,7 +162,7 @@ def process_private_anniversary(private_events=None):
                     reason = templatesyntaxerror_message(e),
                     owned_by = peven.contact.kit_user
             )
-             
+        '''    
     
     
 def process_public_anniversary(public_events=None):
@@ -140,6 +172,40 @@ def process_public_anniversary(public_events=None):
     else:
         due_public_events = PublicEvent.objects.select_related('message').filter(date = timezone.now().date())
     # For each due private anniversary,
+    for publicevent in due_public_events:
+        for recipient_d in publicevent.get_recipients():
+            
+            dmst = recipient_d.kit_user.get_parent().kitsystem.default_message_send_time
+            kutz = recipient_d.kit_user.get_parent().timezone
+            
+            QueuedMessages.objects.create(
+                    message_type = 'STANDARD',
+                    message_id = 0, #0 means it was never saved to draft
+                    message = {
+                        'message_id' : 0,
+                        'title' : _compose(publicevent.message.title, recipient_d),
+                        'email_template' : _compose(publicevent.message.email_template, recipient_d),
+                        'sms_template' : _compose(publicevent.message.sms_template, recipient_d),
+                        'send_email' : publicevent.message.send_email,
+                        'send_sms' : publicevent.message.send_sms,
+                        'sms_insert_optout' : publicevent.message.insert_optout,
+                        'sms_sender_id' : _compose(publicevent.message.sms_sender, recipient_d),
+                        'recipients' : [recipient_d.slug],
+                        'smtp_setting_id': publicevent.message.smtp_setting.id,
+                        'others' : {
+                                'draft_title' : _compose(publicevent.message.title, recipient_d),
+                                'original_created' : '',
+                                'email_reply_to' : [c.email for c in publicevent.message.email_reply_to.all()],                        
+                                    }
+                                },
+                    delivery_time = arrow.utcnow().to(kutz).replace(hour=dmst.hour, minute=dmst.minute).datetime,
+                    created_by = publicevent.kit_user
+                    
+                )
+            
+            publicevent.date = timezone.now().date()+relativedelta(years=1)
+            publicevent.save()
+    '''
     for publicevent in due_public_events:
         for recipient_d in publicevent.get_recipients():
             try:
@@ -193,6 +259,7 @@ def process_public_anniversary(public_events=None):
             
         publicevent.date = timezone.now().date()+relativedelta(years=1)
         publicevent.save()
+        '''
     
 def process_onetime_event(queued_messages=None):
     
@@ -212,11 +279,11 @@ def process_onetime_event(queued_messages=None):
                 
                 recipients_qs = Contact.objects.filter(pk__in = queued_message.message["recipients"])
                 
-                if queued_message.message["others"].get("cc_recipients"):
-                    cc_recipients_qs = Contact.objects.filter(pk__in = queued_message.message["others"]["cc_recipients"])
-                    cc_emails = [x[0] for x in cc_recipients_qs.values_list('email')] #get a list of emails
-                else:
-                    cc_emails = []
+                #if queued_message.message["others"].get("cc_recipients"):
+                #    cc_recipients_qs = Contact.objects.filter(pk__in = queued_message.message["others"]["cc_recipients"])
+                #    cc_emails = [x[0] for x in cc_recipients_qs.values_list('email')] #get a list of emails
+                #else:
+                #    cc_emails = []
                 
                 
                 # create entry in processed message
@@ -242,7 +309,7 @@ def process_onetime_event(queued_messages=None):
                             e_title = _compose(queued_message.message["title"], recipient_d, cdd)
                             _send_email.delay([e_title, e_msg, recipient_d.email],\
                                               smtp_setting_qsv,
-                                              cc_recipients = cc_emails,
+                                              #cc_recipients = cc_emails,
                                               owner = queued_message.created_by,
                                               batch_id = sprm.id,
                                               reply_to = contactpklist_to_emaillist(queued_message.message["others"].get("email_reply_to",[]))
