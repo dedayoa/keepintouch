@@ -28,7 +28,7 @@ class SystemSettingsForm(forms.ModelForm):
     class Meta:
         model = KITSystem
         fields = ['company_wide_contacts', 'default_sms_sender','sms_unsubscribe_message','did_number',\
-                  'user_phone_as_callerid','max_standard_message']
+                  'max_standard_message']
         widgets = {
             'sms_unsubscribe_message' : forms.Textarea(attrs={'rows':5, 'cols': 30})
                    }
