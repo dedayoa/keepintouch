@@ -146,11 +146,11 @@ class StandardMessagingForm(forms.ModelForm):
             #raise forms.ValidationError('Your Delivery Date Cannot be in the past')
             cleaned_data["delivery_time"] = datetime.now()
         
-        if cleaned_data.get("recipients").count() > self.kuser.kitsystem.max_standard_message: #settings.MAX_MSG_RECIPIENT:
+        if cleaned_data.get("recipients").count() > self.kuser.get_parent().kitsystem.max_standard_message: #settings.MAX_MSG_RECIPIENT:
             raise forms.ValidationError(
                 'To check spam, only {} recipients are allowed. \
                 To send to a greater number of recipients, contact your Admin or \
-                use Advanced Messaging'.format(self.kuser.kitsystem.max_standard_message)
+                use Advanced Messaging'.format(self.kuser.get_parent().kitsystem.max_standard_message)
                                         )
         
         return cleaned_data   
