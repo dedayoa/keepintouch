@@ -35,7 +35,7 @@ class StandardMessagingForm(forms.ModelForm):
         super(StandardMessagingForm, self).__init__(*args, **kwargs)
         
         self.fields['recipients'].queryset = self.kuser.get_contacts()
-        self.fields['copied_recipients'].queryset = self.kuser.get_contacts()
+        #self.fields['copied_recipients'].queryset = self.kuser.get_contacts()
         self.fields['smtp_setting'].queryset = self.kuser.get_smtp_items()
         self.fields['sms_sender'].initial = self.kuser.get_default_sms_sender()
         #self.fields['cou_group'].label = "Group Availability"
@@ -65,16 +65,16 @@ class StandardMessagingForm(forms.ModelForm):
                     ),
                     css_class="ss-recipients"
                 ),
-                Row(
-                    Column('copied_recipients', css_class="small-8"),
-                    Column(
-                        
-                        Row('cc_recipients_send_email'),
-                        Row('cc_recipients_send_sms'),
-                        css_class="small-4",
-                        css_id = "cc-recipients-channel-control"),
-                    css_id="cc-recipients-select"
-                    ),
+                #Row(
+                #    Column('copied_recipients', css_class="small-8"),
+                #    Column(
+                #        
+                #        Row('cc_recipients_send_email'),
+                #        Row('cc_recipients_send_sms'),
+                #        css_class="small-4",
+                #        css_id = "cc-recipients-channel-control"),
+                #    css_id="cc-recipients-select"
+                #    ),
                 Row(Column('delivery_time'), css_class="ss-deliver-at"),
                 Div(
                      Row(
@@ -94,12 +94,10 @@ class StandardMessagingForm(forms.ModelForm):
     
     class Meta:
         model = StandardMessaging
-        fields = ['title','email_message','sms_message','recipients','copied_recipients','cc_recipients_send_sms',\
-                  'cc_recipients_send_email','delivery_time','send_sms', 'send_email', \
+        fields = ['title','email_message','sms_message','recipients','delivery_time','send_sms', 'send_email', \
                   'sms_sender','smtp_setting','insert_optout']
         widgets = {
             'recipients': Select2MultipleWidget,
-            'copied_recipients': Select2MultipleWidget,
             'smtp_setting' : Select2Widget,
             'email_message' : TinyMCE(attrs={'cols': 20,'rows':10}),
             'sms_message' : forms.Textarea(attrs={'rows':5})
