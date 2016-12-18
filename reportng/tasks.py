@@ -89,7 +89,7 @@ def process_email_deliveryreport_transaction():
                     recepient_action_fxn(report['email_id'], 7, report['timestamp'],report)
             
             except KeyError:
-                pass
+                return
             
         # now update the status of the SMS delivery report transaction.
         edr.status = '1'
