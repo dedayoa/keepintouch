@@ -23,10 +23,7 @@ class CallHelper():
         self.callee = callee #e164 format
         self.orig_caller_cid = kuser.parent.kitsystem.did_number
         
-        if kuser.kitsystem.user_phone_as_callerid == False:            
-            self.orig_callee_cid = kuser.parent.kitsystem.did_number
-        else:
-            self.orig_callee_cid = (kuser.phone_number.as_e164)[1:]
+        self.orig_callee_cid = kuser.parent.kitsystem.did_number
         
         self.caller = kuser.phone_number.as_e164 #e164 format
         self.kuser = kuser
@@ -44,6 +41,9 @@ class CallHelper():
         
         if not phonenumbers.is_valid_number(phonenumbers.parse(self.caller)):
             raise InvalidPhoneNumberError("Caller Number, %s is Not a Valid Phone Number"%str(self.caller))
+        
+        if not (self.orig_callee_cid and self.orig_caller_cid):
+            raise InvalidPhoneNumberError("This service has not been Activated. Please contact support.") 
         
         # check that user has balance 
         user_balance = self.kuser.kitubalance.user_balance        
