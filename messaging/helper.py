@@ -68,7 +68,7 @@ class SMTPHelper():
         self.email_title = email_message[0]
         self.email_msg = email_message[1]
         self.email_recipient = email_message[2]
-        self.email_cc_recipients = kwargs.get('cc_recipients')
+        #self.email_cc_recipients = kwargs.get('cc_recipients')
         
         self.kuser = kwargs.get('owner')
         
@@ -151,7 +151,7 @@ class SMTPHelper():
                                      'title':self.email_title,
                                      'from' : self.smtp_user,
                                      'to' : self.email_recipient,
-                                     'cc' : self.email_cc_recipients,
+                                     #'cc' : self.email_cc_recipients,
                                      'reply_to' : self.reply_to,
                                      'message' : self.email_msg
                                      },
@@ -173,7 +173,7 @@ class SMTPHelper():
                     from_email = '"{}" <{}>'.format(self.from_sender, self.smtp_user),
                     #from_email = self.smtp_user,
                     to = [self.email_recipient], #recipient
-                    cc = self.email_cc_recipients,
+                    #cc = self.email_cc_recipients,
                     reply_to = self.reply_to,
                     connection=smtp_connection,
                     headers={
