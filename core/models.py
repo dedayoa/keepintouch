@@ -592,7 +592,7 @@ class Event(models.Model):
         if self.date is None:
             self.next_run = timezone.now().date()
         elif self.date > timezone.now().date(): #born in the future!!
-            self.next_run = arrow.get(self.date).replace(year=timezone.now().year+1).date()
+            self.next_run = self.date#arrow.get(self.date).replace(year=timezone.now().year+1).date()
         elif self.date < timezone.now().date():
             self.next_run = arrow.get(self.date).replace(years=+1).date()
         super(Event, self).save(*args, **kwargs)
