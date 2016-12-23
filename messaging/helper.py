@@ -399,6 +399,7 @@ def contactpklist_to_emaillist(contactpklist):
     elist = []
     
     for el in contactpklist:
-        elist.append(Contact.objects.get(pk=el).email)
+        if el != None:
+            elist.append(Contact.objects.get(pk=el).email)
         
     return elist
