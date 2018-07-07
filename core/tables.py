@@ -185,6 +185,7 @@ class ContactGroupsSettingsTable(tables.Table):
     description = tables.Column(verbose_name="Description")
     last_modified = tables.DateTimeColumn(verbose_name="Modified")
     contacts = tables.Column(verbose_name="Contacts")
+    action = tables.Column(verbose_name="", accessor='pk')
     
     def render_contacts(self, record):
         if record.contacts:
@@ -200,10 +201,13 @@ class ContactGroupsSettingsTable(tables.Table):
                                     )
             #return record.contacts.count()
             
+    def render_action(self, record):
+        return mark_safe('<button class="button" title="Share list"><i class="fi-share" style="color: #efefef;"></button>')
+            
     
     class Meta:
         model = ContactGroup
-        fields = ('title','description','contacts','last_modified')
+        fields = ('title','description','contacts','last_modified','action')
         attrs = {'style': 'width: 100%'}
         empty_text = "Sorry, No Contact List Found"
         

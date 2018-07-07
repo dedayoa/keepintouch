@@ -1,7 +1,7 @@
 arrow==0.7.0
 Babel==2.3.4
 BabelDjango==0.2.2
-cffi==1.7.0
+cffi==1.10.0
 click==6.6
 crispy-forms-foundation==0.5.4
 croniter==0.3.12
