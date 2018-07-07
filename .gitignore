@@ -5,3 +5,4 @@ help/*
 /staticfiles/*
 .env
 /media/*.*
+.git.bfg-report/*
